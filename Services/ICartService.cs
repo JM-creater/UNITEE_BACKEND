@@ -6,13 +6,13 @@ namespace UNITEE_BACKEND.Services
 {
     public interface ICartService
     {
+        public Task AddToCart(int userId, int productId, string size, int quantity, UserRole userRole);
         public IEnumerable<Cart> GetAll();
         public Task<Cart> GetById(int id);
+        public List<Cart> GetMyCart(int userId);
         public Task<IEnumerable<Cart>> GetCartByCustomer(int customerId);
         public Task<Cart> Delete(int id);
         public Task<Cart> Save(Cart request);
-        public Task AddToCart(int userId, int productId, int quantity, UserRole userRole);
-        public Task RemoveRestoreStock(int cartItemId);
         public Task<Cart> Update(int id, CartAddRequest request);
     }
 }

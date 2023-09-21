@@ -15,6 +15,21 @@ namespace UNITEE_BACKEND.Controllers
             cartService = service;
         }
 
+        [HttpPost("add")]
+        public async Task<IActionResult> AddToCart([FromBody] CartAddRequest request)
+        {
+            try
+            {
+                var userRole = UserRole.Customer;
+                await cartService.AddToCart(request.UserId, request.ProductId, request.Size, request.Quantity, userRole);
+                return Ok("Item added to cart");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -29,9 +44,9 @@ namespace UNITEE_BACKEND.Controllers
                 var e = await cartService.GetById(id);
                 return Ok(e);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                return BadRequest(e.Message);
             }
         }
 
@@ -43,25 +58,24 @@ namespace UNITEE_BACKEND.Controllers
                 var customer = await cartService.GetCartByCustomer(customerId);
                 return Ok(customer);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+                return BadRequest(e.Message);
             }
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddToCart([FromBody] CartAddRequest request)
+        [HttpGet("myCart/{userId}")]
+        public IActionResult GetMyCartData([FromRoute] int userId)
         {
             try
             {
-                var userRole = UserRole.Customer;
+                var myCartItems = cartService.GetMyCart(userId);
 
-                await cartService.AddToCart(request.UserId, request.ProductId, request.Quantity, userRole);
-                return Ok("Item added to cart");
+                return Ok(myCartItems);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return BadRequest(ex.Message);
+                throw new Exception(e.Message);
             }
         }
 
@@ -86,19 +100,5 @@ namespace UNITEE_BACKEND.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
             => Ok(await cartService.Delete(id));
-
-        [HttpDelete("remove/{id}")]
-        public async Task<IActionResult> RemoveFromCart([FromRoute] int id)
-        {
-            try
-            {
-                await cartService.RemoveRestoreStock(id);
-                return Ok("Item removed from cart");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
     }
 }

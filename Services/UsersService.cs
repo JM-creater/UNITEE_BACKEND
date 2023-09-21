@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
+using System.Security.Claims;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
@@ -10,10 +12,13 @@ namespace UNITEE_BACKEND.Services
     public class UsersService : IUsersService
     {
         private readonly AppDbContext context;
+        private readonly UserManager<User> userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsersService(AppDbContext dbcontext) 
+        public UsersService(AppDbContext dbcontext, IHttpContextAccessor httpContext) 
         {
             this.context = dbcontext;
+            this._httpContextAccessor = httpContext;
         }
 
         public IEnumerable<User> GetAll()
@@ -34,14 +39,27 @@ namespace UNITEE_BACKEND.Services
             return context.Users.Where(u => u.Role == (int)UserRole.Supplier).AsEnumerable();
         }
 
+        public IEnumerable<User> GetAllCustomers()
+        {
+            return context.Users.Where(c => c.Role == (int)UserRole.Customer).AsEnumerable();
+        }
+
+        public async Task<User> GetCurrentUser()
+        {
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return null;
+
+            return await userManager.FindByIdAsync(userId);
+        }
+
         public async Task<User> Register(RegisterRequest request)
         {
             var existingUser = await context.Users
                 .SingleOrDefaultAsync(u => u.Email == request.Email || u.Id == request.Id);
+
             if (existingUser != null)
-            {
                 throw new Exception("A user with this email or user id already exists.");
-            }
 
             var imagePath = await SaveImage(request.Image);
 
@@ -88,28 +106,61 @@ namespace UNITEE_BACKEND.Services
             return Path.Combine("Images", fileName);
         }
 
+        //public async Task<(User user, UserRole role)> Login(LoginRequest request)
+        //{
+        //    var user = await context.Users
+        //        .SingleOrDefaultAsync(u => u.Id == request.Id);
+
+        //    if (user == null)
+        //    {
+        //        throw new AuthenticationException("Invalid user id.");
+        //    }
+
+        //    if (!user.IsActive) 
+        //    {
+        //        throw new AuthenticationException("Account is deactivated.");
+        //    }
+
+        //    if (user.Password != request.Password)
+        //    {
+        //        throw new AuthenticationException("Invalid password.");
+        //    }
+
+        //    return (user, (UserRole)user.Role);
+        //}
+
         public async Task<(User user, UserRole role)> Login(LoginRequest request)
         {
-            var user = await context.Users
-                .SingleOrDefaultAsync(u => u.Id == request.Id);
-
-            if (user == null)
+            try
             {
-                throw new AuthenticationException("Invalid user id.");
-            }
+                User user = null;
 
-            if (!user.IsActive) 
+                if (request.Id.HasValue) 
+                {
+                    user = await context.Users.SingleOrDefaultAsync(u => u.Id == request.Id);
+                }
+                else if (!string.IsNullOrWhiteSpace(request.Email))
+                {
+                    user = await context.Users.SingleOrDefaultAsync(u => u.Email == request.Email);
+                }
+
+                if (user == null)
+                    throw new AuthenticationException("Invalid user Id or Email");
+
+                if (!user.IsActive)
+                    throw new AuthenticationException("Account is deactivated");
+
+                if (user.Password != request.Password)
+                    throw new AuthenticationException("Invalid Password");
+
+                return (user, (UserRole)user.Role);
+            }
+            catch (Exception e)
             {
-                throw new AuthenticationException("Account is deactivated.");
+                throw new Exception(e.Message);
             }
-
-            if (user.Password != request.Password)
-            {
-                throw new AuthenticationException("Invalid password.");
-            }
-
-            return (user, (UserRole)user.Role);
         }
+
 
         public async Task<User> Save(User request)
         {

@@ -42,7 +42,6 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.InnerException?.Message ?? e.Message);
                 return BadRequest(e.Message);
             }
         }
@@ -60,7 +59,7 @@ namespace UNITEE_BACKEND.Controllers
                 }
 
                 var updateSupplier = await supplierService.UpdateSupplier(id, request);
-                return Ok(existingSupplier);
+                return Ok(updateSupplier);
             }
             catch (Exception e)
             {

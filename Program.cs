@@ -3,6 +3,7 @@ using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Services;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using UNITEE_BACKEND.AutoMapperConfig;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -25,6 +26,9 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("default")));
+
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 
 builder.Services.AddCors(options =>
 {

@@ -15,11 +15,30 @@ namespace UNITEE_BACKEND.Controllers
             usersService = service;
         }
 
+        //[HttpPost("login")]
+        //public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        //{
+        //    try
+        //    {
+        //        var (user, role) = await usersService.Login(request);
+        //        return new JsonResult(new { user, role = role.ToString() });
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             try
             {
+                if (!request.Id.HasValue && string.IsNullOrWhiteSpace(request.Email)) 
+                {
+                    return BadRequest("Provide either user ID or email for login");
+                }
+
                 var (user, role) = await usersService.Login(request);
                 return new JsonResult(new { user, role = role.ToString() });
             }
@@ -67,6 +86,13 @@ namespace UNITEE_BACKEND.Controllers
         public IActionResult GetSuppliers()
         {
             var suppliers = usersService.GetAllSuppliers();
+            return Ok(suppliers);
+        }
+
+        [HttpGet("getCustomers")]
+        public IActionResult GetCustomers()
+        {
+            var suppliers = usersService.GetAllCustomers();
             return Ok(suppliers);
         }
 

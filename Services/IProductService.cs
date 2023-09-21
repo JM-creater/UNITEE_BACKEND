@@ -1,17 +1,19 @@
-﻿using UNITEE_BACKEND.Entities;
+﻿using UNITEE_BACKEND.Dto;
+using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 
 namespace UNITEE_BACKEND.Services
 {
     public interface IProductService
     {
-        public Task<Product> AddProduct(ProductRequest request);
+        public Task<int> AddProduct(ProductRequest request);
         public IEnumerable<Product> GetAll();
-        public Task<Product> GetById(int id);
-        public Task<Product> Save(Product request);
-        public Task<Product> Update(int productId, ProductRequest request);
+        public Task<Product> GetById(int productId);
+        //public Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId);
+        public Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId);
+        public Task<Product> UpdateProduct(int productId, ProductRequest request);
         public Task<Product> Delete(int id);
-        public Task<IEnumerable<Product>> GetProductsBySupplier(int id);
+        public Task<IEnumerable<ProductWithSizeQuantityDto>> GetProductsBySupplier(int supplierId);
         public Task<Product> UpdateActivationStatus(int productId, bool isActive);
     }
 }

@@ -39,19 +39,6 @@ namespace UNITEE_BACKEND.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Sizes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(250)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Sizes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -67,7 +54,8 @@ namespace UNITEE_BACKEND.Migrations
                     Address = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(1000)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false)
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    IsValidate = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -90,11 +78,9 @@ namespace UNITEE_BACKEND.Migrations
                     ProductTypeId = table.Column<int>(type: "int", nullable: false),
                     ProductName = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(250)", nullable: false),
-                    Sizes = table.Column<string>(type: "nvarchar(250)", nullable: true),
                     Category = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     Price = table.Column<float>(type: "real", nullable: false),
-                    Stocks = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -122,7 +108,8 @@ namespace UNITEE_BACKEND.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Size = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -138,6 +125,27 @@ namespace UNITEE_BACKEND.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SizeQuantities",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Size = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SizeQuantities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SizeQuantities_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -192,6 +200,11 @@ namespace UNITEE_BACKEND.Migrations
                 column: "ProductTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SizeQuantities_ProductId",
+                table: "SizeQuantities",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_DepartmentId",
                 table: "Users",
                 column: "DepartmentId");
@@ -204,19 +217,19 @@ namespace UNITEE_BACKEND.Migrations
                 name: "Carts");
 
             migrationBuilder.DropTable(
-                name: "Sizes");
-
-            migrationBuilder.DropTable(
-                name: "Products");
+                name: "SizeQuantities");
 
             migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "ProductTypes");
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Departments");
+
+            migrationBuilder.DropTable(
+                name: "ProductTypes");
         }
     }
 }

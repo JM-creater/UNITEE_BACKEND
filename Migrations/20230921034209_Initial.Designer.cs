@@ -12,7 +12,7 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230817145443_Initial")]
+    [Migration("20230921034209_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -38,6 +38,10 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -165,12 +169,6 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<int>("ProductTypeId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Sizes")
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<int>("Stocks")
-                        .HasColumnType("int");
-
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
@@ -181,23 +179,6 @@ namespace UNITEE_BACKEND.Migrations
                     b.HasIndex("ProductTypeId");
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("UNITEE_BACKEND.Entities.ProductSize", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sizes");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.ProductType", b =>
@@ -239,6 +220,31 @@ namespace UNITEE_BACKEND.Migrations
                         });
                 });
 
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.SizeQuantity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("SizeQuantities");
+                });
+
             modelBuilder.Entity("UNITEE_BACKEND.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -268,6 +274,9 @@ namespace UNITEE_BACKEND.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsValidate")
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
@@ -334,6 +343,17 @@ namespace UNITEE_BACKEND.Migrations
                     b.Navigation("ProductType");
                 });
 
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.SizeQuantity", b =>
+                {
+                    b.HasOne("UNITEE_BACKEND.Entities.Product", "Product")
+                        .WithMany("Sizes")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("UNITEE_BACKEND.Entities.User", b =>
                 {
                     b.HasOne("UNITEE_BACKEND.Entities.Department", "Department")
@@ -341,6 +361,11 @@ namespace UNITEE_BACKEND.Migrations
                         .HasForeignKey("DepartmentId");
 
                     b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>
+                {
+                    b.Navigation("Sizes");
                 });
 #pragma warning restore 612, 618
         }

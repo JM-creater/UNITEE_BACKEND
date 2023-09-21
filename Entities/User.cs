@@ -38,5 +38,6 @@ namespace UNITEE_BACKEND.Entities
         [Required]
         public bool IsActive { get; set; }
         public int Role { get; set; }
+        public bool IsValidate { get; set; } = true;
     }
 }

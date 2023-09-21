@@ -8,11 +8,14 @@ namespace UNITEE_BACKEND.Services
     {
         public IEnumerable<User> GetAll();
         public IEnumerable<User> GetAllSuppliers();
+        public IEnumerable<User> GetAllCustomers();
+        public Task<User> GetCurrentUser();
         public Task<User> GetById(int id);
         public Task<User> Save(User request);
         public Task<User> Update(User request);
         public Task<User> Delete(int id);
         public Task<User> Register(RegisterRequest request);
+        //public Task<(User user, UserRole role)> Login(LoginRequest request);
         public Task<(User user, UserRole role)> Login(LoginRequest request);
     }
 }

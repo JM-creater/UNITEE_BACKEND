@@ -28,6 +28,18 @@ namespace UNITEE_BACKEND.Services
             return e;
         }
 
+        public List<Cart> GetMyCart(int userId)
+        {
+            try
+            {
+                return context.Carts.Where(cart => cart.UserId == userId).ToList();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
         public async Task <IEnumerable<Cart>> GetCartByCustomer(int customerId)
         {
             var customer = await context.Carts  
@@ -37,37 +49,48 @@ namespace UNITEE_BACKEND.Services
             return customer;
         }
 
-        public async Task AddToCart(int userId, int productId, int quantity, UserRole userRole)
+        public async Task AddToCart(int userId, int productId, string size, int quantity, UserRole userRole)
         {
-            var user = await context.Users.FindAsync(userId);
-            var product = await context.Products.FindAsync(productId);
-
-            if (user == null || product == null)
+            try
             {
-                throw new Exception("User or Product not found");
+                var user = await context.Users.FindAsync(userId);
+                var product = await context.Products
+                                            .Include(p => p.Sizes)
+                                            .FirstOrDefaultAsync(p => p.ProductId == productId);
+
+                if (user == null)
+                    throw new Exception($"User with ID {userId} not found");
+
+                if (product == null)
+                    throw new Exception($"Product with ID {productId} not found");
+
+                if (userRole != UserRole.Customer)
+                    throw new Exception("Only customers can add to cart");
+
+                var sizeQuantity = product.Sizes.FirstOrDefault(s => s.Size == size);
+                if (sizeQuantity == null)
+                    throw new Exception($"Size {size} not available for this product");
+
+                if (sizeQuantity.Quantity < quantity)
+                    throw new Exception($"Insufficient stock for size {size}");
+
+                sizeQuantity.Quantity -= quantity;
+
+                var cartItem = new Cart
+                {
+                    UserId = userId,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    Size = size
+                };
+
+                context.Carts.Add(cartItem);
+                await context.SaveChangesAsync();
             }
-
-            if (userRole != UserRole.Customer)
+            catch (Exception e)
             {
-                throw new Exception("Only customers can add to cart");
+                throw new Exception(e.Message);
             }
-
-            if (product.Stocks < quantity)
-            {
-                throw new Exception("Insufficient stock");
-            }
-
-            var cartItem = new Cart
-            {
-                UserId = userId,
-                ProductId = productId,
-                Quantity = quantity
-            };
-
-            product.Stocks -= quantity;
-
-            context.Carts.Add(cartItem);
-            await context.SaveChangesAsync();
         }
 
         public async Task<Cart> Delete(int id)
@@ -76,28 +99,6 @@ namespace UNITEE_BACKEND.Services
             var result = context.Remove(e);
             await Save();
             return result.Entity;
-        }
-
-        public async Task RemoveRestoreStock(int cartItemId)
-        {
-            var cartItem = await context.Carts.Include(c => c.Product).FirstOrDefaultAsync(c => c.Id == cartItemId);
-
-            if (cartItem == null)
-                throw new Exception("Cart item not found");
-
-            var productId = cartItem.ProductId;
-            var quantity = cartItem.Quantity;
-
-            context.Carts.Remove(cartItem);
-
-            var product = cartItem.Product;
-
-            if (product != null)
-            {
-                product.Stocks += quantity;
-            }
-
-            await Save();
         }
 
         public async Task<Cart> Update(int id, CartAddRequest request)

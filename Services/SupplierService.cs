@@ -44,8 +44,6 @@ namespace UNITEE_BACKEND.Services
             var newSupplier = new User
             {
                 Id = request.Id,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
                 Email = request.Email,
                 Password = request.Password,
                 PhoneNumber = request.PhoneNumber,
@@ -86,7 +84,7 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<User> UpdateSupplier(int id, SupplierRequest request)
         {
-            var existingSupplier = await context.Users.FindAsync(id);
+            var existingSupplier = await context.Users.FirstOrDefaultAsync(a => a.Id == id);
 
             if (existingSupplier == null)
             {
@@ -103,8 +101,6 @@ namespace UNITEE_BACKEND.Services
                 existingSupplier.Image = await SaveImage(request.Image);
             }
 
-            existingSupplier.FirstName = request.FirstName;
-            existingSupplier.LastName = request.LastName;
             existingSupplier.Email = request.Email;
             existingSupplier.Password = request.Password;
             existingSupplier.PhoneNumber = request.PhoneNumber;

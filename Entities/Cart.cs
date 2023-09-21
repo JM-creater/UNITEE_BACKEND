@@ -15,6 +15,7 @@ namespace UNITEE_BACKEND.Entities
         [ForeignKey("ProductId")]
         public virtual Product? Product { get; set; }
         public int Quantity { get; set; }
+        public string Size { get; set; }
 
     }
 }

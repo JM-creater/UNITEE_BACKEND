@@ -11,7 +11,7 @@ namespace UNITEE_BACKEND.DatabaseContext
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Cart> Carts { get; set; }
-        public DbSet<SizeQuantity> SizeQuantity { get; set; }
+        public DbSet<SizeQuantity> SizeQuantities { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
         {
             
