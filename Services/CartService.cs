@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
@@ -16,23 +17,35 @@ namespace UNITEE_BACKEND.Services
         }
 
         public IEnumerable<Cart> GetAll()
-            => context.Carts.AsEnumerable();
-
-        public async Task<Cart> GetById(int id)
         {
-            var e = await context.Carts.Where(a => a.Id == id).FirstOrDefaultAsync();
+            var cart = context.Carts.Include(c => c.Items).AsEnumerable();
 
-            if (e == null)
-                throw new Exception("Cart Not Found");
-
-            return e;
+            return cart;
         }
 
-        public List<Cart> GetMyCart(int userId)
+
+        public async Task<Cart?> GetById(int id)
+            => await context.Carts.Where(c => c.Id == id).FirstOrDefaultAsync();
+
+        public async Task<List<Cart>> GetByUserId(int id)
+        {
+            var user = await context.Users
+                .Include(u => u.Carts)
+                    .ThenInclude(c => c.Items)
+                        .ThenInclude(i => i.Product)
+                .Include(u => u.Carts)
+                    .ThenInclude(c => c.Supplier)
+                .Where(u => u.Id == id)
+                .FirstOrDefaultAsync();
+                
+            return user.Carts.ToList();
+        }
+
+        public async Task<List<Cart>> GetMyCart(int userId)
         {
             try
             {
-                return context.Carts.Where(cart => cart.UserId == userId).ToList();
+                return await GetByUserId(userId);
             }
             catch (Exception e)
             {
@@ -41,19 +54,13 @@ namespace UNITEE_BACKEND.Services
         }
 
         public async Task <IEnumerable<Cart>> GetCartByCustomer(int customerId)
-        {
-            var customer = await context.Carts  
-                .Where(customer => customer.UserId == customerId)
-                .ToListAsync();
-
-            return customer;
-        }
+            => await GetByUserId(customerId);
 
         public async Task AddToCart(UserRole userRole, CartAddRequest request)
         {
             try
             {
-                var user = await context.Users.FindAsync(request.UserId);
+                var user = await context.Users.Include(u => u.Carts).Where(u => u.Id == request.UserId).FirstOrDefaultAsync();
 
                 if (user == null)
                     throw new Exception($"User with ID {request.UserId} not found");
@@ -77,22 +84,38 @@ namespace UNITEE_BACKEND.Services
 
                 if (sizeQuantity.Quantity < request.Quantity)
                     throw new Exception($"Insufficient stock for size {request.Size}");
+                //sizeQuantity.Quantity -= request.Quantity;
 
-                sizeQuantity.Quantity -= request.Quantity;
+                var cart = user.Carts.Where(c => c.SupplierId == product.SupplierId).FirstOrDefault();
 
-                var cartItem = new Cart
+                if (cart != null)
                 {
-                    UserId = request.UserId,
-                    ProductId = request.ProductId,
-                    Quantity = request.Quantity,
-                    Size = request.Size,
-                    ProductTypeId = request.ProductTypeId,
-                    ProductName = request.ProductName,
-                    Price = request.Price,
-                    Image = request.Image,
-                };
+                    cart.Items.Add(new CartItem
+                    {
+                        ProductId = request.ProductId,
+                        SizeQuantityId = sizeQuantity.Id,
+                        Quantity = request.Quantity,
+                    });
+                    context.Carts.Update(cart);
+                }
+                else
+                {
+                    context.Carts.Add(new Cart
+                    {
+                        UserId = request.UserId,
+                        SupplierId = product.SupplierId,
+                        Items = new List<CartItem> {
+                            new CartItem
+                            {
+                                ProductId = request.ProductId,
+                                SizeQuantityId = sizeQuantity.Id,
+                                Quantity = request.Quantity,
+                            }
+                        }
+                    });
+                }
 
-                context.Carts.Add(cartItem);
+
                 await context.SaveChangesAsync();
             }
             catch (Exception e)
@@ -119,9 +142,9 @@ namespace UNITEE_BACKEND.Services
             }
 
             existingCart.Id = id;
-            existingCart.UserId = request.UserId;
-            existingCart.ProductId = request.ProductId;
-            existingCart.Quantity = request.Quantity;
+            //existingCart.UserId = request.UserId;
+            //existingCart.ProductId = request.ProductId;
+            //existingCart.Quantity = request.Quantity;
 
             await this.Save();
 

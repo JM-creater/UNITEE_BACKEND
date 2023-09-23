@@ -46,5 +46,7 @@ namespace UNITEE_BACKEND.Entities
         public bool IsActive { get; set; } = true;
         public int Role { get; set; }
         public bool IsValidate { get; set; } = false;
+
+        public ICollection<Cart>? Carts { get; set; }
     }
 }

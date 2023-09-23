@@ -9,5 +9,6 @@
         public string BIR { get; set; }
         public string CityPermit { get; set; }
         public string SchoolPermit { get; set; }
+        public string ProofOfPayment { get; set; }
     }
 }

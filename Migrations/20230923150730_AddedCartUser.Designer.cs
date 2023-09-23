@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UNITEE_BACKEND.DatabaseContext;
 
@@ -11,9 +12,11 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230923150730_AddedCartUser")]
+    partial class AddedCartUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,7 +41,7 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SupplierId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Carts");
                 });
@@ -149,51 +152,6 @@ namespace UNITEE_BACKEND.Migrations
                             DepartmentId = 12,
                             Department_Name = "Hotel and Tourism"
                         });
-                });
-
-            modelBuilder.Entity("UNITEE_BACKEND.Entities.Order", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CartId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("EstimateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PaymentType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProofOfPayment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReferenceId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<float>("Total")
-                        .HasColumnType("real");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CartId");
-
-                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>
@@ -399,13 +357,11 @@ namespace UNITEE_BACKEND.Migrations
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Cart", b =>
                 {
-                    b.HasOne("UNITEE_BACKEND.Entities.User", "Supplier")
+                    b.HasOne("UNITEE_BACKEND.Entities.User", null)
                         .WithMany("Carts")
-                        .HasForeignKey("SupplierId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.CartItem", b =>
@@ -421,17 +377,6 @@ namespace UNITEE_BACKEND.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("UNITEE_BACKEND.Entities.Order", b =>
-                {
-                    b.HasOne("UNITEE_BACKEND.Entities.Cart", "Cart")
-                        .WithMany()
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cart");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>

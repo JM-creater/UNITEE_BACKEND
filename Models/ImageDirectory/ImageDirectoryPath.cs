@@ -40,5 +40,10 @@ namespace UNITEE_BACKEND.Models.ImageDirectory
         {
             return _imagePathOptions.SchoolPermit;
         }
+
+        public string GetProofOfPayment()
+        {
+            return _imagePathOptions.ProofOfPayment;
+        }
     }
 }

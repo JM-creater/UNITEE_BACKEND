@@ -8,13 +8,9 @@ namespace UNITEE_BACKEND.Entities
     {
         [Key]
         public int Id { get; set; }
+        public int SupplierId { get; set; }
+        public virtual User Supplier { get; set; }
         public int UserId { get; set; }
-        public int ProductId { get; set; }
-        public int ProductTypeId { get; set; }
-        public string? ProductName { get; set; }
-        public float Price { get; set; }
-        public int Quantity { get; set; }
-        public string? Size { get; set; }
-        public string? Image { get; set; }
+        public ICollection<CartItem>? Items { get; set; }
     }
 }

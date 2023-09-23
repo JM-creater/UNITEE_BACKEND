@@ -123,6 +123,14 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = $"/{imagePathOptions.SchoolPermit}"
 });
 
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Reference")),
+    RequestPath = "/Reference"
+});
+
+
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();

@@ -25,6 +25,8 @@
   <ItemGroup>
     <Folder Include="BIR\" />
     <Folder Include="CityPermit\" />
+    <Folder Include="Migrations\" />
+    <Folder Include="Reference\" />
     <Folder Include="SchoolPermit\" />
     <Folder Include="StudyLoad\" />
   </ItemGroup>
