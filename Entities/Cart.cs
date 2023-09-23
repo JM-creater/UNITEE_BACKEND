@@ -9,13 +9,12 @@ namespace UNITEE_BACKEND.Entities
         [Key]
         public int Id { get; set; }
         public int UserId { get; set; }
-        [ForeignKey("UserId")]
-        public virtual User? User { get; set; }
         public int ProductId { get; set; }
-        [ForeignKey("ProductId")]
-        public virtual Product? Product { get; set; }
+        public int ProductTypeId { get; set; }
+        public string? ProductName { get; set; }
+        public float Price { get; set; }
         public int Quantity { get; set; }
-        public string Size { get; set; }
-
+        public string? Size { get; set; }
+        public string? Image { get; set; }
     }
 }

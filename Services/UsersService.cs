@@ -62,6 +62,7 @@ namespace UNITEE_BACKEND.Services
                 throw new Exception("A user with this email or user id already exists.");
 
             var imagePath = await SaveImage(request.Image);
+            var studyLoadPath = await SaveStudyLoad(request.StudyLoad);
 
             var newUser = new User
             {
@@ -74,7 +75,7 @@ namespace UNITEE_BACKEND.Services
                 PhoneNumber = request.PhoneNumber,
                 Gender = request.Gender,
                 Image = imagePath,
-                IsActive = true,
+                StudyLoad = studyLoadPath,
                 Role = (int)UserRole.Customer
             };
 
@@ -83,7 +84,8 @@ namespace UNITEE_BACKEND.Services
 
             return newUser;
         }
-
+           
+        // Profile Picture
         public async Task<string?> SaveImage(IFormFile? imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
@@ -106,28 +108,29 @@ namespace UNITEE_BACKEND.Services
             return Path.Combine("Images", fileName);
         }
 
-        //public async Task<(User user, UserRole role)> Login(LoginRequest request)
-        //{
-        //    var user = await context.Users
-        //        .SingleOrDefaultAsync(u => u.Id == request.Id);
+        public async Task<string?> SaveStudyLoad(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
 
-        //    if (user == null)
-        //    {
-        //        throw new AuthenticationException("Invalid user id.");
-        //    }
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "StudyLoad");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
 
-        //    if (!user.IsActive) 
-        //    {
-        //        throw new AuthenticationException("Account is deactivated.");
-        //    }
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
 
-        //    if (user.Password != request.Password)
-        //    {
-        //        throw new AuthenticationException("Invalid password.");
-        //    }
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
 
-        //    return (user, (UserRole)user.Role);
-        //}
+            return Path.Combine("StudyLoad", fileName);
+        }
+
+
 
         public async Task<(User user, UserRole role)> Login(LoginRequest request)
         {
@@ -147,6 +150,9 @@ namespace UNITEE_BACKEND.Services
                 if (user == null)
                     throw new AuthenticationException("Invalid user Id or Email");
 
+                if (!user.IsValidate)
+                    throw new AuthenticationException("Waiting for validation");
+
                 if (!user.IsActive)
                     throw new AuthenticationException("Account is deactivated");
 
@@ -161,6 +167,29 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        public async Task<User> ValidateUser(int id, ValidateUserRequest request)
+        {
+            try
+            {
+                var userExist = await context.Users.Where(a => a.Id == id).FirstOrDefaultAsync();
+
+                if (userExist == null)
+                    throw new Exception("User not Found");
+
+                if (userExist.Role != (int)UserRole.Supplier && userExist.Role != (int)UserRole.Customer)
+                    throw new Exception("The provided ID does not correspond to a supplier or a customer");
+
+                userExist.IsValidate = request.IsValidate;
+
+                await this.Save();
+
+                return userExist;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
 
         public async Task<User> Save(User request)
         {

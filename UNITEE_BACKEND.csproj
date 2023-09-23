@@ -22,4 +22,11 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="BIR\" />
+    <Folder Include="CityPermit\" />
+    <Folder Include="SchoolPermit\" />
+    <Folder Include="StudyLoad\" />
+  </ItemGroup>
+
 </Project>

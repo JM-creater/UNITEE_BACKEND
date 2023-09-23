@@ -40,6 +40,9 @@ namespace UNITEE_BACKEND.Services
             }
 
             var imagePath = await SaveImage(request.Image);
+            var imageBir = await SaveBIR(request.BIR);
+            var imageCityPermit = await SaveCityPermit(request.CityPermit);
+            var imageSchoolPermit = await SaveSchoolPermit(request.SchoolPermit);
 
             var newSupplier = new User
             {
@@ -50,7 +53,9 @@ namespace UNITEE_BACKEND.Services
                 ShopName = request.ShopName,
                 Address = request.Address,
                 Image = imagePath,
-                IsActive = true,
+                BIR = imageBir,
+                CityPermit = imageCityPermit,
+                SchoolPermit = imageSchoolPermit,
                 Role = (int)UserRole.Supplier
             };
 
@@ -60,6 +65,7 @@ namespace UNITEE_BACKEND.Services
             return newSupplier;
         }
 
+        // Profile Picture
         public async Task<string?> SaveImage(IFormFile? imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
@@ -80,6 +86,75 @@ namespace UNITEE_BACKEND.Services
             }
 
             return Path.Combine("SupplierImage", fileName);
+        }
+
+        // BIR
+        public async Task<string?> SaveBIR(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "BIR");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("BIR", fileName);
+        }
+
+        // City Permit
+        public async Task<string?> SaveCityPermit(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "CityPermit");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("CityPermit", fileName);
+        }
+
+        // School Permit
+        public async Task<string?> SaveSchoolPermit(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "SchoolPermit");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("SchoolPermit", fileName);
         }
 
         public async Task<User> UpdateSupplier(int id, SupplierRequest request)

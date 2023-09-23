@@ -15,13 +15,29 @@ namespace UNITEE_BACKEND.Controllers
             cartService = service;
         }
 
+        //[HttpPost("add")]
+        //public async Task<IActionResult> AddToCart([FromBody] CartAddRequest request)
+        //{
+        //    try
+        //    {
+        //        var userRole = UserRole.Customer;
+        //        await cartService.AddToCart(request.UserId, request.ProductId, request.Size, request.Quantity, userRole);
+        //        return Ok("Item added to cart");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
+
         [HttpPost("add")]
-        public async Task<IActionResult> AddToCart([FromBody] CartAddRequest request)
+        public async Task<IActionResult> AddToCartUser([FromBody] CartAddRequest request)
         {
             try
             {
                 var userRole = UserRole.Customer;
-                await cartService.AddToCart(request.UserId, request.ProductId, request.Size, request.Quantity, userRole);
+                await cartService.AddToCart(userRole, request);
+
                 return Ok("Item added to cart");
             }
             catch (Exception e)

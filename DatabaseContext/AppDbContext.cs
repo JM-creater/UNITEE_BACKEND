@@ -106,6 +106,22 @@ namespace UNITEE_BACKEND.DatabaseContext
                     Product_Type = "ID Sling"
                 }
                 );
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 20163482,
+                    FirstName = "Admin",
+                    LastName = "Admin",
+                    Password = "123456",
+                    Email = "admin@gmail.com",
+                    PhoneNumber = "639199431060",
+                    Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
+                    IsActive = true,
+                    IsValidate = true,
+                    Role = 3
+                }
+                );
         }
     }
 }

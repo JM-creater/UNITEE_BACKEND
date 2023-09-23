@@ -49,39 +49,47 @@ namespace UNITEE_BACKEND.Services
             return customer;
         }
 
-        public async Task AddToCart(int userId, int productId, string size, int quantity, UserRole userRole)
+        public async Task AddToCart(UserRole userRole, CartAddRequest request)
         {
             try
             {
-                var user = await context.Users.FindAsync(userId);
-                var product = await context.Products
-                                            .Include(p => p.Sizes)
-                                            .FirstOrDefaultAsync(p => p.ProductId == productId);
+                var user = await context.Users.FindAsync(request.UserId);
 
                 if (user == null)
-                    throw new Exception($"User with ID {userId} not found");
+                    throw new Exception($"User with ID {request.UserId} not found");
+
+                if (userRole != UserRole.Customer)
+                    throw new Exception("Only customer can add to cart");
+
+                var product = await context.Products
+                                           .Include(p => p.Sizes)
+                                           .FirstOrDefaultAsync(p => p.ProductId == request.ProductId);
 
                 if (product == null)
-                    throw new Exception($"Product with ID {productId} not found");
+                    throw new Exception($"Product with ID {request.ProductId} not found");
 
                 if (userRole != UserRole.Customer)
                     throw new Exception("Only customers can add to cart");
 
-                var sizeQuantity = product.Sizes.FirstOrDefault(s => s.Size == size);
+                var sizeQuantity = product.Sizes.FirstOrDefault(s => s.Size == request.Size);
                 if (sizeQuantity == null)
-                    throw new Exception($"Size {size} not available for this product");
+                    throw new Exception($"Size {request.Size} not available for this product");
 
-                if (sizeQuantity.Quantity < quantity)
-                    throw new Exception($"Insufficient stock for size {size}");
+                if (sizeQuantity.Quantity < request.Quantity)
+                    throw new Exception($"Insufficient stock for size {request.Size}");
 
-                sizeQuantity.Quantity -= quantity;
+                sizeQuantity.Quantity -= request.Quantity;
 
                 var cartItem = new Cart
                 {
-                    UserId = userId,
-                    ProductId = productId,
-                    Quantity = quantity,
-                    Size = size
+                    UserId = request.UserId,
+                    ProductId = request.ProductId,
+                    Quantity = request.Quantity,
+                    Size = request.Size,
+                    ProductTypeId = request.ProductTypeId,
+                    ProductName = request.ProductName,
+                    Price = request.Price,
+                    Image = request.Image,
                 };
 
                 context.Carts.Add(cartItem);

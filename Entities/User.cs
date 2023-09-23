@@ -35,9 +35,16 @@ namespace UNITEE_BACKEND.Entities
         [Required]
         [Column(TypeName = "nvarchar(1000)")]
         public string? Image { get; set; }
-        [Required]
-        public bool IsActive { get; set; }
+        [Column(TypeName = "nvarchar(1000)")]
+        public string? StudyLoad { get; set; }
+        [Column(TypeName = "nvarchar(1000)")]
+        public string? BIR { get; set; }
+        [Column(TypeName = "nvarchar(1000)")]
+        public string? CityPermit { get; set; }
+        [Column(TypeName = "nvarchar(1000)")]
+        public string? SchoolPermit { get; set; }
+        public bool IsActive { get; set; } = true;
         public int Role { get; set; }
-        public bool IsValidate { get; set; } = true;
+        public bool IsValidate { get; set; } = false;
     }
 }

@@ -13,5 +13,8 @@ namespace UNITEE_BACKEND.Models.Request
         public string ShopName { get; set; } = "";
         public string Address { get; set; } = "";
         public IFormFile? Image { get; set; }
+        public IFormFile? BIR { get; set; }
+        public IFormFile? CityPermit { get; set; }
+        public IFormFile? SchoolPermit { get; set; }
     }
 }

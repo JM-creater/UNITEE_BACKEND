@@ -4,6 +4,8 @@ using UNITEE_BACKEND.Services;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using UNITEE_BACKEND.AutoMapperConfig;
+using UNITEE_BACKEND.Models.ImageDirectory;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -22,10 +24,13 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ISizeQuantityService, SizeQuantityService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("default")));
+
+builder.Services.Configure<ImagePathOptions>(builder.Configuration.GetSection("ImagePath"));
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
@@ -55,6 +60,8 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+var imagePathOptions = app.Services.GetRequiredService<IOptions<ImagePathOptions>>().Value;
+
 app.UseSession();
 
 // Configure the HTTP request pipeline.
@@ -69,22 +76,51 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "ProductImages")),
-    RequestPath = "/ProductImages"
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.ProductImages)),
+    RequestPath = $"/{imagePathOptions.ProductImages}"
 });
 
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "Images")),
-    RequestPath = "/Images"
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.Images)),
+    RequestPath = $"/{imagePathOptions.Images}"
+});
+
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.SupplierImage)),
+    RequestPath = $"/{imagePathOptions.SupplierImage}"
 });
 
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "SupplierImage")),
-    RequestPath = "/SupplierImage"
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.StudyLoad)),
+    RequestPath = $"/{imagePathOptions.StudyLoad}"
+});
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.BIR)),
+    RequestPath = $"/{imagePathOptions.BIR}"
+});
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.CityPermit)),
+    RequestPath = $"/{imagePathOptions.CityPermit}"
+});
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.SchoolPermit)),
+    RequestPath = $"/{imagePathOptions.SchoolPermit}"
 });
 
 app.UseCors(MyAllowSpecificOrigins);

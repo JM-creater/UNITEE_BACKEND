@@ -15,20 +15,6 @@ namespace UNITEE_BACKEND.Controllers
             usersService = service;
         }
 
-        //[HttpPost("login")]
-        //public async Task<IActionResult> Login([FromBody] LoginRequest request)
-        //{
-        //    try
-        //    {
-        //        var (user, role) = await usersService.Login(request);
-        //        return new JsonResult(new { user, role = role.ToString() });
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -107,6 +93,20 @@ namespace UNITEE_BACKEND.Controllers
             catch (Exception e)
             {
                 return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("validate/{id}")]
+        public async Task<IActionResult> ValidateUserAccount([FromRoute] int id, [FromBody] ValidateUserRequest request)
+        {
+            try
+            {
+                var user = await usersService.ValidateUser(id, request);
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
             }
         }
 
