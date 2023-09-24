@@ -42,7 +42,7 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var e = await cartService.GetByUserId(id);
+                var e = await cartService.GetById(id);
                 return Ok(e);
             }
             catch (Exception e)
@@ -66,19 +66,19 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpGet("myCart/{userId}")]
-        public IActionResult GetMyCartData([FromRoute] int userId)
+        public async Task<IActionResult> GetMyCartData([FromRoute] int userId)
         {
             try
             {
-                var myCartItems = cartService.GetMyCart(userId);
-
+                var myCartItems = await cartService.GetByUserId(userId);
                 return Ok(myCartItems);
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                return BadRequest(e.Message);
             }
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] CartAddRequest request)

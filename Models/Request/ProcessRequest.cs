@@ -8,7 +8,7 @@ namespace UNITEE_BACKEND.Models.Request
         public DateTime EstimateDate { get; set; }  
     }
 
-        public class OrderUpdateRequest
+    public class OrderUpdateRequest
     {
         public int Id { get; set; }
         public Status Status { get; set; }  

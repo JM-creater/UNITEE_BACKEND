@@ -32,6 +32,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.Configure<ImagePathOptions>(builder.Configuration.GetSection("ImagePath"));
 
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 

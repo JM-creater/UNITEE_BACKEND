@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Drawing;
 using UNITEE_BACKEND.Entities;
 
@@ -17,6 +18,12 @@ namespace UNITEE_BACKEND.DatabaseContext
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
         {
             
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.ConfigureWarnings(warnings =>
+                warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
