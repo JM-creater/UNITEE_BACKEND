@@ -20,6 +20,11 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
+                if (!request.Id.HasValue && string.IsNullOrWhiteSpace(request.Email)) 
+                {
+                    return BadRequest("Provide either user ID or email for login");
+                }
+
                 var (user, role) = await usersService.Login(request);
                 return new JsonResult(new { user, role = role.ToString() });
             }
@@ -70,6 +75,32 @@ namespace UNITEE_BACKEND.Controllers
             return Ok(suppliers);
         }
 
+        [HttpGet("getSupplierById/{id}")]
+        public IActionResult GetSupplierById(int id)
+        {
+            var supplier = usersService.GetSupplierById(id);
+            if (supplier == null)
+            {
+                return NotFound(new { Message = "Supplier not found." });
+            }
+            return Ok(supplier);
+        }
+
+        [HttpGet("getProductsBySupplierShop/{supplierId}")]
+        public IActionResult GetProductsBySupplierShop(int supplierId)
+        {
+            var products = usersService.GetProductsBySupplierShop(supplierId);
+            return Ok(products);
+        }
+
+
+        [HttpGet("getCustomers")]
+        public IActionResult GetCustomers()
+        {
+            var suppliers = usersService.GetAllCustomers();
+            return Ok(suppliers);
+        }
+
         [HttpPut]
         public async Task<IActionResult> Update(User request)
         {
@@ -81,6 +112,20 @@ namespace UNITEE_BACKEND.Controllers
             catch (Exception e)
             {
                 return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("validate/{id}")]
+        public async Task<IActionResult> ValidateUserAccount([FromRoute] int id, [FromBody] ValidateUserRequest request)
+        {
+            try
+            {
+                var user = await usersService.ValidateUser(id, request);
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
             }
         }
 

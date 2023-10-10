@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
+using System.Security.Claims;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
@@ -10,10 +12,13 @@ namespace UNITEE_BACKEND.Services
     public class UsersService : IUsersService
     {
         private readonly AppDbContext context;
+        private readonly UserManager<User> userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsersService(AppDbContext dbcontext) 
+        public UsersService(AppDbContext dbcontext, IHttpContextAccessor httpContext) 
         {
             this.context = dbcontext;
+            this._httpContextAccessor = httpContext;
         }
 
         public IEnumerable<User> GetAll()
@@ -34,16 +39,41 @@ namespace UNITEE_BACKEND.Services
             return context.Users.Where(u => u.Role == (int)UserRole.Supplier).AsEnumerable();
         }
 
+        public User GetSupplierById(int id)
+        {
+            return context.Users.FirstOrDefault(u => u.Id == id && u.Role == (int)UserRole.Supplier);
+        }
+
+        public IEnumerable<Product> GetProductsBySupplierShop(int supplierId)
+        {
+            return context.Products.Where(p => p.SupplierId == supplierId).ToList();
+        }
+
+
+        public IEnumerable<User> GetAllCustomers()
+        {
+            return context.Users.Where(c => c.Role == (int)UserRole.Customer).AsEnumerable();
+        }
+
+        public async Task<User> GetCurrentUser()
+        {
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return null;
+
+            return await userManager.FindByIdAsync(userId);
+        }
+
         public async Task<User> Register(RegisterRequest request)
         {
             var existingUser = await context.Users
                 .SingleOrDefaultAsync(u => u.Email == request.Email || u.Id == request.Id);
+
             if (existingUser != null)
-            {
                 throw new Exception("A user with this email or user id already exists.");
-            }
 
             var imagePath = await SaveImage(request.Image);
+            var studyLoadPath = await SaveStudyLoad(request.StudyLoad);
 
             var newUser = new User
             {
@@ -56,7 +86,7 @@ namespace UNITEE_BACKEND.Services
                 PhoneNumber = request.PhoneNumber,
                 Gender = request.Gender,
                 Image = imagePath,
-                IsActive = true,
+                StudyLoad = studyLoadPath,
                 Role = (int)UserRole.Customer
             };
 
@@ -65,7 +95,8 @@ namespace UNITEE_BACKEND.Services
 
             return newUser;
         }
-
+           
+        // Profile Picture
         public async Task<string?> SaveImage(IFormFile? imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
@@ -88,27 +119,85 @@ namespace UNITEE_BACKEND.Services
             return Path.Combine("Images", fileName);
         }
 
+        public async Task<string?> SaveStudyLoad(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "StudyLoad");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("StudyLoad", fileName);
+        }
+
         public async Task<(User user, UserRole role)> Login(LoginRequest request)
         {
-            var user = await context.Users
-                .SingleOrDefaultAsync(u => u.Id == request.Id);
-
-            if (user == null)
+            try
             {
-                throw new AuthenticationException("Invalid user id.");
-            }
+                User user = null;
 
-            if (!user.IsActive) 
+                if (request.Id.HasValue) 
+                {
+                    user = await context.Users.SingleOrDefaultAsync(u => u.Id == request.Id);
+                }
+                else if (!string.IsNullOrWhiteSpace(request.Email))
+                {
+                    user = await context.Users.SingleOrDefaultAsync(u => u.Email == request.Email);
+                }
+
+                if (user == null)
+                    throw new AuthenticationException("Invalid user Id or Email");
+
+                if (!user.IsValidate)
+                    throw new AuthenticationException("Waiting for validation");
+
+                if (!user.IsActive)
+                    throw new AuthenticationException("Account is deactivated");
+
+                if (user.Password != request.Password)
+                    throw new AuthenticationException("Invalid Password");
+
+                return (user, (UserRole)user.Role);
+            }
+            catch (Exception e)
             {
-                throw new AuthenticationException("Account is deactivated.");
+                throw new Exception(e.Message);
             }
+        }
 
-            if (user.Password != request.Password)
+        public async Task<User> ValidateUser(int id, ValidateUserRequest request)
+        {
+            try
             {
-                throw new AuthenticationException("Invalid password.");
-            }
+                var userExist = await context.Users.Where(a => a.Id == id).FirstOrDefaultAsync();
 
-            return (user, (UserRole)user.Role);
+                if (userExist == null)
+                    throw new Exception("User not Found");
+
+                if (userExist.Role != (int)UserRole.Supplier && userExist.Role != (int)UserRole.Customer)
+                    throw new Exception("The provided ID does not correspond to a supplier or a customer");
+
+                userExist.IsValidate = request.IsValidate;
+
+                await this.Save();
+
+                return userExist;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public async Task<User> Save(User request)

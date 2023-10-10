@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using UNITEE_BACKEND.DatabaseContext;
+using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using static System.Net.Mime.MediaTypeNames;
@@ -9,36 +12,42 @@ namespace UNITEE_BACKEND.Services
     public class ProductService : IProductService
     {
         private readonly AppDbContext context;
+        private readonly IMapper _mapper;
 
-        public ProductService(AppDbContext dbcontext)
+        public ProductService(AppDbContext dbcontext, IMapper mapper)
         {
             this.context = dbcontext;
+            this._mapper = mapper;
         }
 
-        public async Task<Product> AddProduct(ProductRequest request)
+        public async Task<int> AddProduct(ProductRequest request)
         {
-            var imagePath = await ProductImage(request.Image);
-
-            var newProduct = new Product
+            try
             {
-                SupplierId = request.SupplierId,
-                ProductTypeId = request.ProductTypeId,
-                DepartmentId = request.DepartmentId,
-                ProductName = request.ProductName,
-                Description = request.Description,
-                Sizes = string.Join(',', request.Sizes),
-                Category = request.Category,
-                Price = request.Price,
-                Stocks = request.Stocks,
-                Image = imagePath,
-                IsActive = true
-            };
+                var imagePath = await ProductImage(request.Image);
 
-            await context.Products.AddAsync(newProduct);
-            await this.Save();
+                var newProduct = new Product
+                {
+                    SupplierId = request.SupplierId,
+                    ProductTypeId = request.ProductTypeId,
+                    DepartmentId = request.DepartmentId,
+                    ProductName = request.ProductName,
+                    Description = request.Description,
+                    Category = request.Category,
+                    Price = request.Price,
+                    Image = imagePath,
+                    IsActive = true
+                };
 
-            return newProduct;
+                await context.Products.AddAsync(newProduct);
+                await this.Save();
 
+                return newProduct.ProductId;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public async Task<string?> ProductImage(IFormFile? imageFile)
@@ -64,37 +73,98 @@ namespace UNITEE_BACKEND.Services
         }
 
         public IEnumerable<Product> GetAll()
-            => context.Products.AsEnumerable();
-
-        public async Task<IEnumerable<Product>> GetProductsBySupplier(int supplierId)
         {
-            var products = await context.Products
-                .Where(product => product.SupplierId == supplierId)
-                .ToListAsync();
+            try
+            {
+                var products = context.Products.Include(a => a.Sizes).AsEnumerable();
 
-            return products;
+                return products;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
-        public async Task<Product> GetById(int id)
+        public IEnumerable<Product> GetProductsByShopId(int shopId)
         {
-            var e = await context.Products.Where(a => a.ProductId == id).FirstOrDefaultAsync();
-
-            if (e == null)
-                throw new Exception("Product Not Found");
-
-            return e;
+            return context.Products.Include(s => s.Sizes).Where(p => p.SupplierId == shopId).AsEnumerable();
         }
 
-        public async Task<Product> Save(Product request)
+        public async Task<Product> GetById(int productId)
         {
-            var e = await context.Products.AddAsync(request);
-            await this.Save();
-            return e.Entity;
+            try
+            {
+                var product = await context.Products
+                    .Include(x => x.Sizes)
+                    .FirstOrDefaultAsync(a => a.ProductId == productId);
+
+                if (product == null)
+                    throw new Exception("Product Not Found");
+
+                return product;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
-        public async Task<Product> Update(int productId, ProductRequest request)
+        public async Task<IEnumerable<ProductWithSizeQuantityDto>> GetProductsBySupplier(int supplierId)
         {
-            var existingProduct = await context.Products.FindAsync(productId);
+            try
+            {
+                var products = await context.Products
+                    .Include(product => product.Sizes)
+                    .Where(product => product.SupplierId == supplierId)
+                    .ToListAsync();
+
+                var productDto = products.Select(product => new ProductWithSizeQuantityDto
+                {
+                    ProductId = product.ProductId,
+                    ProductName = product.ProductName,
+                    ProductTypeId = product.ProductTypeId,
+                    DepartmentId = product.DepartmentId,
+                    Category = product.Category,
+                    Price = product.Price,
+                    Image = product.Image,
+                    Sizes = product.Sizes.Select(size => new SizeQuantityDto
+                    {
+                        Size = size.Size,
+                        Quantity = size.Quantity
+                    })
+                }).ToList();
+
+                return productDto;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId)
+        {
+            try
+            {
+                var products = await context.Products
+                                            .Include(a => a.Sizes)
+                                            .Where(p => p.DepartmentId == departmentId)
+                                            .ToListAsync();
+
+                return products;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<Product> UpdateProduct(int productId, ProductRequest request)
+        {
+            var existingProduct = await context.Products
+                .Include(p => p.Sizes) 
+                .FirstOrDefaultAsync(p => p.ProductId == productId);
 
             if (existingProduct == null)
             {
@@ -110,15 +180,27 @@ namespace UNITEE_BACKEND.Services
             existingProduct.DepartmentId = request.DepartmentId;
             existingProduct.ProductName = request.ProductName;
             existingProduct.Description = request.Description;
-
-            // Check if sizes are present before joining them
-            existingProduct.Sizes = request.Sizes != null
-                ? string.Join(',', request.Sizes)
-                : null;
-
             existingProduct.Category = request.Category;
             existingProduct.Price = request.Price;
-            existingProduct.Stocks = request.Stocks;
+
+            // Update sizes
+            foreach (var sizeQuantityDto in request.Sizes)
+            {
+                var existingSize = existingProduct.Sizes.FirstOrDefault(s => s.Size == sizeQuantityDto.Size);
+
+                if (existingSize != null)
+                {
+                    existingSize.Quantity = sizeQuantityDto.Quantity;
+                }
+                else
+                {
+                    existingProduct.Sizes.Add(new SizeQuantity
+                    {
+                        Size = sizeQuantityDto.Size,
+                        Quantity = sizeQuantityDto.Quantity
+                    });
+                }
+            }
 
             await this.Save();
 
@@ -127,17 +209,23 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<Product> UpdateActivationStatus(int productId, bool isActive)
         {
-            var existingProduct = await context.Products.FindAsync(productId);
-
-            if (existingProduct == null)
+            try
             {
-                throw new Exception("Product not found");
+                var existingProduct = await context.Products.FirstOrDefaultAsync(a => a.ProductId == productId);
+
+                if (existingProduct == null)
+                    throw new Exception("Product not found");
+
+                existingProduct.IsActive = isActive;
+
+                await this.Save();
+
+                return existingProduct;
             }
-
-            existingProduct.IsActive = isActive;
-            await this.Save();
-
-            return existingProduct;
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public async Task<Product> Delete(int id)

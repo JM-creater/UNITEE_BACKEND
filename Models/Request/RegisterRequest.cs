@@ -22,5 +22,7 @@ namespace UNITEE_BACKEND.Models.Request
         public string Gender { get; set; } = "";
         [Required]
         public IFormFile? Image { get; set; }
+        [Required]
+        public IFormFile? StudyLoad { get; set; }
     }
 }

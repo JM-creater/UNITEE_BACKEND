@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,7 +8,7 @@
 namespace UNITEE_BACKEND.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -39,19 +40,6 @@ namespace UNITEE_BACKEND.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Sizes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(250)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Sizes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -66,8 +54,13 @@ namespace UNITEE_BACKEND.Migrations
                     ShopName = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(1000)", nullable: false),
+                    StudyLoad = table.Column<string>(type: "nvarchar(1000)", nullable: true),
+                    BIR = table.Column<string>(type: "nvarchar(1000)", nullable: true),
+                    CityPermit = table.Column<string>(type: "nvarchar(1000)", nullable: true),
+                    SchoolPermit = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false)
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    IsValidate = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -90,11 +83,9 @@ namespace UNITEE_BACKEND.Migrations
                     ProductTypeId = table.Column<int>(type: "int", nullable: false),
                     ProductName = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(250)", nullable: false),
-                    Sizes = table.Column<string>(type: "nvarchar(250)", nullable: true),
                     Category = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(1000)", nullable: true),
                     Price = table.Column<float>(type: "real", nullable: false),
-                    Stocks = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -120,25 +111,100 @@ namespace UNITEE_BACKEND.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Carts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Carts_Products_ProductId",
+                        name: "FK_Carts_Users_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SizeQuantities",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Size = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SizeQuantities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SizeQuantities_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    CartId = table.Column<int>(type: "int", nullable: false),
+                    ReferenceId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProofOfPayment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Total = table.Column<float>(type: "real", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EstimateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PaymentType = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_Carts_CartId",
+                        column: x => x.CartId,
+                        principalTable: "Carts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CartItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    SizeQuantityId = table.Column<int>(type: "int", nullable: false),
+                    CartId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CartItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CartItems_Carts_CartId",
+                        column: x => x.CartId,
+                        principalTable: "Carts",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CartItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "ProductId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Carts_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        name: "FK_CartItems_SizeQuantities_SizeQuantityId",
+                        column: x => x.SizeQuantityId,
+                        principalTable: "SizeQuantities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -171,15 +237,35 @@ namespace UNITEE_BACKEND.Migrations
                     { 4, "ID Sling" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Address", "BIR", "CityPermit", "DepartmentId", "Email", "FirstName", "Gender", "Image", "IsActive", "IsValidate", "LastName", "Password", "PhoneNumber", "Role", "SchoolPermit", "ShopName", "StudyLoad" },
+                values: new object[] { 20163482, "", null, null, null, "admin@gmail.com", "Admin", "", "Images/0d218025-7843-4cee-beed-0a62655a9664.png", true, true, "Admin", "123456", "639199431060", 3, null, "", null });
+
             migrationBuilder.CreateIndex(
-                name: "IX_Carts_ProductId",
-                table: "Carts",
+                name: "IX_CartItems_CartId",
+                table: "CartItems",
+                column: "CartId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CartItems_ProductId",
+                table: "CartItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Carts_UserId",
+                name: "IX_CartItems_SizeQuantityId",
+                table: "CartItems",
+                column: "SizeQuantityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Carts_SupplierId",
                 table: "Carts",
-                column: "UserId");
+                column: "SupplierId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_CartId",
+                table: "Orders",
+                column: "CartId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_DepartmentId",
@@ -192,6 +278,11 @@ namespace UNITEE_BACKEND.Migrations
                 column: "ProductTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SizeQuantities_ProductId",
+                table: "SizeQuantities",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_DepartmentId",
                 table: "Users",
                 column: "DepartmentId");
@@ -201,10 +292,16 @@ namespace UNITEE_BACKEND.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Carts");
+                name: "CartItems");
 
             migrationBuilder.DropTable(
-                name: "Sizes");
+                name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "SizeQuantities");
+
+            migrationBuilder.DropTable(
+                name: "Carts");
 
             migrationBuilder.DropTable(
                 name: "Products");

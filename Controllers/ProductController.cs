@@ -1,5 +1,9 @@
 ﻿using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
@@ -10,44 +14,12 @@ namespace UNITEE_BACKEND.Controllers
     public class ProductController : Controller
     {
         private IProductService productService;
+        private IUsersService usersService;
 
-        public ProductController(IProductService service)
+        public ProductController(IProductService service, IUsersService uservice)
         {
             productService = service;
-        }
-
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            return Ok(productService.GetAll());
-        }
-
-        [HttpGet("byid/{id}")]
-        public async Task<IActionResult> GetById([FromRoute] int id)
-        {
-            try
-            {
-                var e = await productService.GetById(id);
-                return Ok(e);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        [HttpGet("bysupplier/{supplierId}")]
-        public async Task<IActionResult> GetProductsBySupplier([FromRoute] int supplierId)
-        {
-            try
-            {
-                var products = await productService.GetProductsBySupplier(supplierId);
-                return Ok(products);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
-            }
+            usersService = uservice;
         }
 
         [HttpPost("addproduct")]
@@ -64,20 +36,93 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromForm] ProductRequest request)
+        [HttpGet]
+        public IActionResult GetAllProduct()
         {
             try
             {
-                var existingProduct = await productService.GetById(id);
+                var products = productService.GetAll();
 
-                if (request.Image == null && existingProduct != null)
-                {
-                    request.Image = null;
-                }
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
-                var updatedProduct = await productService.Update(id, request);
-                return Ok(updatedProduct);
+        [HttpGet("ByShop/{shopId}")]
+        public IActionResult GetProductsByShopId(int shopId)
+        {
+            var products = productService.GetProductsByShopId(shopId);
+
+            if (products == null || !products.Any())
+            {
+                return NotFound(new { Message = "No products found for this shop." });
+            }
+
+            return Ok(products);
+        }
+
+        [HttpGet("{productId}")]
+        public async Task<IActionResult> GetById([FromRoute] int productId)
+        {
+            try
+            {
+                var e = await productService.GetById(productId);
+                return Ok(e);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpGet("bysupplier/{supplierId}")]
+        public async Task<IActionResult> GetProductsBySupplier([FromRoute] int supplierId)
+        {
+            try
+            {
+                var products = await productService.GetProductsBySupplier(supplierId);
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("GetProductsForUser")]
+        public async Task<IActionResult> GetProductsForUser()
+        {
+            try
+            {
+                var user = await usersService.GetCurrentUser();
+
+                if (user == null)
+                    return Unauthorized();
+
+                var departmentId = user.DepartmentId;
+                if (!departmentId.HasValue)
+                    return BadRequest("Error!");
+
+                var products = await productService.GetProductsByDepartment(departmentId.Value);
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{productId}")]
+        public async Task<IActionResult> Update([FromRoute] int productId, [FromForm] ProductRequest request)
+        {
+            try
+            {
+                var updatedProduct = await productService.UpdateProduct(productId, request);
+
+                return Ok("Successfully Update a Product");
             }
             catch (Exception e)
             {
@@ -91,13 +136,15 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var product = await productService.UpdateActivationStatus(productId, isActive);
-                return Ok(product);
+
+                return Ok("Successfully Deactivated");
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(e.Message);
             }
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)

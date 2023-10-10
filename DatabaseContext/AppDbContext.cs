@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Drawing;
 using UNITEE_BACKEND.Entities;
 
@@ -11,10 +12,18 @@ namespace UNITEE_BACKEND.DatabaseContext
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Cart> Carts { get; set; }
-        public DbSet<SizeQuantity> SizeQuantity { get; set; }
+        public DbSet<SizeQuantity> SizeQuantities { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
         {
             
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.ConfigureWarnings(warnings =>
+                warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -103,9 +112,42 @@ namespace UNITEE_BACKEND.DatabaseContext
                 new ProductType
                 {
                     ProductTypeId = 4,
+                    Product_Type = "PE Uniform"
+                },
+                new ProductType
+                {
+                    ProductTypeId = 5,
                     Product_Type = "ID Sling"
                 }
                 );
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 20163482,
+                    FirstName = "Admin",
+                    LastName = "Admin",
+                    Password = "123456",
+                    Email = "admin@gmail.com",
+                    PhoneNumber = "639199431060",
+                    Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
+                    IsActive = true,
+                    IsValidate = true,
+                    Role = 3
+                }
+                );
+
+            modelBuilder.Entity<CartItem>()
+              .HasOne(c => c.SizeQuantity)
+              .WithMany()
+              .HasForeignKey(c => c.SizeQuantityId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

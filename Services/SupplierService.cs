@@ -32,36 +32,48 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<User> AddSupplier(SupplierRequest request)
         {
-            var existingUser = await context.Users
+            try
+            {
+                var existingUser = await context.Users
                 .SingleOrDefaultAsync(u => u.Email == request.Email || u.Id == request.Id);
-            if (existingUser != null)
-            {
-                throw new Exception("A supplier with this email or user id already exists.");
+                if (existingUser != null)
+                {
+                    throw new Exception("A supplier with this email or user id already exists.");
+                }
+
+                var imagePath = await SaveImage(request.Image);
+                var imageBir = await SaveBIR(request.BIR);
+                var imageCityPermit = await SaveCityPermit(request.CityPermit);
+                var imageSchoolPermit = await SaveSchoolPermit(request.SchoolPermit);
+
+                var newSupplier = new User
+                {
+                    Id = request.Id,
+                    Email = request.Email,
+                    Password = request.Password,
+                    PhoneNumber = request.PhoneNumber,
+                    ShopName = request.ShopName,
+                    Address = request.Address,
+                    Image = imagePath,
+                    BIR = imageBir,
+                    CityPermit = imageCityPermit,
+                    SchoolPermit = imageSchoolPermit,
+                    Role = (int)UserRole.Supplier
+                };
+
+                await context.Users.AddAsync(newSupplier);
+                await context.SaveChangesAsync();
+
+                return newSupplier;
             }
-
-            var imagePath = await SaveImage(request.Image);
-
-            var newSupplier = new User
+            catch (Exception e)
             {
-                Id = request.Id,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                Password = request.Password,
-                PhoneNumber = request.PhoneNumber,
-                ShopName = request.ShopName,
-                Address = request.Address,
-                Image = imagePath,
-                IsActive = true,
-                Role = (int)UserRole.Supplier
-            };
 
-            await context.Users.AddAsync(newSupplier);
-            await context.SaveChangesAsync();
-
-            return newSupplier;
+                throw new Exception(e.Message);
+            }
         }
 
+        // Profile Picture
         public async Task<string?> SaveImage(IFormFile? imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
@@ -84,9 +96,78 @@ namespace UNITEE_BACKEND.Services
             return Path.Combine("SupplierImage", fileName);
         }
 
+        // BIR
+        public async Task<string?> SaveBIR(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "BIR");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("BIR", fileName);
+        }
+
+        // City Permit
+        public async Task<string?> SaveCityPermit(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "CityPermit");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("CityPermit", fileName);
+        }
+
+        // School Permit
+        public async Task<string?> SaveSchoolPermit(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "SchoolPermit");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("SchoolPermit", fileName);
+        }
+
         public async Task<User> UpdateSupplier(int id, SupplierRequest request)
         {
-            var existingSupplier = await context.Users.FindAsync(id);
+            var existingSupplier = await context.Users.FirstOrDefaultAsync(a => a.Id == id);
 
             if (existingSupplier == null)
             {
@@ -103,8 +184,6 @@ namespace UNITEE_BACKEND.Services
                 existingSupplier.Image = await SaveImage(request.Image);
             }
 
-            existingSupplier.FirstName = request.FirstName;
-            existingSupplier.LastName = request.LastName;
             existingSupplier.Email = request.Email;
             existingSupplier.Password = request.Password;
             existingSupplier.PhoneNumber = request.PhoneNumber;

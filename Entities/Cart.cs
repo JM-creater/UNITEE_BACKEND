@@ -8,13 +8,10 @@ namespace UNITEE_BACKEND.Entities
     {
         [Key]
         public int Id { get; set; }
+        public int SupplierId { get; set; }
+        public virtual User Supplier { get; set; }
         public int UserId { get; set; }
-        [ForeignKey("UserId")]
-        public virtual User? User { get; set; }
-        public int ProductId { get; set; }
-        [ForeignKey("ProductId")]
-        public virtual Product? Product { get; set; }
-        public int Quantity { get; set; }
-
+        public ICollection<CartItem>? Items { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }
