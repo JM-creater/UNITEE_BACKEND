@@ -98,6 +98,21 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpDelete("deleteCart/{id}")]
+        public async Task<IActionResult> SoftDelete(int id)
+        {
+            try
+            {
+                await cartService.DeleteCart(id);
+
+                return Ok(new { Message = $"Cart with ID {id} has been soft-deleted." });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
             => Ok(await cartService.Delete(id));

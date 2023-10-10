@@ -86,6 +86,11 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        public IEnumerable<Product> GetProductsByShopId(int shopId)
+        {
+            return context.Products.Include(s => s.Sizes).Where(p => p.SupplierId == shopId).AsEnumerable();
+        }
+
         public async Task<Product> GetById(int productId)
         {
             try
@@ -138,24 +143,6 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        //public async Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId)
-        //{
-        //    try
-        //    {
-        //        var products = await context.Products
-        //            .Include(product => product.Sizes)
-        //            .Where(product => product.DepartmentId == departmentId)
-        //            .ToListAsync();
-
-        //        return products;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new Exception(e.Message);
-        //    }
-        //}
-
-
         public async Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId)
         {
             try
@@ -172,50 +159,6 @@ namespace UNITEE_BACKEND.Services
                 throw new Exception(e.Message);
             }
         }
-
-        //public async Task<Product> UpdateProduct(int productId, UpdateProductDto dto)
-        //{
-        //    try
-        //    {
-        //        var product = await context.Products
-        //            .Include(p => p.Sizes)
-        //            .FirstOrDefaultAsync(a => a.ProductId == productId);
-
-        //        if (product == null)
-        //            throw new Exception("Product Not Found");
-
-        //        if (product.Image != null)
-        //        {
-        //            product.Image = await ProductImage(dto.Image);
-        //        }
-
-        //        _mapper.Map(dto, product);
-
-        //        foreach (var sizeDto in dto.Sizes)
-        //        {
-        //            var existingSize = product.Sizes
-        //                .FirstOrDefault(s => s.Size == sizeDto.Size);
-
-        //            if (existingSize != null)
-        //            {
-        //                existingSize.Quantity = sizeDto.Quantity;
-        //            }
-        //            else
-        //            {
-        //                var size = _mapper.Map<SizeQuantity>(sizeDto);
-        //                product.Sizes.Add(size);
-        //            }
-        //        }
-
-        //        await this.Save();
-
-        //        return product;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new Exception(e.Message);
-        //    }
-        //}
 
         public async Task<Product> UpdateProduct(int productId, ProductRequest request)
         {
@@ -263,8 +206,6 @@ namespace UNITEE_BACKEND.Services
 
             return existingProduct;
         }
-
-
 
         public async Task<Product> UpdateActivationStatus(int productId, bool isActive)
         {

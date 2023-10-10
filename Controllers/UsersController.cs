@@ -75,6 +75,25 @@ namespace UNITEE_BACKEND.Controllers
             return Ok(suppliers);
         }
 
+        [HttpGet("getSupplierById/{id}")]
+        public IActionResult GetSupplierById(int id)
+        {
+            var supplier = usersService.GetSupplierById(id);
+            if (supplier == null)
+            {
+                return NotFound(new { Message = "Supplier not found." });
+            }
+            return Ok(supplier);
+        }
+
+        [HttpGet("getProductsBySupplierShop/{supplierId}")]
+        public IActionResult GetProductsBySupplierShop(int supplierId)
+        {
+            var products = usersService.GetProductsBySupplierShop(supplierId);
+            return Ok(products);
+        }
+
+
         [HttpGet("getCustomers")]
         public IActionResult GetCustomers()
         {

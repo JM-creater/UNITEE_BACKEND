@@ -129,8 +129,8 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "Reference")),
-    RequestPath = "/Reference"
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.ProofOfPayment)),
+    RequestPath = $"/{imagePathOptions.ProofOfPayment}"
 });
 
 

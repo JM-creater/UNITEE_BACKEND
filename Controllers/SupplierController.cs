@@ -32,7 +32,7 @@ namespace UNITEE_BACKEND.Controllers
         }
 
 
-        [HttpPost("addSupplier")]
+        [HttpPost("registerSupplier")]
         public async Task<IActionResult> AddSupplier([FromForm] SupplierRequest request)
         {
             try

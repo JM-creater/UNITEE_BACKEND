@@ -26,10 +26,12 @@
   <ItemGroup>
     <Folder Include="BIR\" />
     <Folder Include="CityPermit\" />
-    <Folder Include="Migrations\" />
-    <Folder Include="Reference\" />
+    <Folder Include="Images\" />
+    <Folder Include="ProductImages\" />
+    <Folder Include="ProofOfPayment\" />
     <Folder Include="SchoolPermit\" />
     <Folder Include="StudyLoad\" />
+    <Folder Include="SupplierImage\" />
   </ItemGroup>
 
 </Project>

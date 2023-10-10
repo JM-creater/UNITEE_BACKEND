@@ -32,37 +32,45 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<User> AddSupplier(SupplierRequest request)
         {
-            var existingUser = await context.Users
+            try
+            {
+                var existingUser = await context.Users
                 .SingleOrDefaultAsync(u => u.Email == request.Email || u.Id == request.Id);
-            if (existingUser != null)
-            {
-                throw new Exception("A supplier with this email or user id already exists.");
+                if (existingUser != null)
+                {
+                    throw new Exception("A supplier with this email or user id already exists.");
+                }
+
+                var imagePath = await SaveImage(request.Image);
+                var imageBir = await SaveBIR(request.BIR);
+                var imageCityPermit = await SaveCityPermit(request.CityPermit);
+                var imageSchoolPermit = await SaveSchoolPermit(request.SchoolPermit);
+
+                var newSupplier = new User
+                {
+                    Id = request.Id,
+                    Email = request.Email,
+                    Password = request.Password,
+                    PhoneNumber = request.PhoneNumber,
+                    ShopName = request.ShopName,
+                    Address = request.Address,
+                    Image = imagePath,
+                    BIR = imageBir,
+                    CityPermit = imageCityPermit,
+                    SchoolPermit = imageSchoolPermit,
+                    Role = (int)UserRole.Supplier
+                };
+
+                await context.Users.AddAsync(newSupplier);
+                await context.SaveChangesAsync();
+
+                return newSupplier;
             }
-
-            var imagePath = await SaveImage(request.Image);
-            var imageBir = await SaveBIR(request.BIR);
-            var imageCityPermit = await SaveCityPermit(request.CityPermit);
-            var imageSchoolPermit = await SaveSchoolPermit(request.SchoolPermit);
-
-            var newSupplier = new User
+            catch (Exception e)
             {
-                Id = request.Id,
-                Email = request.Email,
-                Password = request.Password,
-                PhoneNumber = request.PhoneNumber,
-                ShopName = request.ShopName,
-                Address = request.Address,
-                Image = imagePath,
-                BIR = imageBir,
-                CityPermit = imageCityPermit,
-                SchoolPermit = imageSchoolPermit,
-                Role = (int)UserRole.Supplier
-            };
 
-            await context.Users.AddAsync(newSupplier);
-            await context.SaveChangesAsync();
-
-            return newSupplier;
+                throw new Exception(e.Message);
+            }
         }
 
         // Profile Picture

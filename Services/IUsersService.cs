@@ -8,6 +8,8 @@ namespace UNITEE_BACKEND.Services
     {
         public IEnumerable<User> GetAll();
         public IEnumerable<User> GetAllSuppliers();
+        public User GetSupplierById(int id);
+        public IEnumerable<Product> GetProductsBySupplierShop(int supplierId);
         public IEnumerable<User> GetAllCustomers();
         public Task<User> GetCurrentUser();
         public Task<User> GetById(int id);

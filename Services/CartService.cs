@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
@@ -27,18 +28,20 @@ namespace UNITEE_BACKEND.Services
             var user = await context.Users.Where(u => u.Id == id).FirstOrDefaultAsync();
 
             user.Carts = context.Carts
+                .Include(c => c.Supplier)
                 .Include(c => c.Items)
                     .ThenInclude(i => i.Product)
                 .Include(c => c.Items)
-                    .ThenInclude(i => i.SizeQuantity)               
-                .Where(c => c.UserId == user.Id).ToList();
+                    .ThenInclude(i => i.SizeQuantity)
+                        .ThenInclude(i => i.Product)
+                            .ThenInclude(i => i.Sizes)
+                .Where(c => c.UserId == user.Id && !c.IsDeleted).ToList();
 
             if (user == null)
                 throw new Exception($"User with Id {id} not found");
 
             return user.Carts.ToList();
         }
-
 
         public async Task<List<Cart>> GetMyCart(int userId)
         {
@@ -59,68 +62,57 @@ namespace UNITEE_BACKEND.Services
         {
             try
             {
-                if (userRole != UserRole.Customer)
-                    throw new InvalidOperationException("Only customer can add to cart");
+                int supplierId = context.Products.First(p => p.ProductId == request.ProductId).SupplierId;
 
-                var user = await context.Users.Where(u => u.Id == request.UserId).FirstOrDefaultAsync();
-                if (user == null)
-                    throw new ArgumentException($"User with ID {request.UserId} not found");
+                var cart = await context.Carts
+                                        .Include(c => c.Items)
+                                        .ThenInclude(ci => ci.SizeQuantity)
+                                        .FirstOrDefaultAsync(c => c.UserId == request.UserId && c.SupplierId == supplierId);
 
-                var product = await context.Products
-                                           .Include(p => p.Sizes)
-                                           .FirstOrDefaultAsync(p => p.ProductId == request.ProductId);
-                if (product == null)
-                    throw new ArgumentException($"Product with ID {request.ProductId} not found");
-
-                var sizeQuantity = product.Sizes.FirstOrDefault(s => s.Size == request.Size);
-                if (sizeQuantity == null)
-                    throw new ArgumentException($"Size {request.Size} not available for this product");
-
-                if (sizeQuantity.Quantity < request.Quantity)
-                    throw new InvalidOperationException($"Insufficient stock for size {request.Size}");
-
-                //sizeQuantity.Quantity -= request.Quantity; 
-
-                var newItem = new CartItem
+                if (cart == null)
                 {
-                    ProductId = request.ProductId,
-                    SizeQuantityId = sizeQuantity.Id,
-                    Quantity = request.Quantity,
-                };
-                user.Carts = await GetByUserId(user.Id);
-
-                var cart = user.Carts.Where(c => c.SupplierId == product.SupplierId).FirstOrDefault();
-                if (cart != null)
-                {
-                    if (cart.Items.Any())
+                    cart = new Cart
                     {
-                        var cartItem = cart.Items.FirstOrDefault(i => i.ProductId == request.ProductId && i.SizeQuantity.Size.ToLower().Equals(request.Size.ToLower()));
+                        UserId = request.UserId,
+                        SupplierId = supplierId,
+                        Items = new List<CartItem>()
+                    };
 
-                        if (cartItem != null)
-                        {
-                            cartItem.Quantity += request.Quantity;
-                            context.CartItems.Update(cartItem);
-/*                            context.Carts.Update(cart);
-*/                        
-                        }
-                        else
-                            cart.Items.Add(newItem);
-                    }
-                    else
-                        cart.Items.Add(newItem);
+                    context.Carts.Add(cart);
+                }
 
+                var cartItem = cart.Items
+                                    .FirstOrDefault(i => i.ProductId == request.ProductId &&
+                                                    i.SizeQuantity.Size == request.Size);
+
+                if (cartItem != null)
+                {
+                    cartItem.Quantity += request.Quantity;
                 }
                 else
                 {
-                    context.Carts.Add(new Cart
+                    var sizeQuantity = await context.SizeQuantities
+                        .FirstOrDefaultAsync(sq => sq.ProductId == request.ProductId && sq.Size == request.Size);
+
+                    if (sizeQuantity == null)
                     {
-                        UserId = request.UserId,
-                        SupplierId = product.SupplierId,
-                        Items = new List<CartItem> 
+                        sizeQuantity = new SizeQuantity
                         {
-                            newItem
-                        }
-                    });
+                            ProductId = request.ProductId,
+                            Size = request.Size,
+                            Quantity = request.Quantity
+                        };
+                        context.SizeQuantities.Add(sizeQuantity);
+                    }
+
+                    cartItem = new CartItem
+                    {
+                        ProductId = request.ProductId,
+                        SizeQuantityId = sizeQuantity.Id,
+                        Quantity = request.Quantity
+                    };
+
+                    cart.Items.Add(cartItem);
                 }
 
                 await context.SaveChangesAsync();
@@ -131,13 +123,37 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        public async Task DeleteCart(int id)
+        {
+            try
+            {
+                var cart = context.Carts.Find(id);
+                
+                if (cart != null)
+                {
+                    cart.IsDeleted = true;
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
 
         public async Task<Cart> Delete(int id)
         {
-            var e = await this.GetById(id);
-            var result = context.Remove(e);
-            await Save();
-            return result.Entity;
+            try
+            {
+                var e = await GetById(id);
+                var result = context.Remove(e);
+                await Save();
+                return result.Entity;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public async Task<Cart> Update(int id, CartAddRequest request)

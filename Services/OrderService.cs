@@ -15,11 +15,30 @@ namespace UNITEE_BACKEND.Services
             context = dbcontext;
         }
 
+        public IEnumerable<Order> GetAll()
+            => context.Orders
+                      .Include(u => u.User)
+                      .Include(c => c.Cart)
+                        .ThenInclude(s => s.Supplier)
+                      .Include(c => c.Cart)
+                        .ThenInclude(i => i.Items)
+                        .ThenInclude(p => p.Product)
+                        .ThenInclude(s => s.Sizes)
+                      .AsEnumerable();
+
         public async Task<Order?> GetById(int id)
             => await context.Orders.FirstOrDefaultAsync(o => o.Id == id);
 
         public async Task<List<Order>> GetAllByUserId(int id)
-            => await context.Orders.Where(o => o.UserId == id).ToListAsync();
+            => await context.Orders
+                            .Include(u => u.User)
+                            .Include(u => u.Cart)
+                                .ThenInclude(s => s.Supplier)
+                            .Include(u => u.Cart)
+                                .ThenInclude(i => i.Items)
+                                .ThenInclude(p => p.Product)
+                                .ThenInclude(s => s.Sizes)
+                            .Where(o => o.UserId == id).ToListAsync();
 
         public async Task<Order> GenerateReceipt(int id)
         {
@@ -39,26 +58,68 @@ namespace UNITEE_BACKEND.Services
         {
             try
             {
-                var order = context.Orders.Add(new Order { 
+                var imagePath = await ProofofPayment(request.ProofOfPayment);
+
+                int nextId;
+                if (context.Orders.Any())
+                {
+                    nextId = context.Orders.Max(o => o.Id) + 1;
+                }
+                else
+                {
+                    nextId = 1; 
+                }
+
+                var order = new Order
+                {
                     UserId = request.UserId,
                     CartId = request.CartId,
                     Total = request.Total,
+                    ProofOfPayment = imagePath,
+                    ReferenceId = request.ReferenceId,
                     DateCreated = DateTime.Now,
                     DateUpdated = DateTime.Now,
                     PaymentType = PaymentType.EMoney,
-                    Status = Status.Pending
-                });
+                    Status = Status.Pending,
+                    OrderNumber = GenerateOrderNumber(DateTime.Now, nextId)
+                };
 
-                if (order == null)
-                    throw new Exception("Order not found");
-
+                context.Orders.Add(order);
                 await context.SaveChangesAsync();
-                return order.Entity;
+
+                return order;
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new InvalidOperationException(e.Message);
             }
+        }
+
+        private string GenerateOrderNumber(DateTime dateCreated, int id)
+        {
+            return $"ORD-{dateCreated:yyMMdd}-{id:D5}"; 
+        }
+
+        public async Task<string?> ProofofPayment(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            string folder = Path.Combine(Directory.GetCurrentDirectory(), "ProofOfPayment");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return Path.Combine("ProofOfPayment", fileName);
         }
 
         public async Task<Order> UpdateReference(UpdateReferenceRequest request)
@@ -70,10 +131,10 @@ namespace UNITEE_BACKEND.Services
                 if (order == null)
                     throw new Exception("Order not found");
 
-                var imagePath = await SaveImage(request.ProofOfPayment);
+                //var imagePath = await SaveImage(request.ProofOfPayment);
 
                 order.ReferenceId = request.ReferenceId;
-                order.ProofOfPayment = imagePath;
+                //order.ProofOfPayment = request.ProofOfPayment;
                 order.DateUpdated = DateTime.Now;
                 order.Status = Status.Pending;
 
@@ -139,30 +200,5 @@ namespace UNITEE_BACKEND.Services
                 throw new Exception(e.Message);
             }
         }
-
-        public async Task<string?> SaveImage(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "Reference");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("Reference", fileName);
-        }
-
-
-
     }
 }

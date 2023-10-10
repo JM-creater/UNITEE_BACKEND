@@ -39,6 +39,17 @@ namespace UNITEE_BACKEND.Services
             return context.Users.Where(u => u.Role == (int)UserRole.Supplier).AsEnumerable();
         }
 
+        public User GetSupplierById(int id)
+        {
+            return context.Users.FirstOrDefault(u => u.Id == id && u.Role == (int)UserRole.Supplier);
+        }
+
+        public IEnumerable<Product> GetProductsBySupplierShop(int supplierId)
+        {
+            return context.Products.Where(p => p.SupplierId == supplierId).ToList();
+        }
+
+
         public IEnumerable<User> GetAllCustomers()
         {
             return context.Users.Where(c => c.Role == (int)UserRole.Customer).AsEnumerable();
@@ -129,8 +140,6 @@ namespace UNITEE_BACKEND.Services
 
             return Path.Combine("StudyLoad", fileName);
         }
-
-
 
         public async Task<(User user, UserRole role)> Login(LoginRequest request)
         {

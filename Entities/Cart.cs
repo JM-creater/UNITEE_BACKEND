@@ -12,5 +12,6 @@ namespace UNITEE_BACKEND.Entities
         public virtual User Supplier { get; set; }
         public int UserId { get; set; }
         public ICollection<CartItem>? Items { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

@@ -2,10 +2,10 @@
 {
     public enum Status
     {
-        Created = 1,
+        OrderPlaced = 1,
         Pending = 2,
-        OrderPlaced = 3,
-        ForPickUp = 4,
-        Completed = 5
+        ForPickUp = 3,
+        Completed = 4,
+        Canceled = 5
     }
 }

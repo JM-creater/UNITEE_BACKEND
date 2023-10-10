@@ -112,6 +112,11 @@ namespace UNITEE_BACKEND.DatabaseContext
                 new ProductType
                 {
                     ProductTypeId = 4,
+                    Product_Type = "PE Uniform"
+                },
+                new ProductType
+                {
+                    ProductTypeId = 5,
                     Product_Type = "ID Sling"
                 }
                 );
@@ -131,6 +136,18 @@ namespace UNITEE_BACKEND.DatabaseContext
                     Role = 3
                 }
                 );
+
+            modelBuilder.Entity<CartItem>()
+              .HasOne(c => c.SizeQuantity)
+              .WithMany()
+              .HasForeignKey(c => c.SizeQuantityId)
+              .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

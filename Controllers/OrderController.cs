@@ -14,11 +14,26 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddOrder(OrderRequest request)
+        public async Task<IActionResult> AddOrder([FromForm] OrderRequest request)
         {
             try
             {
                 var order = await orderService.AddOrder(request);
+
+                return Ok(order);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetAllOrder()
+        {
+            try
+            {
+                var order = orderService.GetAll();
 
                 return Ok(order);
             }
@@ -43,12 +58,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetByUserId(int id)
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetByUserId(int userId)
         {
             try
             {
-                var order = await orderService.GetAllByUserId(id);
+                var order = await orderService.GetAllByUserId(userId);
 
                 return Ok(order);
             }

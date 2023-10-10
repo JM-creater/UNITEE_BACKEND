@@ -6,8 +6,10 @@ namespace UNITEE_BACKEND.Entities
     {
         public int Id { get; set; }
         public int UserId { get; set; }
+        public virtual User User { get; set; }
         public int CartId { get; set; }
         public virtual Cart Cart { get; set; }
+        public string OrderNumber { get; set; }
         public string? ReferenceId { get; set; }
         public string? ProofOfPayment { get; set; }
         public float Total { get; set; }

@@ -51,7 +51,20 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("byid/{productId}")]
+        [HttpGet("ByShop/{shopId}")]
+        public IActionResult GetProductsByShopId(int shopId)
+        {
+            var products = productService.GetProductsByShopId(shopId);
+
+            if (products == null || !products.Any())
+            {
+                return NotFound(new { Message = "No products found for this shop." });
+            }
+
+            return Ok(products);
+        }
+
+        [HttpGet("{productId}")]
         public async Task<IActionResult> GetById([FromRoute] int productId)
         {
             try
@@ -78,20 +91,6 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(e.Message);
             }
         }
-
-        //[HttpGet("GetProductsForCurrentCustomer")]
-        //public async Task<IActionResult> GetProductsForCurrentCustomer()
-        //{
-        //    var customerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-        //    var customer = await usersService.GetById(customerId); 
-
-        //    if (customer == null || !customer.DepartmentId.HasValue)
-        //        return NotFound("Customer or customer's department not found.");
-
-        //    var products = await productService.GetProductsByDepartment(customer.DepartmentId.Value);
-
-        //    return Ok(products);
-        //}
 
         [HttpGet("GetProductsForUser")]
         public async Task<IActionResult> GetProductsForUser()
