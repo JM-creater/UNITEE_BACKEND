@@ -9,6 +9,7 @@ namespace UNITEE_BACKEND.Services
         public Task<int> AddProduct(ProductRequest request);
         public IEnumerable<Product> GetAll();
         public IEnumerable<Product> GetProductsByShopId(int shopId);
+        public IEnumerable<Product> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId);
         public Task<Product> GetById(int productId);
         public Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId);
         public Task<Product> UpdateProduct(int productId, ProductRequest request);

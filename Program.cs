@@ -6,11 +6,16 @@ using System.IO;
 using UNITEE_BACKEND.AutoMapperConfig;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using Microsoft.Extensions.Options;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 // Add services to the container.
+builder.Services.AddHangfire(config =>
+   config.UseSqlServerStorage(builder.Configuration.GetConnectionString("default")));
+builder.Services.AddHangfireServer();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -25,6 +30,7 @@ builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ISizeQuantityService, SizeQuantityService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -57,7 +63,7 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true; 
+    options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
@@ -133,8 +139,10 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = $"/{imagePathOptions.ProofOfPayment}"
 });
 
-
 app.UseCors(MyAllowSpecificOrigins);
+
+app.UseHangfireDashboard();
+app.UseHangfireServer();
 
 app.UseAuthorization();
 

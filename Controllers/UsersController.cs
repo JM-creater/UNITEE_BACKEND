@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
@@ -9,10 +10,12 @@ namespace UNITEE_BACKEND.Controllers
     public class UsersController : Controller
     {
         private IUsersService usersService;
+        private readonly AppDbContext context;
 
-        public UsersController(IUsersService service)
+        public UsersController(IUsersService service, AppDbContext dbcontext)
         {
             usersService = service;
+            context = dbcontext;
         }
 
         [HttpPost("login")]
@@ -100,6 +103,28 @@ namespace UNITEE_BACKEND.Controllers
             var suppliers = usersService.GetAllCustomers();
             return Ok(suppliers);
         }
+
+
+        [HttpGet("UserDepartment/{userId}")]
+        public IActionResult GetUserDepartment(int userId)
+        {
+            var user = context.Users.Find(userId);
+
+            if (user == null)
+            {
+                return NotFound(new { Message = "User not found." });
+            }
+
+            return Ok(new { departmentId = user.DepartmentId });
+        }
+
+        [HttpGet("getSuppliersProduct/{departmentId}")]
+        public IActionResult GetSuppliers(int departmentId)
+        {
+            var suppliers = usersService.GetAllSuppliersProducts(departmentId);
+            return Ok(suppliers);
+        }
+
 
         [HttpPut]
         public async Task<IActionResult> Update(User request)

@@ -36,7 +36,7 @@ namespace UNITEE_BACKEND.Services
                     Category = request.Category,
                     Price = request.Price,
                     Image = imagePath,
-                    IsActive = true
+                    IsActive = request.IsActive
                 };
 
                 await context.Products.AddAsync(newProduct);
@@ -91,13 +91,21 @@ namespace UNITEE_BACKEND.Services
             return context.Products.Include(s => s.Sizes).Where(p => p.SupplierId == shopId).AsEnumerable();
         }
 
+        public IEnumerable<Product> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
+        {
+            return context.Products
+                        .Include(s => s.Sizes)
+                        .Where(p => p.SupplierId == shopId && p.DepartmentId == departmentId)
+                        .AsEnumerable();
+        }
+
         public async Task<Product> GetById(int productId)
         {
             try
             {
                 var product = await context.Products
-                    .Include(x => x.Sizes)
-                    .FirstOrDefaultAsync(a => a.ProductId == productId);
+                                           .Include(x => x.Sizes)
+                                           .FirstOrDefaultAsync(a => a.ProductId == productId);
 
                 if (product == null)
                     throw new Exception("Product Not Found");
@@ -115,9 +123,9 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var products = await context.Products
-                    .Include(product => product.Sizes)
-                    .Where(product => product.SupplierId == supplierId)
-                    .ToListAsync();
+                                            .Include(product => product.Sizes)
+                                            .Where(product => product.SupplierId == supplierId)
+                                            .ToListAsync();
 
                 var productDto = products.Select(product => new ProductWithSizeQuantityDto
                 {
@@ -128,6 +136,7 @@ namespace UNITEE_BACKEND.Services
                     Category = product.Category,
                     Price = product.Price,
                     Image = product.Image,
+                    IsActive = product.IsActive,
                     Sizes = product.Sizes.Select(size => new SizeQuantityDto
                     {
                         Size = size.Size,

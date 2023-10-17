@@ -15,6 +15,8 @@ namespace UNITEE_BACKEND.DatabaseContext
         public DbSet<SizeQuantity> SizeQuantities { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
         {
             
@@ -148,6 +150,28 @@ namespace UNITEE_BACKEND.DatabaseContext
                 .WithMany()
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Order)
+                .WithMany(o => o.Notifications)
+                .HasForeignKey(n => n.OrderId);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany() 
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.SizeQuantity)
+                .WithMany() 
+                .OnDelete(DeleteBehavior.NoAction);
+
+
         }
     }
 }

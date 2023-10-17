@@ -12,6 +12,7 @@ namespace UNITEE_BACKEND.Services
         public IEnumerable<Product> GetProductsBySupplierShop(int supplierId);
         public IEnumerable<User> GetAllCustomers();
         public Task<User> GetCurrentUser();
+        public IEnumerable<User> GetAllSuppliersProducts(int departmentId);
         public Task<User> GetById(int id);
         public Task<User> Save(User request);
         public Task<User> Update(User request);

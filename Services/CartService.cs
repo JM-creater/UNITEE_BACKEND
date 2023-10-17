@@ -67,9 +67,12 @@ namespace UNITEE_BACKEND.Services
                 var cart = await context.Carts
                                         .Include(c => c.Items)
                                         .ThenInclude(ci => ci.SizeQuantity)
-                                        .FirstOrDefaultAsync(c => c.UserId == request.UserId && c.SupplierId == supplierId);
+                                        .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
+                                                                 c.SupplierId == supplierId &&
+                                                                 !c.IsDeleted &&
+                                                                 !context.Orders.Any(o => o.CartId == c.Id));
 
-                if (cart == null)
+                if (cart == null) 
                 {
                     cart = new Cart
                     {
@@ -83,7 +86,7 @@ namespace UNITEE_BACKEND.Services
 
                 var cartItem = cart.Items
                                     .FirstOrDefault(i => i.ProductId == request.ProductId &&
-                                                    i.SizeQuantity.Size == request.Size);
+                                                         i.SizeQuantity.Size == request.Size);
 
                 if (cartItem != null)
                 {
@@ -145,14 +148,27 @@ namespace UNITEE_BACKEND.Services
         {
             try
             {
-                var e = await GetById(id);
-                var result = context.Remove(e);
-                await Save();
-                return result.Entity;
+                var cart = await context.Carts
+                                        .Include(c => c.Items) 
+                                        .FirstOrDefaultAsync(c => c.Id == id);
+
+                if (cart == null)
+                {
+                    throw new KeyNotFoundException($"No cart found with the ID: {id}");
+                }
+
+                if (cart.Items != null && cart.Items.Any())
+                {
+                    context.CartItems.RemoveRange(cart.Items);
+                }
+
+                context.Carts.Remove(cart);
+                await context.SaveChangesAsync();
+                return cart;
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
