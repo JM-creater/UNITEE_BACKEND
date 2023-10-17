@@ -11,6 +11,9 @@ namespace UNITEE_BACKEND.Services
         public Task<Order?> GetById(int id);
         public Task<List<Order>> GetAllByUserId(int id);
         public Task<Order> GenerateReceipt(int id);
+        public Task<List<Order>> GetAllBySupplierId(int supplierId);
+        public Task<Order> ApproveOrder(int orderId);
+        public Task<Order> DeniedOrder(int orderId);
         public Task<Order> Update(int id, Status status);
         public Task<Order> UpdateReference(UpdateReferenceRequest request);
         public Task<Order> PlaceOrder(PlaceOrderRequest request);

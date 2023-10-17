@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
 
@@ -87,6 +88,43 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("BySupplier/{supplierId}")]
+        public async Task<ActionResult<List<Order>>> GetBySupplier(int supplierId)
+        {
+            return await orderService.GetAllBySupplierId(supplierId);
+        }
+
+        [HttpPut("approvedOrder/{orderId}")]
+        public async Task<IActionResult> ApprovedOrders(int orderId)
+        {
+            try
+            {
+                var order = await orderService.ApproveOrder(orderId);
+
+                return Ok(order);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("deniedOrder/{orderId}")]
+        public async Task<IActionResult> DeniedOrders(int orderId)
+        {
+            try
+            {
+                var order = await orderService.DeniedOrder(orderId);
+
+                return Ok(order);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
 
         [HttpPut("place")]
         public async Task<IActionResult> UpdateOrderPlace([FromBody] PlaceOrderRequest request)

@@ -51,7 +51,7 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("ByShop/{shopId}")]
+        [HttpGet("ByShopProduct/{shopId}")]
         public IActionResult GetProductsByShopId(int shopId)
         {
             var products = productService.GetProductsByShopId(shopId);
@@ -59,6 +59,19 @@ namespace UNITEE_BACKEND.Controllers
             if (products == null || !products.Any())
             {
                 return NotFound(new { Message = "No products found for this shop." });
+            }
+
+            return Ok(products);
+        }
+
+        [HttpGet("ByShop/{shopId}/ByDepartment/{departmentId}")]
+        public IActionResult GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
+        {
+            var products = productService.GetProductsByShopIdAndDepartmentId(shopId, departmentId);
+
+            if (products == null || !products.Any())
+            {
+                return NotFound(new { Message = "No products found for this shop and department." });
             }
 
             return Ok(products);

@@ -156,6 +156,37 @@ namespace UNITEE_BACKEND.Migrations
                         });
                 });
 
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -205,6 +236,37 @@ namespace UNITEE_BACKEND.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SizeQuantityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SizeQuantityId");
+
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>
@@ -447,6 +509,17 @@ namespace UNITEE_BACKEND.Migrations
                     b.Navigation("SizeQuantity");
                 });
 
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.Notification", b =>
+                {
+                    b.HasOne("UNITEE_BACKEND.Entities.Order", "Order")
+                        .WithMany("Notifications")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Order", b =>
                 {
                     b.HasOne("UNITEE_BACKEND.Entities.Cart", "Cart")
@@ -464,6 +537,33 @@ namespace UNITEE_BACKEND.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.OrderItem", b =>
+                {
+                    b.HasOne("UNITEE_BACKEND.Entities.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UNITEE_BACKEND.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UNITEE_BACKEND.Entities.SizeQuantity", "SizeQuantity")
+                        .WithMany()
+                        .HasForeignKey("SizeQuantityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("SizeQuantity");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>
@@ -508,6 +608,13 @@ namespace UNITEE_BACKEND.Migrations
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Cart", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.Order", b =>
+                {
+                    b.Navigation("Notifications");
+
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>

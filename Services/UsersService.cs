@@ -39,6 +39,20 @@ namespace UNITEE_BACKEND.Services
             return context.Users.Where(u => u.Role == (int)UserRole.Supplier).AsEnumerable();
         }
 
+        public IEnumerable<User> GetAllSuppliersProducts(int departmentId)
+        {
+            var supplierIdsWithProductsInDepartment = context.Products
+                                                             .Where(p => p.DepartmentId == departmentId)
+                                                             .Select(p => p.SupplierId)
+                                                             .Distinct()
+                                                             .ToList();
+
+            return context.Users
+                         .Where(u => u.Role == (int)UserRole.Supplier && supplierIdsWithProductsInDepartment.Contains(u.Id))
+                         .AsEnumerable();
+        }
+
+
         public User GetSupplierById(int id)
         {
             return context.Users.FirstOrDefault(u => u.Id == id && u.Role == (int)UserRole.Supplier);

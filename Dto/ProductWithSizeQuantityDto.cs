@@ -11,6 +11,7 @@ namespace UNITEE_BACKEND.Dto
         public string? Category { get; set; }
         public float Price { get; set; }
         public string? Image { get; set; }
+        public bool IsActive { get; set; }
 
         // Relation
         public IEnumerable<SizeQuantityDto>? Sizes { get; set; }

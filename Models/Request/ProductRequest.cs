@@ -14,6 +14,7 @@ namespace UNITEE_BACKEND.Models.Request
         public string Category { get; set; } = "";
         public float Price { get; set; }
         public IFormFile? Image { get; set; }
+        public bool IsActive { get; set; }
         public List<SizeQuantityDto> Sizes { get; set; } = new List<SizeQuantityDto>();
     }
 }

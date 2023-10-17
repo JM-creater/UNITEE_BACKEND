@@ -18,5 +18,7 @@ namespace UNITEE_BACKEND.Entities
         public DateTime? EstimateDate { get; set; }
         public PaymentType PaymentType { get; set; }
         public Status Status { get; set; }
+        public virtual ICollection<OrderItem>? OrderItems { get; set; }
+        public virtual ICollection<Notification>? Notifications { get; set; }
     }
 }
