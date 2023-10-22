@@ -24,6 +24,9 @@ namespace UNITEE_BACKEND.DatabaseContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            // to be remove
+            optionsBuilder.EnableSensitiveDataLogging();
+
             optionsBuilder.ConfigureWarnings(warnings =>
                 warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
         }
