@@ -27,6 +27,9 @@ namespace UNITEE_BACKEND.Services
         {
             var user = await context.Users.Where(u => u.Id == id).FirstOrDefaultAsync();
 
+            if (user == null)
+                throw new Exception($"User with Id {id} not found");
+
             user.Carts = context.Carts
                 .Include(c => c.Supplier)
                 .Include(c => c.Items)
@@ -35,10 +38,13 @@ namespace UNITEE_BACKEND.Services
                     .ThenInclude(i => i.SizeQuantity)
                         .ThenInclude(i => i.Product)
                             .ThenInclude(i => i.Sizes)
-                .Where(c => c.UserId == user.Id && !c.IsDeleted).ToList();
+                .Where(c => c.UserId == user.Id && c.Items.Any(i => !i.IsDeleted)) 
+                .ToList();
 
-            if (user == null)
-                throw new Exception($"User with Id {id} not found");
+            foreach (var cart in user.Carts)
+            {
+                cart.Items = cart.Items.Where(i => !i.IsDeleted).ToList();
+            }
 
             return user.Carts.ToList();
         }
@@ -72,7 +78,7 @@ namespace UNITEE_BACKEND.Services
                                                                  !c.IsDeleted &&
                                                                  !context.Orders.Any(o => o.CartId == c.Id));
 
-                if (cart == null) 
+                if (cart == null)
                 {
                     cart = new Cart
                     {

@@ -74,119 +74,13 @@ namespace UNITEE_BACKEND.Services
             return order;
         }
 
-        //public async Task<Order> AddOrder(OrderRequest request)
-        //{
-        //    try
-        //    {
-        //        var imagePath = await ProofofPayment(request.ProofOfPayment);
-
-        //        int nextId;
-        //        if (context.Orders.Any())
-        //        {
-        //            nextId = context.Orders.Max(o => o.Id) + 1;
-        //        }
-        //        else
-        //        {
-        //            nextId = 1;
-        //        }
-
-        //        var order = new Order
-        //        {
-        //            UserId = request.UserId,
-        //            CartId = request.CartId,
-        //            Total = request.Total,
-        //            ProofOfPayment = imagePath,
-        //            ReferenceId = request.ReferenceId,
-        //            DateCreated = DateTime.Now,
-        //            DateUpdated = DateTime.Now,
-        //            PaymentType = PaymentType.EMoney,
-        //            Status = Status.Pending,
-        //            OrderNumber = GenerateOrderNumber(DateTime.Now, nextId)
-        //        };
-
-        //        context.Orders.Add(order);
-        //        await context.SaveChangesAsync();
-
-        //        return order;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new InvalidOperationException(e.Message);
-        //    }
-        //}
-
-        //public async Task<Order> AddOrder(OrderRequest request)
-        //{
-        //    try
-        //    {
-        //        var imagePath = await ProofofPayment(request.ProofOfPayment);
-
-        //        int nextId;
-        //        if (context.Orders.Any())
-        //        {
-        //            nextId = context.Orders.Max(o => o.Id) + 1;
-        //        }
-        //        else
-        //        {
-        //            nextId = 1;
-        //        }
-
-        //        var order = new Order
-        //        {
-        //            UserId = request.UserId,
-        //            CartId = request.CartId,
-        //            Total = request.Total,
-        //            ProofOfPayment = imagePath,
-        //            ReferenceId = request.ReferenceId,
-        //            DateCreated = DateTime.Now,
-        //            DateUpdated = DateTime.Now,
-        //            PaymentType = PaymentType.EMoney,
-        //            Status = Status.Pending,
-        //            OrderNumber = GenerateOrderNumber(DateTime.Now, nextId)
-        //        };
-
-        //        context.Orders.Add(order);
-        //        await context.SaveChangesAsync();
-
-        //        // Retrieve the cart associated with the order
-        //        var cart = await context.Carts
-        //                                .Include(c => c.Items)
-        //                                .FirstOrDefaultAsync(c => c.Id == request.CartId && !c.IsDeleted);
-
-        //        if (cart != null)
-        //        {
-        //            // Assuming the OrderRequest contains details about ordered items
-        //            if (request.OrderItems.Count() == cart.Items.Count())
-        //            {
-        //                // All items in the cart are ordered, so mark the cart as deleted
-        //                cart.IsDeleted = true;
-        //                await context.SaveChangesAsync();
-        //            }
-        //        }
-
-        //        return order;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new InvalidOperationException(e.Message);
-        //    }
-        //}
-
         public async Task<Order> AddOrder(OrderRequest request)
         {
             try
             {
                 var imagePath = await ProofofPayment(request.ProofOfPayment);
 
-                int nextId;
-                if (context.Orders.Any())
-                {
-                    nextId = context.Orders.Max(o => o.Id) + 1;
-                }
-                else
-                {
-                    nextId = 1;
-                }
+                int nextId = context.Orders.Any() ? context.Orders.Max(o => o.Id) + 1 : 1;
 
                 var order = new Order
                 {
@@ -206,21 +100,33 @@ namespace UNITEE_BACKEND.Services
                 await context.SaveChangesAsync();
 
                 var cart = await context.Carts
-                                        .Include(c => c.Items)
-                                        .FirstOrDefaultAsync(c => c.Id == request.CartId && !c.IsDeleted);
+                        .Include(c => c.Items)
+                        .FirstOrDefaultAsync(c => c.Id == request.CartId);
 
                 if (cart != null)
                 {
-                    var orderedProductIds = request.OrderItems.Select(oi => oi.ProductId).ToList();
-
-                    var cartProductIds = cart.Items.Select(ci => ci.ProductId).ToList();
-
-                    if (!cartProductIds.Except(orderedProductIds).Any())
+                    foreach (var cartItemId in request.CartItemIds) 
                     {
-                        cart.IsDeleted = true;
-                        await context.SaveChangesAsync();
+                        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == cartItemId);
+
+                        if (cartItem != null)
+                        {
+                            var orderItem = new OrderItem
+                            {
+                                OrderId = order.Id,
+                                ProductId = cartItem.ProductId,
+                                Quantity = cartItem.Quantity,
+                                SizeQuantityId = cartItem.SizeQuantityId
+                            };
+
+                            context.OrderItems.Add(orderItem);
+
+                            cartItem.IsDeleted = true;
+                        }
                     }
                 }
+
+                await context.SaveChangesAsync();
 
                 return order;
             }
@@ -229,7 +135,6 @@ namespace UNITEE_BACKEND.Services
                 throw new InvalidOperationException(e.Message);
             }
         }
-
 
         private string GenerateOrderNumber(DateTime dateCreated, int id)
         {
@@ -336,6 +241,17 @@ namespace UNITEE_BACKEND.Services
 
                 context.Orders.Update(order);
                 await context.SaveChangesAsync();
+
+                order = await context.Orders
+                                     .Include(u => u.User)
+                                     .Include(c => c.Cart)
+                                         .ThenInclude(s => s.Supplier)
+                                     .Include(c => c.Cart)
+                                         .ThenInclude(i => i.Items)
+                                         .ThenInclude(p => p.Product)
+                                         .ThenInclude(s => s.Sizes)
+                                     .Where(o => o.Id == orderId)
+                                     .FirstOrDefaultAsync();
 
                 return order;
             }
