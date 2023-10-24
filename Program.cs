@@ -31,6 +31,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ISizeQuantityService, SizeQuantityService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 // DbContext Configuration

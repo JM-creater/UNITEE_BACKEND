@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UNITEE_BACKEND.DatabaseContext;
 
@@ -11,9 +12,11 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231024152006_AddRatingEntity")]
+    partial class AddRatingEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -377,6 +380,12 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -384,6 +393,10 @@ namespace UNITEE_BACKEND.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("RatingId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SupplierId");
 
                     b.HasIndex("UserId");
 
@@ -617,11 +630,27 @@ namespace UNITEE_BACKEND.Migrations
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Rating", b =>
                 {
+                    b.HasOne("UNITEE_BACKEND.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UNITEE_BACKEND.Entities.User", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("UNITEE_BACKEND.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Supplier");
 
                     b.Navigation("User");
                 });

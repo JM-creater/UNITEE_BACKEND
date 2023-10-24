@@ -102,7 +102,7 @@ namespace UNITEE_BACKEND.Services
                 {
                     UserId = request.UserId,
                     OrderId = order.Id,
-                    Message = "Your order has been placed",
+                    Message = $"Your order {order.OrderNumber} has been placed",
                     DateCreated = DateTime.Now
                 };
 
@@ -192,153 +192,6 @@ namespace UNITEE_BACKEND.Services
             return Path.Combine("ProofOfPayment", fileName);
         }
 
-        //public async Task<Order> ApproveOrder(int orderId)
-        //{
-        //    try
-        //    {
-        //        var order = await context.Orders.FindAsync(orderId);
-
-        //        if (order == null)
-        //        {
-        //            throw new ArgumentException("Order not found");
-        //        }
-
-        //        if (order.Status != Status.Pending)
-        //        {
-        //            throw new InvalidOperationException("Only orders with pending status can be approved");
-        //        }
-
-        //        foreach (var item in order.Cart.Items)
-        //        {
-        //            foreach (var sizeQuantity in item.Product.Sizes)
-        //            {
-        //                var cartSizeQuantity = item.SizeQuantity;
-        //                var productSizeQuantity = sizeQuantity;
-
-        //                if (cartSizeQuantity != null && productSizeQuantity != null) 
-        //                {
-        //                    if (cartSizeQuantity.Quantity > 0)
-        //                    {
-        //                        cartSizeQuantity.Quantity--;
-        //                        productSizeQuantity.Quantity--;
-        //                    }
-        //                }
-        //            }
-        //        }
-
-        //        order.Status = Status.Approved;
-
-        //        var notification = new Notification
-        //        {
-        //            UserId = order.UserId,
-        //            OrderId = order.Id,
-        //            Message = $"Your order {order.OrderNumber} has been approved!"
-        //        };
-
-        //        await service.AddNotification(notification);
-
-        //        context.Orders.Update(order);
-        //        await context.SaveChangesAsync();
-
-        //        order = await context.Orders
-        //                             .Include(u => u.User)
-        //                             .Include(c => c.Cart)
-        //                                 .ThenInclude(s => s.Supplier)
-        //                             .Include(c => c.Cart)
-        //                                 .ThenInclude(i => i.Items)
-        //                                 .ThenInclude(p => p.Product)
-        //                                 .ThenInclude(s => s.Sizes)
-        //                             .Where(o => o.Id == orderId)
-        //                             .FirstOrDefaultAsync();
-
-        //        return order;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new Exception(e.Message);
-        //    }
-        //}
-
-        //public async Task<Order> ApproveOrder(int orderId)
-        //{
-        //    try
-        //    {
-        //        var order = await context.Orders
-        //                                 .Include(o => o.OrderItems)
-        //                                 .ThenInclude(oi => oi.SizeQuantity)
-        //                                 .FirstOrDefaultAsync(o => o.Id == orderId);
-
-        //        if (order == null)
-        //        {
-        //            throw new ArgumentException("Order not found");
-        //        }
-
-        //        if (order.Status != Status.Pending)
-        //        {
-        //            throw new InvalidOperationException("Only orders with pending status can be approved");
-        //        }
-
-        //        foreach (var orderItem in order.OrderItems)
-        //        {
-        //            var sizeQuantity = orderItem.SizeQuantity;
-
-        //            if (sizeQuantity != null)
-        //            {
-        //                if (sizeQuantity.Quantity >= orderItem.Quantity)
-        //                {
-        //                    sizeQuantity.Quantity -= orderItem.Quantity;
-        //                }
-        //                else
-        //                {
-        //                    throw new InvalidOperationException($"Insufficient stock for product {orderItem.ProductId} size {sizeQuantity.Id}");
-        //                }
-        //            }
-        //        }
-
-        //        order.Status = Status.Approved;
-
-        //        var existingNotification = await context.Notifications
-        //                                                .Where(o => o.OrderId == order.Id)
-        //                                                .FirstOrDefaultAsync();
-
-        //        if (existingNotification != null)
-        //        {
-        //            existingNotification.Message = $"Your order {order.OrderNumber} has been approved!";
-        //        }
-        //        else
-        //        {
-        //            var notification = new Notification
-        //            {
-        //                UserId = order.UserId,
-        //                OrderId = order.Id,
-        //                Message = $"Your order {order.OrderNumber} has been approved!",
-        //                DateCreated = DateTime.Now
-        //            };
-        //            await service.AddNotification(notification);
-        //        }
-
-        //        context.Orders.Update(order);
-        //        await context.SaveChangesAsync();
-
-        //        order = await context.Orders
-        //                             .Include(u => u.User)
-        //                             .Include(c => c.Cart)
-        //                                 .ThenInclude(s => s.Supplier)
-        //                             .Include(c => c.Cart)
-        //                                 .ThenInclude(i => i.Items)
-        //                                 .ThenInclude(p => p.Product)
-        //                                 .ThenInclude(s => s.Sizes)
-        //                             .Where(o => o.Id == orderId)
-        //                             .FirstOrDefaultAsync();
-
-        //        return order;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new Exception(e.Message);
-        //    }
-        //}
-
         public async Task<Order> ApproveOrder(int orderId)
         {
             try
@@ -355,7 +208,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (order.Status != Status.Pending)
                 {
-                    throw new InvalidOperationException("Only orders with pending status can be approved");
+                    throw new InvalidOperationException("Only orders with 'Pending' status can be approved");
                 }
 
                 foreach (var orderItem in order.OrderItems)
@@ -431,7 +284,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (order.Status != Status.Pending)
                 {
-                    throw new InvalidOperationException("Only orders with pending status can be approved");
+                    throw new InvalidOperationException("Only orders with 'Pending' status can be approved");
                 }
 
                 order.Status = Status.Denied;
@@ -442,7 +295,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingNotification != null) 
                 {
-                    existingNotification.Message = $"Your order {order.OrderNumber} has been denied!";
+                    existingNotification.Message = $"Your order {order.OrderNumber} has been denied.";
                 }
                 else
                 {
@@ -450,7 +303,7 @@ namespace UNITEE_BACKEND.Services
                     {
                         UserId = order.UserId,
                         OrderId = order.Id,
-                        Message = $"Your order {order.OrderNumber} has been denied!"
+                        Message = $"Your order {order.OrderNumber} has been denied."
                     };
                     await service.AddNotification(notification);
                 }
@@ -477,6 +330,68 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        public async Task<Order> CanceledOrder(int orderId)
+        {
+            try
+            {
+                var order = await context.Orders.FindAsync(orderId);
+
+                if (order == null) 
+                {
+                    throw new ArgumentException("Order not found");
+                }
+
+                if (order.Status != Status.Pending)
+                {
+                    throw new InvalidOperationException("Only orders with 'Pending' status can be approved");
+                }
+
+                order.Status = Status.Canceled;
+
+                var existingNotification = await context.Notifications
+                                                        .Where(o => o.OrderId == order.Id)
+                                                        .FirstOrDefaultAsync();
+
+                if (existingNotification != null)
+                {
+                    existingNotification.Message = $"Your order {order.OrderNumber} is canceled.";
+                }
+                else
+                {
+                    var notification = new Notification
+                    {
+                        UserId = order.UserId,
+                        OrderId = order.Id,
+                        Message = $"Your order {order.OrderNumber} is canceled.",
+                        DateCreated = DateTime.Now
+                    };
+                    await service.AddNotification(notification);
+                }
+
+                order.IsDeleted = true;
+
+                context.Orders.Update(order);
+                await context.SaveChangesAsync();
+
+                order = await context.Orders
+                                     .Include(u => u.User)
+                                     .Include(c => c.Cart)
+                                         .ThenInclude(s => s.Supplier)
+                                     .Include(c => c.Cart)
+                                         .ThenInclude(i => i.Items)
+                                         .ThenInclude(p => p.Product)
+                                         .ThenInclude(s => s.Sizes)
+                                     .Where(o => o.Id == orderId)
+                                     .FirstOrDefaultAsync();
+
+                return order;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
         public async Task<Order> ForPickUp(int orderId)
         {
             try
@@ -490,12 +405,14 @@ namespace UNITEE_BACKEND.Services
 
                 if (order.Status != Status.Approved)
                 {
-                    throw new InvalidOperationException("Only orders with approved status can be approved");
+                    throw new InvalidOperationException("Only orders with 'Approved' status can be approved");
                 }
 
                 var pickUpDate = DateTime.Now.AddDays(5);
 
                 order.Status = Status.ForPickUp;
+
+                order.EstimateDate = pickUpDate;
 
                 var existingNotification = await context.Notifications
                                                         .Where(o => o.OrderId == order.Id)
@@ -539,6 +456,7 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+
         public async Task<Order> CompletedOrder(int orderId)
         {
             try
@@ -565,7 +483,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingNotification != null)
                 {
-                    existingNotification.Message = $"Your order {order.OrderNumber} has been completed on {completionDate:d}.";
+                    existingNotification.Message = $"Your order {order.OrderNumber} has been completed. Thank you for shopping with us!";
                 }
                 else
                 {
@@ -573,7 +491,7 @@ namespace UNITEE_BACKEND.Services
                     {
                         UserId = order.UserId,
                         OrderId = order.Id,
-                        Message = $"Your order {order.OrderNumber} has been completed on {completionDate:d}.",
+                        Message = $"Your order {order.OrderNumber} has been completed. Thank you for shopping with us!",
                         DateCreated = DateTime.Now
                     };
                     await service.AddNotification(notification);

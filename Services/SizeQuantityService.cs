@@ -124,11 +124,13 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task<bool> DeleteSizeQuantity(int productId)
+        public async Task<SizeQuantity> DeleteSizeQuantity(int productId)
         {
             try
             {
-                var sizeQuantity = await context.SizeQuantities.FindAsync(productId);
+                var sizeQuantity = await context.SizeQuantities
+                                                .Where(p => p.ProductId == productId)
+                                                .FirstOrDefaultAsync();
 
                 if (sizeQuantity == null)
                     throw new KeyNotFoundException($"SizeQuantity with ID {productId} not found.");
@@ -136,7 +138,7 @@ namespace UNITEE_BACKEND.Services
                 context.SizeQuantities.Remove(sizeQuantity);
                 await this.Save();
 
-                return true;
+                return sizeQuantity;
             }
             catch (Exception e)
             {
@@ -240,6 +242,19 @@ namespace UNITEE_BACKEND.Services
                 throw new Exception(e.Message);
             }
         }
+
+        //public async Task<SizeQuantity> DeleteAll(int productId)
+        //{
+        //    try
+        //    {
+
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
         
         public async Task<SizeQuantity> Save(SizeQuantity request)
         {
