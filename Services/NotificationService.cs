@@ -45,5 +45,26 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException(e.Message);
             }
         }
+
+        public async Task<IEnumerable<Notification>> GetUnreadNotifications(int userId)
+        {
+            return await context.Notifications
+                                .Include(n => n.Order)
+                                .Where(n => n.UserId == userId && !n.IsRead)
+                                .ToListAsync();
+        }
+
+        public async Task MarkNotificationsAsRead(int userId)
+        {
+            var unreadNotifications = context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead);
+
+            foreach (var notification in unreadNotifications)
+            {
+                notification.IsRead = true;
+            }
+
+            await context.SaveChangesAsync();
+        }
     }
 }

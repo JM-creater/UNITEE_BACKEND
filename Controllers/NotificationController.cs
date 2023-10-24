@@ -45,5 +45,19 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(new { message = e.Message });
             }
         }
+
+        [HttpGet("unread/{userId}")]
+        public async Task<IActionResult> GetUnreadNotifications(int userId)
+        {
+            var notifications = await service.GetUnreadNotifications(userId);
+            return Ok(notifications);
+        }
+
+        [HttpPost("markRead/{userId}")]
+        public async Task<IActionResult> MarkNotificationsAsRead(int userId)
+        {
+            await service.MarkNotificationsAsRead(userId);
+            return Ok(); 
+        }
     }
 }

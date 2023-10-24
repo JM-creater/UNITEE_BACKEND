@@ -6,5 +6,7 @@ namespace UNITEE_BACKEND.Services
     {
         public Task<Notification> AddNotification(Notification notification);
         public Task<List<Notification>> GetNotificationById(int userId);
+        public Task<IEnumerable<Notification>> GetUnreadNotifications(int userId);
+        public Task MarkNotificationsAsRead(int userId);
     }
 }

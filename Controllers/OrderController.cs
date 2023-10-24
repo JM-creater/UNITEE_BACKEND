@@ -44,21 +44,6 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateReference([FromForm] UpdateReferenceRequest request)
-        {
-            try
-            {
-                var order = await orderService.UpdateReference(request);
-
-                return Ok(order);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetByUserId(int userId)
         {
@@ -125,28 +110,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-
-        [HttpPut("place")]
-        public async Task<IActionResult> UpdateOrderPlace([FromBody] PlaceOrderRequest request)
+        [HttpPut("forPickUp/{orderId}")]
+        public async Task<IActionResult> ForPickUpOrders(int orderId)
         {
             try
             {
-                var order = await orderService.PlaceOrder(request);
-
-                return Ok(order);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [HttpPut("update")]
-        public async Task<IActionResult> Update([FromBody] OrderUpdateRequest request)
-        {
-            try
-            {
-                var order = await orderService.Update(request.Id, request.Status);
+                var order = await orderService.ForPickUp(orderId);
 
                 return Ok(order);
             }

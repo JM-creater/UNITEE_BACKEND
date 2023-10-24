@@ -6,6 +6,7 @@ using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.Request;
+using UNITEE_BACKEND.Models.Security;
 
 namespace UNITEE_BACKEND.Services
 {
@@ -88,6 +89,7 @@ namespace UNITEE_BACKEND.Services
 
             var imagePath = await SaveImage(request.Image);
             var studyLoadPath = await SaveStudyLoad(request.StudyLoad);
+            var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
 
             var newUser = new User
             {
@@ -96,7 +98,7 @@ namespace UNITEE_BACKEND.Services
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,
-                Password = request.Password,
+                Password = encryptedPassword,
                 PhoneNumber = request.PhoneNumber,
                 Gender = request.Gender,
                 Image = imagePath,
@@ -181,6 +183,9 @@ namespace UNITEE_BACKEND.Services
 
                 if (user.Password != request.Password)
                     throw new AuthenticationException("Invalid Password");
+
+                //if (!PasswordEncryptionService.VerifyPassword(request.Password, user.Password))
+                //    throw new AuthenticationException("Invalid Password");
 
                 return (user, (UserRole)user.Role);
             }
