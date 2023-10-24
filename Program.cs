@@ -2,26 +2,26 @@ using Microsoft.EntityFrameworkCore;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Services;
 using Microsoft.Extensions.FileProviders;
-using System.IO;
+//using System.IO;
 using UNITEE_BACKEND.AutoMapperConfig;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using Microsoft.Extensions.Options;
 using Hangfire;
 
+// Variables
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-// Add services to the container.
+// HangFire Configuration
 builder.Services.AddHangfire(config =>
    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("default")));
 builder.Services.AddHangfireServer();
 
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Repository Pattern
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
@@ -33,17 +33,21 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+// DbContext Configuration
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("default")));
 
+// Image Path
 builder.Services.Configure<ImagePathOptions>(builder.Configuration.GetSection("ImagePath"));
 
+// Json Serializer
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 
+// Add Cors
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -60,6 +64,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDistributedMemoryCache();
 
+// Cookie
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -82,6 +87,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Local Image Directory
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -95,7 +101,6 @@ app.UseStaticFiles(new StaticFileOptions
         Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.Images)),
     RequestPath = $"/{imagePathOptions.Images}"
 });
-
 
 app.UseStaticFiles(new StaticFileOptions
 {
