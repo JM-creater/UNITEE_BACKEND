@@ -14,6 +14,8 @@ namespace UNITEE_BACKEND.Services
         public Task<List<Order>> GetAllBySupplierId(int supplierId);
         public Task<Order> ApproveOrder(int orderId);
         public Task<Order> DeniedOrder(int orderId);
+        public Task<Order> CanceledOrder(int orderId);
         public Task<Order> ForPickUp(int orderId);
+        public Task<Order> CompletedOrder(int orderId);
     }
 }

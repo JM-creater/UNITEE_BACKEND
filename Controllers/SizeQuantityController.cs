@@ -104,14 +104,14 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        [HttpDelete("Delete/{productId}")]
+        public async Task<IActionResult> Delete([FromRoute] int productId)
         {
             try
             {
-                var result = await sizeQuantityService.DeleteSizeQuantity(id);
+                var result = await sizeQuantityService.DeleteSizeQuantity(productId);
 
-                return Ok("Successfully Deleted");
+                return Ok(result);
             }
             catch (Exception e)
             {

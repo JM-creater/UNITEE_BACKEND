@@ -110,12 +110,42 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpPut("orderCanceled/{orderId}")]
+        public async Task<IActionResult> OrderCanceled(int orderId)
+        {
+            try
+            {
+                var order = await orderService.CanceledOrder(orderId);
+
+                return Ok(order);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpPut("forPickUp/{orderId}")]
         public async Task<IActionResult> ForPickUpOrders(int orderId)
         {
             try
             {
                 var order = await orderService.ForPickUp(orderId);
+
+                return Ok(order);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("orderCompleted/{orderId}")]
+        public async Task<IActionResult> OrderCompleted(int orderId)
+        {
+            try
+            {
+                var order = await orderService.CompletedOrder(orderId);
 
                 return Ok(order);
             }
