@@ -132,6 +132,7 @@ namespace UNITEE_BACKEND.Services
                     ProductId = product.ProductId,
                     ProductName = product.ProductName,
                     ProductTypeId = product.ProductTypeId,
+                    Description = product.Description,
                     DepartmentId = product.DepartmentId,
                     Category = product.Category,
                     Price = product.Price,
@@ -139,6 +140,7 @@ namespace UNITEE_BACKEND.Services
                     IsActive = product.IsActive,
                     Sizes = product.Sizes.Select(size => new SizeQuantityDto
                     {
+                        Id = size.Id,
                         Size = size.Size,
                         Quantity = size.Quantity
                     })
