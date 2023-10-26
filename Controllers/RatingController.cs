@@ -42,5 +42,20 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetRatingByUser(int userId)
+        {
+            try
+            {
+                var rating = await service.GetRatingByUser(userId);
+
+                return Ok(rating);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

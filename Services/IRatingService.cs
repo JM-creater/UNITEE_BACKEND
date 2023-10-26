@@ -7,5 +7,6 @@ namespace UNITEE_BACKEND.Services
     {
         public Task<Rating> SubmitRatingProduct(RatingRequest request);
         public Task<Rating> SubmitRatingSupplier(RatingRequest request);
+        public Task<List<Rating>> GetRatingByUser(int userId);
     }
 }

@@ -12,7 +12,7 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231026102358_InitialCreate")]
+    [Migration("20231026122230_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -389,10 +389,16 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProductId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId1")
                         .HasColumnType("int");
 
                     b.Property<int>("Value")
@@ -402,9 +408,13 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.HasIndex("ProductId");
 
+                    b.HasIndex("ProductId1");
+
                     b.HasIndex("SupplierId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Ratings");
                 });
@@ -642,6 +652,10 @@ namespace UNITEE_BACKEND.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("UNITEE_BACKEND.Entities.Product", null)
+                        .WithMany("Ratings")
+                        .HasForeignKey("ProductId1");
+
                     b.HasOne("UNITEE_BACKEND.Entities.User", "Supplier")
                         .WithMany()
                         .HasForeignKey("SupplierId")
@@ -653,6 +667,10 @@ namespace UNITEE_BACKEND.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("UNITEE_BACKEND.Entities.User", null)
+                        .WithMany("SupplierRatings")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("Product");
 
@@ -695,12 +713,16 @@ namespace UNITEE_BACKEND.Migrations
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>
                 {
+                    b.Navigation("Ratings");
+
                     b.Navigation("Sizes");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.User", b =>
                 {
                     b.Navigation("Carts");
+
+                    b.Navigation("SupplierRatings");
                 });
 #pragma warning restore 612, 618
         }

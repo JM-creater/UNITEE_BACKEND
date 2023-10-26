@@ -34,6 +34,6 @@ namespace UNITEE_BACKEND.Entities
 
         // Relation
         public ICollection<SizeQuantity> Sizes { get; set; } = new List<SizeQuantity>();
-        public ICollection<Rating> Ratings { get; set; } = new List<Rating>(); 
+        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
     }
 }
