@@ -1,5 +1,7 @@
-﻿using UNITEE_BACKEND.DatabaseContext;
+﻿using Microsoft.EntityFrameworkCore;
+using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
+using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.Request;
 
 namespace UNITEE_BACKEND.Services
@@ -12,6 +14,12 @@ namespace UNITEE_BACKEND.Services
             context = dbcontext;
         }
 
+        public async Task<List<Rating>> GetRatingByUser(int userId)
+            =>  await context.Ratings
+                             .Where(r => r.UserId == userId)
+                             .ToListAsync();
+
+
         public async Task<Rating> SubmitRatingProduct(RatingRequest request)
         {
             try
@@ -20,7 +28,10 @@ namespace UNITEE_BACKEND.Services
                 {
                     UserId = request.UserId,
                     Value = request.Value,
-                    DateCreated = DateTime.Now
+                    ProductId = request.ProductId,
+                    SupplierId = request.SupplierId,
+                    DateCreated = DateTime.Now,
+                    Role = RatingRole.Product
                 };
 
                 context.Ratings.Add(rating);
@@ -42,7 +53,10 @@ namespace UNITEE_BACKEND.Services
                 {
                     UserId = request.UserId,
                     Value = request.Value,
-                    DateCreated = DateTime.Now
+                    ProductId = request.ProductId,
+                    SupplierId = request.SupplierId,
+                    DateCreated = DateTime.Now,
+                    Role = RatingRole.Supplier
                 };
 
                 context.Ratings.Add(rating);

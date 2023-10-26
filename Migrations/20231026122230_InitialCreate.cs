@@ -137,7 +137,9 @@ namespace UNITEE_BACKEND.Migrations
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     SupplierId = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<int>(type: "int", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProductId1 = table.Column<int>(type: "int", nullable: true),
+                    UserId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -148,6 +150,11 @@ namespace UNITEE_BACKEND.Migrations
                         principalTable: "Products",
                         principalColumn: "ProductId");
                     table.ForeignKey(
+                        name: "FK_Ratings_Products_ProductId1",
+                        column: x => x.ProductId1,
+                        principalTable: "Products",
+                        principalColumn: "ProductId");
+                    table.ForeignKey(
                         name: "FK_Ratings_Users_SupplierId",
                         column: x => x.SupplierId,
                         principalTable: "Users",
@@ -155,6 +162,11 @@ namespace UNITEE_BACKEND.Migrations
                     table.ForeignKey(
                         name: "FK_Ratings_Users_UserId",
                         column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Ratings_Users_UserId1",
+                        column: x => x.UserId1,
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
@@ -408,6 +420,11 @@ namespace UNITEE_BACKEND.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Ratings_ProductId1",
+                table: "Ratings",
+                column: "ProductId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Ratings_SupplierId",
                 table: "Ratings",
                 column: "SupplierId");
@@ -416,6 +433,11 @@ namespace UNITEE_BACKEND.Migrations
                 name: "IX_Ratings_UserId",
                 table: "Ratings",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ratings_UserId1",
+                table: "Ratings",
+                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SizeQuantities_ProductId",

@@ -48,6 +48,6 @@ namespace UNITEE_BACKEND.Entities
         public bool IsValidate { get; set; } = false;
 
         public ICollection<Cart> Carts { get; set; } = new List<Cart>();
-        public ICollection<Rating> SupplierRatings { get; set; } = new List<Rating>();  
+        public ICollection<Rating> SupplierRatings { get; set; } = new List<Rating>();
     }
 }

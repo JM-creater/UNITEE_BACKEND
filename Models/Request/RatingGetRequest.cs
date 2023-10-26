@@ -1,8 +1,9 @@
-﻿using UNITEE_BACKEND.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using UNITEE_BACKEND.Entities;
 
 namespace UNITEE_BACKEND.Models.Request
 {
-    public class RatingRequest
+    public class RatingGetRequest
     {
         public int UserId { get; set; }
         public int ProductId { get; set; }

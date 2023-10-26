@@ -40,14 +40,68 @@ namespace UNITEE_BACKEND.Services
         public async Task<List<Order>> GetAllByUserId(int id)
             => await context.Orders
                             .Include(u => u.User)
+                                .ThenInclude(sr => sr.SupplierRatings)
                             .Include(u => u.Cart)
                                 .ThenInclude(s => s.Supplier)
                             .Include(u => u.Cart)
                                 .ThenInclude(i => i.Items)
-                                .ThenInclude(p => p.Product)
-                                .ThenInclude(s => s.Sizes)
+                                    .ThenInclude(p => p.Product)
+                                        .ThenInclude(s => s.Sizes)
+                            .Include(u => u.Cart)
+                                .ThenInclude(i => i.Items)
+                                    .ThenInclude(p => p.Product)
+                                        .ThenInclude(r => r.Ratings)
+                                            .ThenInclude(rating => rating.User)
+                            .Include(u => u.Cart)
+                                .ThenInclude(u => u.Supplier)
+                                    .ThenInclude(u => u.SupplierRatings)
                             .Where(o => o.UserId == id)
+                            .OrderByDescending(o => o.DateCreated)
                             .ToListAsync();
+
+        //public IEnumerable<Order> GetAllByUserId(int id)
+        //{
+        //    return context.Orders
+        //                  .Include(o => o.User)
+        //                      .ThenInclude(u => u.SupplierRatings)
+        //                  .Include(o => o.Cart)
+        //                      .ThenInclude(c => c.Items)
+        //                          .ThenInclude(i => i.Product)
+        //                              .ThenInclude(p => p.Ratings)
+        //                  .Include(o => o.Cart)
+        //                      .ThenInclude(c => c.Supplier)
+        //                  .Where(o => o.UserId == id)
+        //                  .OrderByDescending(o => o.DateCreated)
+        //                  .ToList(); 
+        //}
+
+        //public async Task<List<Order>> GetAllByUserId(int id)
+        //{
+        //    return await context.Orders
+        //        .Include(o => o.User)
+        //            .ThenInclude(u => u.SupplierRatings)
+        //        .Include(o => o.Cart)
+        //            .ThenInclude(c => c.Items)
+        //                .ThenInclude(item => item.Product)
+        //                    .ThenInclude(p => p.Ratings)
+        //                        .ThenInclude(rating => rating.User) 
+        //        .Include(o => o.Cart)
+        //            .ThenInclude(c => c.Supplier)
+        //                .ThenInclude(s => s.SupplierRatings)
+        //                    .ThenInclude(rating => rating.User) 
+        //        .Where(o => o.UserId == id && !o.IsDeleted)
+        //        .OrderByDescending(o => o.DateCreated)
+        //        .ToListAsync();
+        //}
+
+
+        public IEnumerable<Order> GetAllTest()
+        {
+            var order = context.Orders.Include(o => o.User).ThenInclude(o => o.SupplierRatings).AsEnumerable();
+
+            return order;
+        }
+
 
         public async Task<List<Order>> GetAllBySupplierId(int supplierId)
         {
@@ -60,6 +114,7 @@ namespace UNITEE_BACKEND.Services
                             .ThenInclude(p => p.Product)
                             .ThenInclude(s => s.Sizes)
                         .Where(o => o.Cart.Supplier.Id == supplierId)
+                        .OrderByDescending(o => o.DateCreated)
                         .ToListAsync();
         }
 
