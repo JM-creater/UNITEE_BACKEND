@@ -12,9 +12,10 @@ namespace UNITEE_BACKEND.Services
         public IEnumerable<Product> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId);
         public Task<Product> GetById(int productId);
         public Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId);
-        public Task<Product> UpdateProduct(int productId, ProductRequest request);
+        public Task<Product> UpdateProduct(int productId, ProductUpdateRequest request);
         public Task<Product> Delete(int id);
         public Task<IEnumerable<ProductWithSizeQuantityDto>> GetProductsBySupplier(int supplierId);
-        public Task<Product> UpdateActivationStatus(int productId, bool isActive);
+        public Task<Product> UpdateActivationStatus(int productId);
+        public Task<Product> UpdateDectivationStatus(int productId);
     }
 }

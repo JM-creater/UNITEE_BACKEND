@@ -7,6 +7,7 @@ using UNITEE_BACKEND.AutoMapperConfig;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using Microsoft.Extensions.Options;
 using Hangfire;
+using UNITEE_BACKEND.Models.SignalRNotification;
 
 // Variables
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +49,9 @@ builder.Services.AddControllers()
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
 
+// SignalR
+builder.Services.AddSignalR();
+
 // Add Cors
 builder.Services.AddCors(options =>
 {
@@ -57,8 +61,8 @@ builder.Services.AddCors(options =>
                           policy.WithOrigins("http://127.0.0.1:5173", "https://127.0.0.1:5173")
                                 .AllowAnyMethod()
                                 .AllowAnyHeader()
-                                .SetIsOriginAllowed((host) => true)
                                 .AllowCredentials()
+                                .SetIsOriginAllowed((host) => true)
                                 .WithMethods("OPTIONS");
                       });
 });
@@ -146,6 +150,8 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseCors(MyAllowSpecificOrigins);
+
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseHangfireDashboard();
 app.UseHangfireServer();

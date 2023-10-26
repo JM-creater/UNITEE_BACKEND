@@ -1,4 +1,6 @@
-﻿namespace UNITEE_BACKEND.Entities
+﻿using UNITEE_BACKEND.Enum;
+
+namespace UNITEE_BACKEND.Entities
 {
     public class Notification
     {
@@ -9,5 +11,6 @@
         public string Message { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.Now;
         public bool IsRead { get; set; }
+        public UserRole UserRole { get; set; }
     }
 }

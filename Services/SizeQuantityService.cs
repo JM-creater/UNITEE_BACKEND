@@ -221,15 +221,16 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task<SizeQuantity> UpdateQuantity(int productId, string size, int newQuantity)
+        public async Task<SizeQuantity> UpdateQuantity(int id, int productId, string size, int newQuantity)
         {
             try
             {
                 var sizeQuantity = await context.SizeQuantities
-                    .FirstOrDefaultAsync(a => a.ProductId == productId && a.Size == size);
+                                                .Where(a => a.Id == id && a.ProductId == productId && a.Size == size)
+                                                .FirstOrDefaultAsync();
 
                 if (sizeQuantity == null)
-                    throw new Exception("Not Found");
+                    throw new InvalidOperationException("Size and Quantity not Found");
 
                 sizeQuantity.Quantity = newQuantity;
 
@@ -239,22 +240,9 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
-        }
-
-        //public async Task<SizeQuantity> DeleteAll(int productId)
-        //{
-        //    try
-        //    {
-
-        //    }
-        //    catch (Exception)
-        //    {
-
-        //        throw;
-        //    }
-        //}
+        }   
         
         public async Task<SizeQuantity> Save(SizeQuantity request)
         {

@@ -169,11 +169,11 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task<Product> UpdateProduct(int productId, ProductRequest request)
+        public async Task<Product> UpdateProduct(int productId, ProductUpdateRequest request)
         {
             var existingProduct = await context.Products
-                .Include(p => p.Sizes) 
-                .FirstOrDefaultAsync(p => p.ProductId == productId);
+                                               .Include(p => p.Sizes) 
+                                               .FirstOrDefaultAsync(p => p.ProductId == productId);
 
             if (existingProduct == null)
             {
@@ -216,16 +216,41 @@ namespace UNITEE_BACKEND.Services
             return existingProduct;
         }
 
-        public async Task<Product> UpdateActivationStatus(int productId, bool isActive)
+        public async Task<Product> UpdateActivationStatus(int productId)
         {
             try
             {
-                var existingProduct = await context.Products.FirstOrDefaultAsync(a => a.ProductId == productId);
+                var existingProduct = await context.Products
+                                                .Where(a => a.ProductId == productId)
+                                                .FirstOrDefaultAsync();
 
                 if (existingProduct == null)
                     throw new Exception("Product not found");
 
-                existingProduct.IsActive = isActive;
+                existingProduct.IsActive = true;
+
+                await this.Save();
+
+                return existingProduct;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<Product> UpdateDectivationStatus(int productId)
+        {
+            try
+            {
+                var existingProduct = await context.Products
+                                                .Where(a => a.ProductId == productId)
+                                                .FirstOrDefaultAsync();
+
+                if (existingProduct == null)
+                    throw new Exception("Product not found");
+
+                existingProduct.IsActive = false;
 
                 await this.Save();
 
