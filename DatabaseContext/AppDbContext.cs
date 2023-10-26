@@ -181,11 +181,17 @@ namespace UNITEE_BACKEND.DatabaseContext
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            //modelBuilder.Entity<Rating>()
-            //    .HasOne(r => r.Product)
-            //    .WithMany() 
-            //    .HasForeignKey(r => r.ProductId)
-            //    .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Rating>()
+                .HasOne(r => r.Supplier)
+                .WithMany()
+                .HasForeignKey(r => r.SupplierId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Rating>()
+                .HasOne(r => r.Product)
+                .WithMany()
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
