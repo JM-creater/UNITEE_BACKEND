@@ -36,7 +36,7 @@ namespace UNITEE_BACKEND.Services
                     Category = request.Category,
                     Price = request.Price,
                     Image = imagePath,
-                    IsActive = request.IsActive
+                    IsActive = true
                 };
 
                 await context.Products.AddAsync(newProduct);
