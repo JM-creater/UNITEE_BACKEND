@@ -46,7 +46,8 @@ namespace UNITEE_BACKEND.Services
                                 .ThenInclude(i => i.Items)
                                 .ThenInclude(p => p.Product)
                                 .ThenInclude(s => s.Sizes)
-                            .Where(o => o.UserId == id).ToListAsync();
+                            .Where(o => o.UserId == id)
+                            .ToListAsync();
 
         public async Task<List<Order>> GetAllBySupplierId(int supplierId)
         {
@@ -58,7 +59,7 @@ namespace UNITEE_BACKEND.Services
                             .ThenInclude(i => i.Items)
                             .ThenInclude(p => p.Product)
                             .ThenInclude(s => s.Sizes)
-                        .Where(o => o.Cart.Supplier.Id == supplierId) 
+                        .Where(o => o.Cart.Supplier.Id == supplierId)
                         .ToListAsync();
         }
 
@@ -75,111 +76,6 @@ namespace UNITEE_BACKEND.Services
 
             return order;
         }
-
-        //public async Task<Order> AddOrder(OrderRequest request)
-        //{
-        //    try
-        //    {
-        //        var imagePath = await ProofofPayment(request.ProofOfPayment);
-
-        //        int nextId = context.Orders.Any() ? context.Orders.Max(o => o.Id) + 1 : 1;
-
-        //        var order = new Order
-        //        {
-        //            UserId = request.UserId,
-        //            CartId = request.CartId,
-        //            Total = request.Total,
-        //            ProofOfPayment = imagePath,
-        //            ReferenceId = request.ReferenceId,
-        //            DateCreated = DateTime.Now,
-        //            DateUpdated = DateTime.Now,
-        //            PaymentType = PaymentType.EMoney,
-        //            Status = Status.OrderPlaced,
-        //            OrderNumber = GenerateOrderNumber(DateTime.Now, nextId)
-        //        };
-
-        //        context.Orders.Add(order);
-        //        await context.SaveChangesAsync();
-
-        //        var notification = new Notification
-        //        {
-        //            UserId = request.UserId,
-        //            OrderId = order.Id,
-        //            Message = $"Your order {order.OrderNumber} has been placed",
-        //            DateCreated = DateTime.Now,
-        //            IsRead = false,
-        //            UserRole = UserRole.Customer
-        //        };
-
-        //        context.Notifications.Add(notification);
-
-        //        await context.SaveChangesAsync();
-
-
-        //        var supplierIds = context.Carts
-        //                                .Where(oi => oi.Id == order.Id)
-        //                                .Select(oi => oi.SupplierId)
-        //                                .Distinct()
-        //                                .ToList();
-
-        //        if (supplierIds != null && supplierIds.Any())
-        //        {
-        //            foreach (var supplierId in supplierIds)
-        //            {
-        //                var supplierNotification = new Notification
-        //                {
-        //                    UserId = supplierId,
-        //                    OrderId = order.Id,
-        //                    Message = $"New order {order.OrderNumber} has been placed and requires your attention.",
-        //                    DateCreated = DateTime.Now,
-        //                    IsRead = false,
-        //                    UserRole = UserRole.Supplier
-        //                };
-
-        //                context.Notifications.Add(supplierNotification);
-        //            }
-        //        }
-
-        //        await context.SaveChangesAsync();
-
-        //        BackgroundJob.Schedule(() => UpdateOrderStatusAndNotify(order.Id, notification.Id), TimeSpan.FromSeconds(5));
-
-        //        var cart = await context.Carts
-        //                .Include(c => c.Items)
-        //                .FirstOrDefaultAsync(c => c.Id == request.CartId);
-
-        //        if (cart != null)
-        //        {
-        //            foreach (var cartItemId in request.CartItemIds) 
-        //            {
-        //                var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == cartItemId);
-
-        //                if (cartItem != null)
-        //                {
-        //                    var orderItem = new OrderItem
-        //                    {
-        //                        OrderId = order.Id,
-        //                        ProductId = cartItem.ProductId,
-        //                        Quantity = cartItem.Quantity,
-        //                        SizeQuantityId = cartItem.SizeQuantityId
-        //                    };
-
-        //                    context.OrderItems.Add(orderItem);
-
-        //                    cartItem.IsDeleted = true;
-        //                }
-        //            }
-        //        }
-
-        //        await context.SaveChangesAsync();
-
-        //        return order;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new InvalidOperationException(e.Message);
-        //    }
-        //}
 
         public async Task<Order> AddOrder(OrderRequest request)
         {

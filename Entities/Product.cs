@@ -33,6 +33,7 @@ namespace UNITEE_BACKEND.Entities
         public bool IsActive { get; set; }
 
         // Relation
-        public ICollection<SizeQuantity> Sizes { get; set; }
+        public ICollection<SizeQuantity> Sizes { get; set; } = new List<SizeQuantity>();
+        public ICollection<Rating> Ratings { get; set; } = new List<Rating>(); 
     }
 }

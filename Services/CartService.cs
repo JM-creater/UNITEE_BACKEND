@@ -31,15 +31,16 @@ namespace UNITEE_BACKEND.Services
                 throw new Exception($"User with Id {id} not found");
 
             user.Carts = context.Carts
-                .Include(c => c.Supplier)
-                .Include(c => c.Items)
-                    .ThenInclude(i => i.Product)
-                .Include(c => c.Items)
-                    .ThenInclude(i => i.SizeQuantity)
-                        .ThenInclude(i => i.Product)
-                            .ThenInclude(i => i.Sizes)
-                .Where(c => c.UserId == user.Id && c.Items.Any(i => !i.IsDeleted)) 
-                .ToList();
+                                .Include(c => c.Supplier)
+                                .Include(c => c.Items)
+                                    .ThenInclude(i => i.Product)
+                                .Include(c => c.Items)
+                                    .ThenInclude(i => i.SizeQuantity)
+                                        .ThenInclude(i => i.Product)
+                                            .ThenInclude(i => i.Sizes)
+                                .Where(c => c.UserId == user.Id && c.Items.Any(i => !i.IsDeleted)) 
+                                .OrderByDescending(c => c.DateCreated)
+                                .ToList();
 
             foreach (var cart in user.Carts)
             {
@@ -84,7 +85,8 @@ namespace UNITEE_BACKEND.Services
                     {
                         UserId = request.UserId,
                         SupplierId = supplierId,
-                        Items = new List<CartItem>()
+                        Items = new List<CartItem>(),
+                        DateCreated = DateTime.Now
                     };
 
                     context.Carts.Add(cart);
@@ -101,7 +103,8 @@ namespace UNITEE_BACKEND.Services
                 else
                 {
                     var sizeQuantity = await context.SizeQuantities
-                        .FirstOrDefaultAsync(sq => sq.ProductId == request.ProductId && sq.Size == request.Size);
+                                                    .Where(sq => sq.ProductId == request.ProductId && sq.Size == request.Size)
+                                                    .FirstOrDefaultAsync();
 
                     if (sizeQuantity == null)
                     {

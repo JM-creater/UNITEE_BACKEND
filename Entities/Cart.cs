@@ -13,5 +13,6 @@ namespace UNITEE_BACKEND.Entities
         public int UserId { get; set; }
         public ICollection<CartItem>? Items { get; set; }
         public bool IsDeleted { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 }

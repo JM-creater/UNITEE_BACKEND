@@ -47,6 +47,7 @@ namespace UNITEE_BACKEND.Entities
         public int Role { get; set; }
         public bool IsValidate { get; set; } = false;
 
-        public ICollection<Cart>? Carts { get; set; }
+        public ICollection<Cart> Carts { get; set; } = new List<Cart>();
+        public ICollection<Rating> SupplierRatings { get; set; } = new List<Rating>();  
     }
 }

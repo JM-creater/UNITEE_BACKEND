@@ -37,6 +37,7 @@ namespace UNITEE_BACKEND.Services
                 var notif = await context.Notifications
                                          .Include(o => o.Order)
                                          .Where(n => n.UserId == userId)
+                                         .OrderByDescending(o => o.DateCreated)
                                          .ToListAsync();
 
                 return notif;
@@ -46,7 +47,6 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException(e.Message);
             }
         }
-
         
         public async Task<IEnumerable<Notification>> GetUnreadNotifications(int userId)
         {
