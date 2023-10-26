@@ -2,6 +2,7 @@
 using System.Globalization;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
+using UNITEE_BACKEND.Enum;
 
 namespace UNITEE_BACKEND.Services
 {
@@ -46,18 +47,19 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        
         public async Task<IEnumerable<Notification>> GetUnreadNotifications(int userId)
         {
             return await context.Notifications
                                 .Include(n => n.Order)
-                                .Where(n => n.UserId == userId && !n.IsRead)
+                                .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Customer)
                                 .ToListAsync();
         }
 
         public async Task MarkNotificationsAsRead(int userId)
         {
             var unreadNotifications = context.Notifications
-                .Where(n => n.UserId == userId && !n.IsRead);
+                .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Customer);
 
             foreach (var notification in unreadNotifications)
             {
@@ -66,5 +68,27 @@ namespace UNITEE_BACKEND.Services
 
             await context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Notification>> GetSupplierUnreadNotifications(int userId)
+        {
+            return await context.Notifications
+                                .Include(n => n.Order)
+                                .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Supplier)
+                                .ToListAsync();
+        }
+
+        public async Task MarkSupplierNotificationsAsRead(int userId)
+        {
+            var unreadNotifications = context.Notifications
+                                             .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Supplier);
+
+            foreach (var notification in unreadNotifications)
+            {
+                notification.IsRead = true;
+            }
+
+            await context.SaveChangesAsync();
+        }
+
     }
 }

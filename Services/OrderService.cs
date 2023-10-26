@@ -1,10 +1,12 @@
 ﻿using Hangfire;
+using Hangfire.Server;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.Request;
-
+using UNITEE_BACKEND.Models.SignalRNotification;
 
 namespace UNITEE_BACKEND.Services
 {
@@ -12,12 +14,13 @@ namespace UNITEE_BACKEND.Services
     {
         private readonly AppDbContext context;
         private readonly INotificationService service;
+        private readonly IHubContext<NotificationHub> hubContext;
 
-        public OrderService(AppDbContext dbcontext, INotificationService notificationService)
+        public OrderService(AppDbContext dbcontext, INotificationService notificationService, IHubContext<NotificationHub> _hubContext)
         {
             context = dbcontext;
             this.service = notificationService;
-
+            hubContext = _hubContext;
         }
 
         public IEnumerable<Order> GetAll()
@@ -73,6 +76,111 @@ namespace UNITEE_BACKEND.Services
             return order;
         }
 
+        //public async Task<Order> AddOrder(OrderRequest request)
+        //{
+        //    try
+        //    {
+        //        var imagePath = await ProofofPayment(request.ProofOfPayment);
+
+        //        int nextId = context.Orders.Any() ? context.Orders.Max(o => o.Id) + 1 : 1;
+
+        //        var order = new Order
+        //        {
+        //            UserId = request.UserId,
+        //            CartId = request.CartId,
+        //            Total = request.Total,
+        //            ProofOfPayment = imagePath,
+        //            ReferenceId = request.ReferenceId,
+        //            DateCreated = DateTime.Now,
+        //            DateUpdated = DateTime.Now,
+        //            PaymentType = PaymentType.EMoney,
+        //            Status = Status.OrderPlaced,
+        //            OrderNumber = GenerateOrderNumber(DateTime.Now, nextId)
+        //        };
+
+        //        context.Orders.Add(order);
+        //        await context.SaveChangesAsync();
+
+        //        var notification = new Notification
+        //        {
+        //            UserId = request.UserId,
+        //            OrderId = order.Id,
+        //            Message = $"Your order {order.OrderNumber} has been placed",
+        //            DateCreated = DateTime.Now,
+        //            IsRead = false,
+        //            UserRole = UserRole.Customer
+        //        };
+
+        //        context.Notifications.Add(notification);
+
+        //        await context.SaveChangesAsync();
+
+
+        //        var supplierIds = context.Carts
+        //                                .Where(oi => oi.Id == order.Id)
+        //                                .Select(oi => oi.SupplierId)
+        //                                .Distinct()
+        //                                .ToList();
+
+        //        if (supplierIds != null && supplierIds.Any())
+        //        {
+        //            foreach (var supplierId in supplierIds)
+        //            {
+        //                var supplierNotification = new Notification
+        //                {
+        //                    UserId = supplierId,
+        //                    OrderId = order.Id,
+        //                    Message = $"New order {order.OrderNumber} has been placed and requires your attention.",
+        //                    DateCreated = DateTime.Now,
+        //                    IsRead = false,
+        //                    UserRole = UserRole.Supplier
+        //                };
+
+        //                context.Notifications.Add(supplierNotification);
+        //            }
+        //        }
+
+        //        await context.SaveChangesAsync();
+
+        //        BackgroundJob.Schedule(() => UpdateOrderStatusAndNotify(order.Id, notification.Id), TimeSpan.FromSeconds(5));
+
+        //        var cart = await context.Carts
+        //                .Include(c => c.Items)
+        //                .FirstOrDefaultAsync(c => c.Id == request.CartId);
+
+        //        if (cart != null)
+        //        {
+        //            foreach (var cartItemId in request.CartItemIds) 
+        //            {
+        //                var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == cartItemId);
+
+        //                if (cartItem != null)
+        //                {
+        //                    var orderItem = new OrderItem
+        //                    {
+        //                        OrderId = order.Id,
+        //                        ProductId = cartItem.ProductId,
+        //                        Quantity = cartItem.Quantity,
+        //                        SizeQuantityId = cartItem.SizeQuantityId
+        //                    };
+
+        //                    context.OrderItems.Add(orderItem);
+
+        //                    cartItem.IsDeleted = true;
+        //                }
+        //            }
+        //        }
+
+        //        await context.SaveChangesAsync();
+
+        //        return order;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new InvalidOperationException(e.Message);
+        //    }
+        //}
+
         public async Task<Order> AddOrder(OrderRequest request)
         {
             try
@@ -103,21 +211,33 @@ namespace UNITEE_BACKEND.Services
                     UserId = request.UserId,
                     OrderId = order.Id,
                     Message = $"Your order {order.OrderNumber} has been placed",
-                    DateCreated = DateTime.Now
+                    DateCreated = DateTime.Now,
+                    IsRead = false,
+                    UserRole = UserRole.Customer
                 };
 
                 context.Notifications.Add(notification);
                 await context.SaveChangesAsync();
 
-                BackgroundJob.Schedule(() => UpdateOrderStatusAndNotify(order.Id), TimeSpan.FromSeconds(5));
-
                 var cart = await context.Carts
-                        .Include(c => c.Items)
-                        .FirstOrDefaultAsync(c => c.Id == request.CartId);
+                                        .Include(c => c.Items)
+                                        .FirstOrDefaultAsync(c => c.Id == request.CartId);
 
                 if (cart != null)
                 {
-                    foreach (var cartItemId in request.CartItemIds) 
+                    var supplierNotifications = new Notification
+                    {
+                        UserId = cart.SupplierId,
+                        OrderId = order.Id,
+                        Message = $"New order {order.OrderNumber} has been placed and requires your attention.",
+                        DateCreated = DateTime.Now,
+                        IsRead = false,
+                        UserRole = UserRole.Supplier
+                    };
+
+                    context.Notifications.Add(supplierNotifications);
+
+                    foreach (var cartItemId in request.CartItemIds)
                     {
                         var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == cartItemId);
 
@@ -132,13 +252,14 @@ namespace UNITEE_BACKEND.Services
                             };
 
                             context.OrderItems.Add(orderItem);
-
                             cartItem.IsDeleted = true;
                         }
                     }
                 }
 
                 await context.SaveChangesAsync();
+
+                BackgroundJob.Schedule(() => UpdateOrderStatusAndNotify(order.Id, notification.Id), TimeSpan.FromSeconds(5));
 
                 return order;
             }
@@ -153,19 +274,45 @@ namespace UNITEE_BACKEND.Services
             return $"ORD-{dateCreated:yyMMdd}-{id:D5}";
         }
 
-        public async Task UpdateOrderStatusAndNotify(int orderId)
+        public async Task UpdateOrderStatusAndNotify(int orderId, int id)
         {
             await Task.Delay(TimeSpan.FromSeconds(5));
-            UpdateOrderStatusToPending(orderId);
+            UpdateOrderStatusToPending(orderId, id);
         }
 
-        public void UpdateOrderStatusToPending(int orderId)
+        public void UpdateOrderStatusToPending(int orderId, int id)
         {
             var orderToUpdate = context.Orders.Find(orderId);
             if (orderToUpdate != null && orderToUpdate.Status == Status.OrderPlaced)
             {
                 orderToUpdate.Status = Status.Pending;
                 orderToUpdate.DateUpdated = DateTime.Now;
+                context.SaveChanges();
+
+                hubContext.Clients.User(orderToUpdate.UserId.ToString())
+                          .SendAsync("OrderStatusUpdated", "Your order status has been updated to Pending.");
+
+                var existingNotification = context.Notifications.Where(e => e.Id == id).First();
+
+                if (existingNotification != null) 
+                {
+                    existingNotification.Message = $"Your order {orderToUpdate.OrderNumber} status has been updated to Pending";
+                    existingNotification.IsRead = false;
+                }
+                else
+                {
+                    var notification = new Notification
+                    {
+                        UserId = orderToUpdate.UserId,
+                        OrderId = orderId,
+                        Message = $"Your order {orderToUpdate.OrderNumber} status has been updated to Pending",
+                        DateCreated = DateTime.Now,
+                        IsRead = false
+                    };
+
+                    context.Notifications.Add(notification);
+                }
+                
                 context.SaveChanges();
             }
         }
@@ -237,6 +384,7 @@ namespace UNITEE_BACKEND.Services
                 if (existingNotification != null)
                 {
                     existingNotification.Message = $"Your order {order.OrderNumber} has been approved!";
+                    existingNotification.IsRead = false;
                 }
                 else
                 {
@@ -245,12 +393,15 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} has been approved!",
-                        DateCreated = DateTime.Now
+                        DateCreated = DateTime.Now,
+                        IsRead = false
                     };
                     context.Notifications.Add(notification);
                 }
 
                 await context.SaveChangesAsync();
+
+                
 
                 order = await context.Orders
                                     .Include(u => u.User)
@@ -296,6 +447,7 @@ namespace UNITEE_BACKEND.Services
                 if (existingNotification != null) 
                 {
                     existingNotification.Message = $"Your order {order.OrderNumber} has been denied.";
+                    existingNotification.IsRead = false;
                 }
                 else
                 {
@@ -303,7 +455,9 @@ namespace UNITEE_BACKEND.Services
                     {
                         UserId = order.UserId,
                         OrderId = order.Id,
-                        Message = $"Your order {order.OrderNumber} has been denied."
+                        Message = $"Your order {order.OrderNumber} has been denied.",
+                        DateCreated = DateTime.Now,
+                        IsRead = false
                     };
                     await service.AddNotification(notification);
                 }
@@ -355,6 +509,7 @@ namespace UNITEE_BACKEND.Services
                 if (existingNotification != null)
                 {
                     existingNotification.Message = $"Your order {order.OrderNumber} is canceled.";
+                    existingNotification.IsRead = false;
                 }
                 else
                 {
@@ -363,7 +518,8 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} is canceled.",
-                        DateCreated = DateTime.Now
+                        DateCreated = DateTime.Now,
+                        IsRead = false
                     };
                     await service.AddNotification(notification);
                 }
@@ -421,6 +577,7 @@ namespace UNITEE_BACKEND.Services
                 if (existingNotification != null)
                 {
                     existingNotification.Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {pickUpDate:d}.";
+                    existingNotification.IsRead = false;
                 }
                 else
                 {
@@ -429,7 +586,8 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {pickUpDate:d}.",
-                        DateCreated = DateTime.Now
+                        DateCreated = DateTime.Now,
+                        IsRead = false
                     };
                     await service.AddNotification(notification);
                 }
@@ -484,6 +642,7 @@ namespace UNITEE_BACKEND.Services
                 if (existingNotification != null)
                 {
                     existingNotification.Message = $"Your order {order.OrderNumber} has been completed. Thank you for shopping with us!";
+                    existingNotification.IsRead = false;
                 }
                 else
                 {
@@ -492,7 +651,8 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} has been completed. Thank you for shopping with us!",
-                        DateCreated = DateTime.Now
+                        DateCreated = DateTime.Now,
+                        IsRead = false
                     };
                     await service.AddNotification(notification);
                 }

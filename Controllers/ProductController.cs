@@ -129,7 +129,7 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("{productId}")]
-        public async Task<IActionResult> Update([FromRoute] int productId, [FromForm] ProductRequest request)
+        public async Task<IActionResult> Update([FromRoute] int productId, [FromForm] ProductUpdateRequest request)
         {
             try
             {
@@ -144,11 +144,26 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("activate/{productId}")]
-        public async Task<IActionResult> ActivateProduct(int productId, [FromBody] bool isActive)
+        public async Task<IActionResult> ActivateProduct(int productId)
         {
             try
             {
-                var product = await productService.UpdateActivationStatus(productId, isActive);
+                var product = await productService.UpdateActivationStatus(productId);
+
+                return Ok("Successfully Activated");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("deactivate/{productId}")]
+        public async Task<IActionResult> DeactivateProduct(int productId)
+        {
+            try
+            {
+                var product = await productService.UpdateDectivationStatus(productId);
 
                 return Ok("Successfully Deactivated");
             }

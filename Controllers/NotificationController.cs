@@ -59,5 +59,34 @@ namespace UNITEE_BACKEND.Controllers
             await service.MarkNotificationsAsRead(userId);
             return Ok(); 
         }
+
+        [HttpGet("supplierUnread/{userId}")]
+        public async Task<ActionResult<IEnumerable<Notification>>> GetUnreadNotificationsSupplier(int userId)
+        {
+            try
+            {
+                var notifications = await service.GetSupplierUnreadNotifications(userId);
+
+                return Ok(notifications);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("supplierMarkAsRead/{userId}")]
+        public async Task<IActionResult> MarkNotificationsSupplierAsRead(int userId)
+        {
+            try
+            {
+                await service.MarkSupplierNotificationsAsRead(userId);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

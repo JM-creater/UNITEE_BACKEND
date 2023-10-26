@@ -164,11 +164,11 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("UpdateSizes/{productId}/{size}")]
-        public async Task<IActionResult> UpdateSizeQuantity(int productId, string size, [FromBody] UpdateSizeQuantityDto dto)
+        public async Task<IActionResult> UpdateSizeQuantity(int id, int productId, string size, int newQuantity)
         {
             try
             {
-                var sizeQuantity = await sizeQuantityService.UpdateQuantity(productId, size, dto.Quantity);
+                var sizeQuantity = await sizeQuantityService.UpdateQuantity(id, productId, size, newQuantity);
 
                 return Ok(sizeQuantity);
             }

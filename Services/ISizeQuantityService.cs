@@ -17,6 +17,6 @@ namespace UNITEE_BACKEND.Services
         public Task<IEnumerable<GetSizeQuantityByIdDto>> GetSizesByProductId(int productId);
         public Task<SizeQuantity> AddSizeToProduct(int productId, SizeQuantityDto dto);
         public Task<bool> DeleteSizeFromProduct(int productId, string sizeLabel);
-        public Task<SizeQuantity> UpdateQuantity(int productId, string size, int newQuantity);
+        public Task<SizeQuantity> UpdateQuantity(int id, int productId, string size, int newQuantity);
     }
 }

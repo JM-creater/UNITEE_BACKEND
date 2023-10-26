@@ -181,11 +181,11 @@ namespace UNITEE_BACKEND.Services
                 if (!user.IsActive)
                     throw new AuthenticationException("Account is deactivated");
 
-                if (user.Password != request.Password)
-                    throw new AuthenticationException("Invalid Password");
-
-                //if (!PasswordEncryptionService.VerifyPassword(request.Password, user.Password))
+                //if (user.Password != request.Password)
                 //    throw new AuthenticationException("Invalid Password");
+
+                if (user.Password != request.Password && !PasswordEncryptionService.VerifyPassword(request.Password, user.Password))
+                    throw new AuthenticationException("Invalid Password");
 
                 return (user, (UserRole)user.Role);
             }
