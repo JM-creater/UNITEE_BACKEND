@@ -6,6 +6,7 @@ namespace UNITEE_BACKEND.Dto
     {
         public int ProductId { get; set; }
         public string? ProductName { get; set; }
+        public string Description { get; set; }
         public int ProductTypeId { get; set; }
         public int DepartmentId { get; set; }
         public string? Category { get; set; }
