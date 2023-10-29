@@ -103,7 +103,8 @@ namespace UNITEE_BACKEND.Services
                 Gender = request.Gender,
                 Image = imagePath,
                 StudyLoad = studyLoadPath,
-                Role = (int)UserRole.Customer
+                Role = (int)UserRole.Customer,
+                IsActive = false
             };
 
             await context.Users.AddAsync(newUser);
@@ -165,11 +166,15 @@ namespace UNITEE_BACKEND.Services
 
                 if (request.Id.HasValue) 
                 {
-                    user = await context.Users.SingleOrDefaultAsync(u => u.Id == request.Id);
+                    user = await context.Users
+                                        .Where(u => u.Id == request.Id)
+                                        .SingleOrDefaultAsync();
                 }
                 else if (!string.IsNullOrWhiteSpace(request.Email))
                 {
-                    user = await context.Users.SingleOrDefaultAsync(u => u.Email == request.Email);
+                    user = await context.Users
+                                        .Where(u => u.Email == request.Email)
+                                        .SingleOrDefaultAsync();
                 }
 
                 if (user == null)
@@ -181,10 +186,7 @@ namespace UNITEE_BACKEND.Services
                 if (!user.IsActive)
                     throw new AuthenticationException("Account is deactivated");
 
-                //if (user.Password != request.Password)
-                //    throw new AuthenticationException("Invalid Password");
-
-                if (user.Password != request.Password && !PasswordEncryptionService.VerifyPassword(request.Password, user.Password))
+                if (!PasswordEncryptionService.VerifyPassword(request.Password, PasswordEncryptionService.EncryptPassword(request.Password)))
                     throw new AuthenticationException("Invalid Password");
 
                 return (user, (UserRole)user.Role);

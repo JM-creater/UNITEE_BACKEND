@@ -7,8 +7,6 @@ namespace UNITEE_BACKEND.Entities
     {
         [Key]
         public int ProductTypeId { get; set; }
-        [Required]
-        [Column(TypeName = "nvarchar(250)")]
-        public string Product_Type { get; set; } = "";
+        public string Product_Type { get; set; }
     }
 }

@@ -1,7 +1,10 @@
-﻿namespace UNITEE_BACKEND.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace UNITEE_BACKEND.Entities
 {
     public class OrderItem
     {
+        [Key]
         public int Id { get; set; }
         public int OrderId { get; set; }
         public virtual Order Order { get; set; }

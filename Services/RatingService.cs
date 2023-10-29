@@ -30,8 +30,7 @@ namespace UNITEE_BACKEND.Services
                     Value = request.Value,
                     ProductId = request.ProductId,
                     SupplierId = request.SupplierId,
-                    DateCreated = DateTime.Now,
-                    Role = RatingRole.Product
+                    DateCreated = DateTime.Now
                 };
 
                 context.Ratings.Add(rating);
@@ -55,8 +54,7 @@ namespace UNITEE_BACKEND.Services
                     Value = request.Value,
                     ProductId = request.ProductId,
                     SupplierId = request.SupplierId,
-                    DateCreated = DateTime.Now,
-                    Role = RatingRole.Supplier
+                    DateCreated = DateTime.Now
                 };
 
                 context.Ratings.Add(rating);

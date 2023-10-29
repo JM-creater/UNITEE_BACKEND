@@ -12,7 +12,7 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231026122230_InitialCreate")]
+    [Migration("20231029192843_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -96,7 +96,7 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.Property<string>("Department_Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("DepartmentId");
 
@@ -294,17 +294,17 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Image")
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -314,9 +314,12 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProductTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RatingId")
                         .HasColumnType("int");
 
                     b.Property<int>("SupplierId")
@@ -327,6 +330,8 @@ namespace UNITEE_BACKEND.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("ProductTypeId");
+
+                    b.HasIndex("RatingId");
 
                     b.ToTable("Products");
                 });
@@ -341,7 +346,7 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.Property<string>("Product_Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProductTypeId");
 
@@ -389,16 +394,10 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProductId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserId1")
                         .HasColumnType("int");
 
                     b.Property<int>("Value")
@@ -408,13 +407,9 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("ProductId1");
-
                     b.HasIndex("SupplierId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("Ratings");
                 });
@@ -450,33 +445,32 @@ namespace UNITEE_BACKEND.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BIR")
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CityPermit")
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -485,33 +479,36 @@ namespace UNITEE_BACKEND.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("RatingId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
                     b.Property<string>("SchoolPermit")
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShopName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudyLoad")
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("RatingId");
 
                     b.ToTable("Users");
 
@@ -519,18 +516,17 @@ namespace UNITEE_BACKEND.Migrations
                         new
                         {
                             Id = 20163482,
-                            Address = "",
+                            Address = "123 Main Street",
+                            DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@gmail.com",
                             FirstName = "Admin",
-                            Gender = "",
                             Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
                             IsActive = true,
                             IsValidate = true,
                             LastName = "Admin",
-                            Password = "123456",
+                            Password = "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=",
                             PhoneNumber = "639199431060",
-                            Role = 3,
-                            ShopName = ""
+                            Role = 3
                         });
                 });
 
@@ -639,9 +635,16 @@ namespace UNITEE_BACKEND.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("UNITEE_BACKEND.Entities.Rating", "Rating")
+                        .WithMany()
+                        .HasForeignKey("RatingId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Department");
 
                     b.Navigation("ProductType");
+
+                    b.Navigation("Rating");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Rating", b =>
@@ -651,10 +654,6 @@ namespace UNITEE_BACKEND.Migrations
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("UNITEE_BACKEND.Entities.Product", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("ProductId1");
 
                     b.HasOne("UNITEE_BACKEND.Entities.User", "Supplier")
                         .WithMany()
@@ -667,10 +666,6 @@ namespace UNITEE_BACKEND.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.HasOne("UNITEE_BACKEND.Entities.User", null)
-                        .WithMany("SupplierRatings")
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("Product");
 
@@ -696,7 +691,14 @@ namespace UNITEE_BACKEND.Migrations
                         .WithMany()
                         .HasForeignKey("DepartmentId");
 
+                    b.HasOne("UNITEE_BACKEND.Entities.Rating", "Rating")
+                        .WithMany()
+                        .HasForeignKey("RatingId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Department");
+
+                    b.Navigation("Rating");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Cart", b =>
@@ -713,16 +715,12 @@ namespace UNITEE_BACKEND.Migrations
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>
                 {
-                    b.Navigation("Ratings");
-
                     b.Navigation("Sizes");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.User", b =>
                 {
                     b.Navigation("Carts");
-
-                    b.Navigation("SupplierRatings");
                 });
 #pragma warning restore 612, 618
         }

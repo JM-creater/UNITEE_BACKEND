@@ -1,9 +1,11 @@
-﻿using UNITEE_BACKEND.Enum;
+﻿using System.ComponentModel.DataAnnotations;
+using UNITEE_BACKEND.Enum;
 
 namespace UNITEE_BACKEND.Entities
 {
     public class Order
     {
+        [Key]
         public int Id { get; set; }
         public int UserId { get; set; }
         public virtual User User { get; set; }
