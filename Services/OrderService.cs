@@ -39,8 +39,6 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<List<Order>> GetAllByUserId(int id)
             => await context.Orders
-                            .Include(u => u.User)
-                                .ThenInclude(sr => sr.SupplierRatings)
                             .Include(u => u.Cart)
                                 .ThenInclude(s => s.Supplier)
                             .Include(u => u.Cart)
@@ -50,11 +48,8 @@ namespace UNITEE_BACKEND.Services
                             .Include(u => u.Cart)
                                 .ThenInclude(i => i.Items)
                                     .ThenInclude(p => p.Product)
-                                        .ThenInclude(r => r.Ratings)
-                                            .ThenInclude(rating => rating.User)
                             .Include(u => u.Cart)
                                 .ThenInclude(u => u.Supplier)
-                                    .ThenInclude(u => u.SupplierRatings)
                             .Where(o => o.UserId == id)
                             .OrderByDescending(o => o.DateCreated)
                             .ToListAsync();
@@ -93,15 +88,6 @@ namespace UNITEE_BACKEND.Services
         //        .OrderByDescending(o => o.DateCreated)
         //        .ToListAsync();
         //}
-
-
-        public IEnumerable<Order> GetAllTest()
-        {
-            var order = context.Orders.Include(o => o.User).ThenInclude(o => o.SupplierRatings).AsEnumerable();
-
-            return order;
-        }
-
 
         public async Task<List<Order>> GetAllBySupplierId(int supplierId)
         {
@@ -210,7 +196,7 @@ namespace UNITEE_BACKEND.Services
 
                 await context.SaveChangesAsync();
 
-                BackgroundJob.Schedule(() => UpdateOrderStatusAndNotify(order.Id, notification.Id), TimeSpan.FromSeconds(5));
+                BackgroundJob.Schedule(() => UpdateOrderStatusAndNotify(order.Id, notification.Id), TimeSpan.FromSeconds(2));
 
                 return order;
             }
@@ -227,7 +213,7 @@ namespace UNITEE_BACKEND.Services
 
         public async Task UpdateOrderStatusAndNotify(int orderId, int id)
         {
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(2));
             UpdateOrderStatusToPending(orderId, id);
         }
 
@@ -515,7 +501,8 @@ namespace UNITEE_BACKEND.Services
                     throw new InvalidOperationException("Only orders with 'Approved' status can be approved");
                 }
 
-                var pickUpDate = DateTime.Now.AddDays(5);
+                DateTime pickUpDate = DateTime.Now.AddDays(5);
+                string formattedDate = pickUpDate.ToString("MM/dd/yyyy");
 
                 order.Status = Status.ForPickUp;
 
@@ -527,7 +514,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingNotification != null)
                 {
-                    existingNotification.Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {pickUpDate:d}.";
+                    existingNotification.Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on ${formattedDate}.";
                     existingNotification.IsRead = false;
                 }
                 else
@@ -536,7 +523,7 @@ namespace UNITEE_BACKEND.Services
                     {
                         UserId = order.UserId,
                         OrderId = order.Id,
-                        Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {pickUpDate:d}.",
+                        Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {formattedDate}.",
                         DateCreated = DateTime.Now,
                         IsRead = false
                     };

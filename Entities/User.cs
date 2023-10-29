@@ -8,46 +8,28 @@ namespace UNITEE_BACKEND.Entities
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
-        [ForeignKey("DepartmentId")]
         public int? DepartmentId { get; set; }
         public virtual Department? Department { get; set; }
-        [Required]
-        [Column(TypeName = "nvarchar(250)")]
-        public string FirstName { get; set; } = "";
-        [Required]
-        [Column(TypeName = "nvarchar(250)")]
-        public string LastName { get; set; } = "";
-        [Required]
-        [Column(TypeName = "nvarchar(250)")]
-        public string Password { get; set; } = "";
-        [Required]
-        [Column(TypeName = "nvarchar(250)")]
-        public string Email { get; set; } = "";
-        [Required]
-        [Column(TypeName = "nvarchar(50)")]
-        public string PhoneNumber { get; set; } = "";
-        [Column(TypeName = "nvarchar(10)")]
-        public string Gender { get; set; } = "";
-        [Column(TypeName = "nvarchar(250)")]
-        public string ShopName { get; set; } = "";
-        [Column(TypeName = "nvarchar(250)")]
-        public string Address { get; set; } = "";
-        [Required]
-        [Column(TypeName = "nvarchar(1000)")]
+        public int? RatingId { get; set; }
+        public virtual Rating Rating { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string Password { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; } 
+        public string? Gender { get; set; } 
+        public string? ShopName { get; set; } 
+        public string? Address { get; set; }
         public string? Image { get; set; }
-        [Column(TypeName = "nvarchar(1000)")]
         public string? StudyLoad { get; set; }
-        [Column(TypeName = "nvarchar(1000)")]
         public string? BIR { get; set; }
-        [Column(TypeName = "nvarchar(1000)")]
         public string? CityPermit { get; set; }
-        [Column(TypeName = "nvarchar(1000)")]
         public string? SchoolPermit { get; set; }
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; }
         public int Role { get; set; }
-        public bool IsValidate { get; set; } = false;
+        public bool IsValidate { get; set; }
+        public DateTime DateCreated { get; set; }
 
         public ICollection<Cart> Carts { get; set; } = new List<Cart>();
-        public ICollection<Rating> SupplierRatings { get; set; } = new List<Rating>();
     }
 }

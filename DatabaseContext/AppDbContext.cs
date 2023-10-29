@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Drawing;
 using UNITEE_BACKEND.Entities;
+using UNITEE_BACKEND.Models.Security;
 
 namespace UNITEE_BACKEND.DatabaseContext
 {
@@ -133,13 +134,14 @@ namespace UNITEE_BACKEND.DatabaseContext
                     Id = 20163482,
                     FirstName = "Admin",
                     LastName = "Admin",
-                    Password = "123456",
+                    Password = PasswordEncryptionService.EncryptPassword("123456"),
                     Email = "admin@gmail.com",
                     PhoneNumber = "639199431060",
                     Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
                     IsActive = true,
                     IsValidate = true,
-                    Role = 3
+                    Role = 3,
+                    Address = "123 Main Street"
                 }
                 );
 
@@ -191,6 +193,18 @@ namespace UNITEE_BACKEND.DatabaseContext
                 .HasOne(r => r.Product)
                 .WithMany()
                 .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Rating)
+                .WithMany()
+                .HasForeignKey(u => u.RatingId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Product>()
+                .HasOne(u => u.Rating)
+                .WithMany()
+                .HasForeignKey(u => u.RatingId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

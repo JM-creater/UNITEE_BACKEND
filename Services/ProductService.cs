@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
@@ -70,6 +71,28 @@ namespace UNITEE_BACKEND.Services
             }
 
             return Path.Combine("ProductImages", fileName);
+        }
+
+        public async Task<IEnumerable<Product>> RecommendProducts(string description, string size, string departmentName, string productType, string productName)
+        {
+            try
+            {
+                var products = await context.Products
+                                    .Include(p => p.Sizes)
+                                    .Include(p => p.Department)
+                                    .Include(p => p.ProductType)
+                                    .Where(p => p.Description.Contains(description) &&
+                                                p.Sizes.Any(s => s.Size == size) &&
+                                                p.Department.Department_Name == departmentName &&
+                                                p.ProductType.Product_Type == productType && 
+                                                p.ProductName == productName)
+                                    .ToListAsync();
+                return products;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
         }
 
         public IEnumerable<Product> GetAll()

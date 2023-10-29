@@ -4,6 +4,7 @@ using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.Request;
+using UNITEE_BACKEND.Models.Security;
 
 namespace UNITEE_BACKEND.Services
 {
@@ -45,12 +46,13 @@ namespace UNITEE_BACKEND.Services
                 var imageBir = await SaveBIR(request.BIR);
                 var imageCityPermit = await SaveCityPermit(request.CityPermit);
                 var imageSchoolPermit = await SaveSchoolPermit(request.SchoolPermit);
+                var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
 
                 var newSupplier = new User
                 {
                     Id = request.Id,
                     Email = request.Email,
-                    Password = request.Password,
+                    Password = encryptedPassword,
                     PhoneNumber = request.PhoneNumber,
                     ShopName = request.ShopName,
                     Address = request.Address,
@@ -58,7 +60,8 @@ namespace UNITEE_BACKEND.Services
                     BIR = imageBir,
                     CityPermit = imageCityPermit,
                     SchoolPermit = imageSchoolPermit,
-                    Role = (int)UserRole.Supplier
+                    Role = (int)UserRole.Supplier,
+                    IsActive = false
                 };
 
                 await context.Users.AddAsync(newSupplier);

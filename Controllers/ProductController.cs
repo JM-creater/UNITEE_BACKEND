@@ -36,6 +36,21 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpGet("recommender")]
+        public async Task<IActionResult> GetRecommendProducts(string description, string size, string departmentName, string productType, string productName)
+        {
+            try
+            {
+                var products = await productService.RecommendProducts(description, size, departmentName, productType, productName);
+
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet]
         public IActionResult GetAllProduct()
         {
