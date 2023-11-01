@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
 using System.Security.Claims;
@@ -37,7 +38,7 @@ namespace UNITEE_BACKEND.Services
 
         public IEnumerable<User> GetAllSuppliers()
         {
-            return context.Users.Where(u => u.Role == (int)UserRole.Supplier).AsEnumerable();
+            return context.Users.Where(u => u.Role == (int)UserRole.Supplier).OrderByDescending(u => u.DateCreated).AsEnumerable();
         }
 
         public IEnumerable<User> GetAllSuppliersProducts(int departmentId)
@@ -67,7 +68,7 @@ namespace UNITEE_BACKEND.Services
 
         public IEnumerable<User> GetAllCustomers()
         {
-            return context.Users.Where(c => c.Role == (int)UserRole.Customer).AsEnumerable();
+            return context.Users.Where(c => c.Role == (int)UserRole.Customer).OrderByDescending(u => u.DateCreated).AsEnumerable();
         }
 
         public async Task<User> GetCurrentUser()
@@ -104,7 +105,8 @@ namespace UNITEE_BACKEND.Services
                 Image = imagePath,
                 StudyLoad = studyLoadPath,
                 Role = (int)UserRole.Customer,
-                IsActive = false
+                IsActive = false,
+                DateCreated = DateTime.UtcNow
             };
 
             await context.Users.AddAsync(newUser);
@@ -206,10 +208,11 @@ namespace UNITEE_BACKEND.Services
                 if (userExist == null)
                     throw new Exception("User not Found");
 
-                if (userExist.Role != (int)UserRole.Supplier && userExist.Role != (int)UserRole.Customer)
-                    throw new Exception("The provided ID does not correspond to a supplier or a customer");
+                if (userExist.Role != (int)UserRole.Customer)
+                    throw new Exception("The provided ID does not correspond to a customer");
 
                 userExist.IsValidate = request.IsValidate;
+                userExist.IsActive = request.IsActive;
 
                 await this.Save();
 
@@ -218,6 +221,56 @@ namespace UNITEE_BACKEND.Services
             catch (Exception e)
             {
                 throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<User> ValidateSupplier(int id, ValidateUserRequest request)
+        {
+            try
+            {
+                var userExist = await context.Users.Where(a => a.Id == id).FirstOrDefaultAsync();
+
+                if (userExist == null)
+                    throw new Exception("User not Found");
+
+                if (userExist.Role != (int)UserRole.Supplier)
+                    throw new Exception("The provided ID does not correspond to a supplier");
+
+                userExist.IsValidate = request.IsValidate;
+                userExist.IsActive = request.IsActive;
+
+                await this.Save();
+
+                return userExist;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<User> UpdatePassword(int id, UpdatePasswordRequest request)
+        {
+            try
+            {
+                var user = await context.Users
+                                        .Where(u => u.Id == id)
+                                        .FirstOrDefaultAsync();
+                if (user == null)
+                    throw new InvalidOperationException("User not found");
+
+                var updatePassword = PasswordEncryptionService.EncryptPassword(request.Password);
+
+                user.Password = updatePassword;
+
+                context.Users.Update(user);
+                await context.SaveChangesAsync();
+
+                return user;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
             }
         }
 
