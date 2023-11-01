@@ -140,7 +140,7 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpPut("validate/{id}")]
+        [HttpPut("validateCustomer/{id}")]
         public async Task<IActionResult> ValidateUserAccount([FromRoute] int id, [FromBody] ValidateUserRequest request)
         {
             try
@@ -151,6 +151,35 @@ namespace UNITEE_BACKEND.Controllers
             catch (Exception e)
             {
                 throw new Exception(e.Message);
+            }
+        }
+
+        [HttpPut("validateSupplier/{id}")]
+        public async Task<IActionResult> ValidateSupplierAccount([FromRoute] int id, [FromBody] ValidateUserRequest request)
+        {
+            try
+            {
+                var user = await usersService.ValidateSupplier(id, request);
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        [HttpPut("updateCustomerPassword/{id}")]
+        public async Task<IActionResult> UpdateSupplierPassword(int id, [FromBody] UpdatePasswordRequest request)
+        {
+            try
+            {
+                var user = await usersService.UpdatePassword(id, request);
+
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
 

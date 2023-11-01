@@ -33,12 +33,27 @@ namespace UNITEE_BACKEND.Controllers
 
 
         [HttpPost("registerSupplier")]
-        public async Task<IActionResult> AddSupplier([FromForm] SupplierRequest request)
+        public async Task<IActionResult> RegisterSupplierAccount([FromForm] SupplierRequest request)
         {
             try
             {
-                var newSupplier = await supplierService.AddSupplier(request);
+                var newSupplier = await supplierService.RegisterSupplier(request);
                 return Ok(newSupplier);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("updatePassword/{id}")]
+        public async Task<IActionResult> UpdateSupplierPassword(int id, [FromBody] UpdatePasswordRequest request)
+        {
+            try
+            {
+                var supplier = await supplierService.UpdatePassword(id, request);
+
+                return Ok(supplier);
             }
             catch (Exception e)
             {
@@ -60,20 +75,6 @@ namespace UNITEE_BACKEND.Controllers
 
                 var updateSupplier = await supplierService.UpdateSupplier(id, request);
                 return Ok(updateSupplier);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [HttpPut("activate/{id}")]
-        public async Task<IActionResult> Activate(int id, [FromBody] bool isActive)
-        {
-            try
-            {
-                var activateSupplier = await supplierService.ActivateSupplier(id, isActive);
-                return Ok(activateSupplier);
             }
             catch (Exception e)
             {

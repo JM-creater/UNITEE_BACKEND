@@ -31,7 +31,7 @@ namespace UNITEE_BACKEND.Services
             return supplier;
         }
 
-        public async Task<User> AddSupplier(SupplierRequest request)
+        public async Task<User> RegisterSupplier(SupplierRequest request)
         {
             try
             {
@@ -61,7 +61,8 @@ namespace UNITEE_BACKEND.Services
                     CityPermit = imageCityPermit,
                     SchoolPermit = imageSchoolPermit,
                     Role = (int)UserRole.Supplier,
-                    IsActive = false
+                    IsActive = false,
+                    DateCreated = DateTime.UtcNow
                 };
 
                 await context.Users.AddAsync(newSupplier);
@@ -168,6 +169,31 @@ namespace UNITEE_BACKEND.Services
             return Path.Combine("SchoolPermit", fileName);
         }
 
+        public async Task<User> UpdatePassword(int id, UpdatePasswordRequest request)
+        {
+            try
+            {
+                var supplier = await context.Users
+                                            .Where(u => u.Id == id)
+                                            .FirstOrDefaultAsync();
+                if (supplier == null)
+                    throw new InvalidOperationException("Supplier not found");
+
+                var updatedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
+
+                supplier.Password = updatedPassword;
+
+                context.Users.Update(supplier);
+                await context.SaveChangesAsync();
+
+                return supplier;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
         public async Task<User> UpdateSupplier(int id, SupplierRequest request)
         {
             var existingSupplier = await context.Users.FirstOrDefaultAsync(a => a.Id == id);
@@ -196,33 +222,6 @@ namespace UNITEE_BACKEND.Services
             await this.Save();
 
             return existingSupplier;
-        }
-
-        public async Task<User> ActivateSupplier(int id, bool isActive)
-        {
-            var existingSupplier = await context.Users.FindAsync(id);
-
-            if (existingSupplier == null)
-            {
-                throw new Exception("Supplier not found");
-            }
-
-            if (existingSupplier.Role != (int)UserRole.Supplier)
-            {
-                throw new Exception("The provided ID does not correspond to a supplier");
-            }
-
-            existingSupplier.IsActive = isActive;
-            await Save();
-
-            return existingSupplier;
-        }
-
-        public async Task<User> Save(User request)
-        {
-            var e = await context.Users.AddAsync(request);
-            await this.Save();
-            return e.Entity;
         }
 
         async Task<int> Save()

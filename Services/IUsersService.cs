@@ -20,5 +20,7 @@ namespace UNITEE_BACKEND.Services
         public Task<User> Register(RegisterRequest request);
         public Task<(User user, UserRole role)> Login(LoginRequest request);
         public Task<User> ValidateUser(int id, ValidateUserRequest request);
+        public Task<User> ValidateSupplier(int id, ValidateUserRequest request);
+        public Task<User> UpdatePassword(int id, UpdatePasswordRequest request);
     }
 }
