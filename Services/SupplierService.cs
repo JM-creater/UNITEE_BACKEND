@@ -13,10 +13,10 @@ namespace UNITEE_BACKEND.Services
         private readonly AppDbContext context;
         private readonly IUsersService usersService;
 
-        public SupplierService(AppDbContext dbcontext, IUsersService usersService) 
+        public SupplierService(AppDbContext dbcontext, IUsersService _usersService) 
         {
-            this.context = dbcontext;
-            this.usersService = usersService;
+            context = dbcontext;
+            usersService = _usersService;
         }
 
         public async Task<User> GetSupplierById(int id)
@@ -36,10 +36,11 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var existingUser = await context.Users
-                .SingleOrDefaultAsync(u => u.Email == request.Email || u.Id == request.Id);
+                                                .Where(u => u.Email == request.Email || u.Id == request.Id)
+                                                .SingleOrDefaultAsync();
                 if (existingUser != null)
                 {
-                    throw new Exception("A supplier with this email or user id already exists.");
+                    throw new InvalidOperationException("A supplier with this email or user id already exists.");
                 }
 
                 var imagePath = await SaveImage(request.Image);
@@ -72,8 +73,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 

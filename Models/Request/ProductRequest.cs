@@ -9,6 +9,7 @@ namespace UNITEE_BACKEND.Models.Request
         public int SupplierId { get; set; }
         public int ProductTypeId { get; set; }
         public int DepartmentId { get; set; }
+        public List<int> DepartmentIds { get; set; }
         public string ProductName { get; set; } = "";
         public string Description { get; set; } = "";
         public string Category { get; set; } = "";

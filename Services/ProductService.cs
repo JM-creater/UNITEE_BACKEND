@@ -25,13 +25,21 @@ namespace UNITEE_BACKEND.Services
         {
             try
             {
+                var existingProduct = await context.Products
+                                                   .Where(p => p.ProductName == request.ProductName)
+                                                   .FirstOrDefaultAsync();
+
+                if (existingProduct != null)
+                {
+                    throw new ArgumentException("Product already exists");
+                }
+
                 var imagePath = await ProductImage(request.Image);
 
                 var newProduct = new Product
                 {
                     SupplierId = request.SupplierId,
                     ProductTypeId = request.ProductTypeId,
-                    DepartmentId = request.DepartmentId,
                     ProductName = request.ProductName,
                     Description = request.Description,
                     Category = request.Category,
@@ -40,14 +48,27 @@ namespace UNITEE_BACKEND.Services
                     IsActive = true
                 };
 
+                foreach (var departmentId in request.DepartmentIds)
+                {
+                    var department = await context.Departments.FindAsync(departmentId);
+                    if (department != null)
+                    {
+                        newProduct.ProductDepartments.Add(new ProductDepartment { Department = department });
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+
                 await context.Products.AddAsync(newProduct);
-                await this.Save();
+                await context.SaveChangesAsync();
 
                 return newProduct.ProductId;
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -79,11 +100,9 @@ namespace UNITEE_BACKEND.Services
             {
                 var products = await context.Products
                                     .Include(p => p.Sizes)
-                                    .Include(p => p.Department)
                                     .Include(p => p.ProductType)
                                     .Where(p => p.Description.Contains(description) &&
                                                 p.Sizes.Any(s => s.Size == size) &&
-                                                p.Department.Department_Name == departmentName &&
                                                 p.ProductType.Product_Type == productType && 
                                                 p.ProductName == productName)
                                     .ToListAsync();
@@ -117,9 +136,12 @@ namespace UNITEE_BACKEND.Services
         public IEnumerable<Product> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
         {
             return context.Products
-                        .Include(s => s.Sizes)
-                        .Where(p => p.SupplierId == shopId && p.DepartmentId == departmentId)
-                        .AsEnumerable();
+                  .Include(p => p.ProductDepartments)
+                      .ThenInclude(pd => pd.Department)
+                  .Include(p => p.Sizes)
+                  .Where(p => p.SupplierId == shopId &&
+                              p.ProductDepartments.Any(pd => pd.DepartmentId == departmentId))
+                  .ToList(); 
         }
 
         public async Task<Product> GetById(int productId)
@@ -147,6 +169,8 @@ namespace UNITEE_BACKEND.Services
             {
                 var products = await context.Products
                                             .Include(product => product.Sizes)
+                                            .Include(product => product.ProductDepartments)
+                                                .ThenInclude(pd => pd.Department)
                                             .Where(product => product.SupplierId == supplierId)
                                             .ToListAsync();
 
@@ -156,7 +180,6 @@ namespace UNITEE_BACKEND.Services
                     ProductName = product.ProductName,
                     ProductTypeId = product.ProductTypeId,
                     Description = product.Description,
-                    DepartmentId = product.DepartmentId,
                     Category = product.Category,
                     Price = product.Price,
                     Image = product.Image,
@@ -166,14 +189,19 @@ namespace UNITEE_BACKEND.Services
                         Id = size.Id,
                         Size = size.Size,
                         Quantity = size.Quantity
-                    })
+                    }).ToList(),
+                    Departments = product.ProductDepartments.Select(pd => new DepartmentDto
+                    {
+                        DepartmentId = pd.DepartmentId,
+                        Department_Name = pd.Department.Department_Name
+                    }).ToList()
                 }).ToList();
 
                 return productDto;
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -183,7 +211,6 @@ namespace UNITEE_BACKEND.Services
             {
                 var products = await context.Products
                                             .Include(a => a.Sizes)
-                                            .Where(p => p.DepartmentId == departmentId)
                                             .ToListAsync();
 
                 return products;
@@ -196,49 +223,80 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<Product> UpdateProduct(int productId, ProductUpdateRequest request)
         {
-            var existingProduct = await context.Products
-                                               .Include(p => p.Sizes) 
-                                               .FirstOrDefaultAsync(p => p.ProductId == productId);
-
-            if (existingProduct == null)
+            try
             {
-                throw new Exception("Product not found");
-            }
+                var existingProduct = await context.Products
+                                                  .Include(p => p.Sizes)
+                                                  .Include(p => p.ProductDepartments)
+                                                  .FirstOrDefaultAsync(p => p.ProductId == productId);
 
-            if (request.Image != null)
-            {
-                existingProduct.Image = await ProductImage(request.Image);
-            }
-
-            existingProduct.ProductTypeId = request.ProductTypeId;
-            existingProduct.DepartmentId = request.DepartmentId;
-            existingProduct.ProductName = request.ProductName;
-            existingProduct.Description = request.Description;
-            existingProduct.Category = request.Category;
-            existingProduct.Price = request.Price;
-
-            // Update sizes
-            foreach (var sizeQuantityDto in request.Sizes)
-            {
-                var existingSize = existingProduct.Sizes.FirstOrDefault(s => s.Size == sizeQuantityDto.Size);
-
-                if (existingSize != null)
+                if (existingProduct == null)
                 {
-                    existingSize.Quantity = sizeQuantityDto.Quantity;
+                    throw new Exception("Product not found");
                 }
-                else
+
+                if (request.Image != null)
                 {
-                    existingProduct.Sizes.Add(new SizeQuantity
+                    existingProduct.Image = await ProductImage(request.Image); 
+                }
+
+                existingProduct.ProductTypeId = request.ProductTypeId;
+                existingProduct.ProductName = request.ProductName;
+                existingProduct.Description = request.Description;
+                existingProduct.Category = request.Category;
+                existingProduct.Price = request.Price;
+
+                // Update sizes
+                foreach (var sizeQuantityDto in request.Sizes)
+                {
+                    var existingSize = existingProduct.Sizes.FirstOrDefault(s => s.Size == sizeQuantityDto.Size);
+
+                    if (existingSize != null)
                     {
-                        Size = sizeQuantityDto.Size,
-                        Quantity = sizeQuantityDto.Quantity
-                    });
+                        existingSize.Quantity = sizeQuantityDto.Quantity;
+                    }
+                    else
+                    {
+                        existingProduct.Sizes.Add(new SizeQuantity
+                        {
+                            Size = sizeQuantityDto.Size,
+                            Quantity = sizeQuantityDto.Quantity
+                        });
+                    }
                 }
+
+                // Remove Departments
+                var departmentsToRemove = existingProduct.ProductDepartments
+                                                        .Where(pd => !request.DepartmentIds.Contains(pd.DepartmentId))
+                                                        .ToList();
+
+                foreach (var toRemove in departmentsToRemove)
+                {
+                    existingProduct.ProductDepartments.Remove(toRemove);
+                    context.ProductDepartments.Remove(toRemove); 
+                }
+
+                // Update Departments
+                foreach (var departmentId in request.DepartmentIds)
+                {
+                    if (!existingProduct.ProductDepartments.Any(pd => pd.DepartmentId == departmentId))
+                    {
+                        existingProduct.ProductDepartments.Add(new ProductDepartment
+                        {
+                            ProductId = existingProduct.ProductId,
+                            DepartmentId = departmentId
+                        });
+                    }
+                }
+
+                await context.SaveChangesAsync();
+
+                return existingProduct;
             }
-
-            await this.Save();
-
-            return existingProduct;
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<Product> UpdateActivationStatus(int productId)

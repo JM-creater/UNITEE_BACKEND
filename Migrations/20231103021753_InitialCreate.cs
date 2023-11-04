@@ -137,12 +137,28 @@ namespace UNITEE_BACKEND.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductDepartments",
+                columns: table => new
+                {
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductDepartments", x => new { x.ProductId, x.DepartmentId });
+                    table.ForeignKey(
+                        name: "FK_ProductDepartments_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "DepartmentId");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
                     ProductId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DepartmentId = table.Column<int>(type: "int", nullable: false),
                     SupplierId = table.Column<int>(type: "int", nullable: false),
                     ProductTypeId = table.Column<int>(type: "int", nullable: false),
                     RatingId = table.Column<int>(type: "int", nullable: true),
@@ -156,12 +172,6 @@ namespace UNITEE_BACKEND.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.ProductId);
-                    table.ForeignKey(
-                        name: "FK_Products_Departments_DepartmentId",
-                        column: x => x.DepartmentId,
-                        principalTable: "Departments",
-                        principalColumn: "DepartmentId",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Products_ProductTypes_ProductTypeId",
                         column: x => x.ProductTypeId,
@@ -340,8 +350,8 @@ namespace UNITEE_BACKEND.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_DepartmentId",
-                table: "Products",
+                name: "IX_ProductDepartments_DepartmentId",
+                table: "ProductDepartments",
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
@@ -353,6 +363,11 @@ namespace UNITEE_BACKEND.Migrations
                 name: "IX_Products_RatingId",
                 table: "Products",
                 column: "RatingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_SupplierId",
+                table: "Products",
+                column: "SupplierId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Ratings_ProductId",
@@ -454,11 +469,25 @@ namespace UNITEE_BACKEND.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_ProductDepartments_Products_ProductId",
+                table: "ProductDepartments",
+                column: "ProductId",
+                principalTable: "Products",
+                principalColumn: "ProductId");
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_Products_Ratings_RatingId",
                 table: "Products",
                 column: "RatingId",
                 principalTable: "Ratings",
                 principalColumn: "RatingId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Products_Users_SupplierId",
+                table: "Products",
+                column: "SupplierId",
+                principalTable: "Users",
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Ratings_Users_SupplierId",
@@ -498,6 +527,9 @@ namespace UNITEE_BACKEND.Migrations
 
             migrationBuilder.DropTable(
                 name: "OrderItems");
+
+            migrationBuilder.DropTable(
+                name: "ProductDepartments");
 
             migrationBuilder.DropTable(
                 name: "Orders");
