@@ -10,9 +10,8 @@ namespace UNITEE_BACKEND.Entities
     {
         [Key]
         public int ProductId { get; set; }
-        public int DepartmentId { get; set; }
-        public virtual Department Department { get; set; }
         public int SupplierId { get; set; }
+        public virtual User Supplier { get; set; }
         public int ProductTypeId { get; set; }
         public virtual ProductType ProductType { get; set; }
         public int? RatingId { get; set; }
@@ -26,5 +25,6 @@ namespace UNITEE_BACKEND.Entities
 
         // Relation
         public ICollection<SizeQuantity> Sizes { get; set; } = new List<SizeQuantity>();
+        public ICollection<ProductDepartment> ProductDepartments { get; set; } = new List<ProductDepartment>();
     }
 }

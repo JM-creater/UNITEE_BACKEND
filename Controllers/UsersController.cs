@@ -104,7 +104,6 @@ namespace UNITEE_BACKEND.Controllers
             return Ok(suppliers);
         }
 
-
         [HttpGet("UserDepartment/{userId}")]
         public IActionResult GetUserDepartment(int userId)
         {
@@ -124,7 +123,6 @@ namespace UNITEE_BACKEND.Controllers
             var suppliers = usersService.GetAllSuppliersProducts(departmentId);
             return Ok(suppliers);
         }
-
 
         [HttpPut]
         public async Task<IActionResult> Update(User request)

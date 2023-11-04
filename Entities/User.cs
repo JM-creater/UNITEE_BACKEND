@@ -31,5 +31,7 @@ namespace UNITEE_BACKEND.Entities
         public DateTime DateCreated { get; set; }
 
         public ICollection<Cart> Carts { get; set; } = new List<Cart>();
+        public ICollection<Product> Products { get; set; } = new List<Product>();
+
     }
 }

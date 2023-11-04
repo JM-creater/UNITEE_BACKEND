@@ -19,6 +19,7 @@ namespace UNITEE_BACKEND.DatabaseContext
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Rating> Ratings { get; set; }
+        public DbSet<ProductDepartment> ProductDepartments { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
         {
             
@@ -144,6 +145,27 @@ namespace UNITEE_BACKEND.DatabaseContext
                     Address = "123 Main Street"
                 }
                 );
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Supplier)
+                .WithMany(u => u.Products)
+                .HasForeignKey(p => p.SupplierId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.ProductDepartments)
+                .WithOne(pd => pd.Product)
+                .HasForeignKey(pd => pd.ProductId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Department>()
+                .HasMany(d => d.ProductDepartments)
+                .WithOne(pd => pd.Department)
+                .HasForeignKey(pd => pd.DepartmentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ProductDepartment>()
+                .HasKey(pd => new { pd.ProductId, pd.DepartmentId });
 
             modelBuilder.Entity<CartItem>()
                 .HasOne(c => c.SizeQuantity)

@@ -12,7 +12,7 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231029194630_InitialCreate")]
+    [Migration("20231103021753_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -296,9 +296,6 @@ namespace UNITEE_BACKEND.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -327,13 +324,28 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.HasIndex("DepartmentId");
-
                     b.HasIndex("ProductTypeId");
 
                     b.HasIndex("RatingId");
 
+                    b.HasIndex("SupplierId");
+
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.ProductDepartment", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "DepartmentId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("ProductDepartments");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.ProductType", b =>
@@ -623,12 +635,6 @@ namespace UNITEE_BACKEND.Migrations
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>
                 {
-                    b.HasOne("UNITEE_BACKEND.Entities.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("UNITEE_BACKEND.Entities.ProductType", "ProductType")
                         .WithMany()
                         .HasForeignKey("ProductTypeId")
@@ -640,11 +646,36 @@ namespace UNITEE_BACKEND.Migrations
                         .HasForeignKey("RatingId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Navigation("Department");
+                    b.HasOne("UNITEE_BACKEND.Entities.User", "Supplier")
+                        .WithMany("Products")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("ProductType");
 
                     b.Navigation("Rating");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.ProductDepartment", b =>
+                {
+                    b.HasOne("UNITEE_BACKEND.Entities.Department", "Department")
+                        .WithMany("ProductDepartments")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UNITEE_BACKEND.Entities.Product", "Product")
+                        .WithMany("ProductDepartments")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Rating", b =>
@@ -706,6 +737,11 @@ namespace UNITEE_BACKEND.Migrations
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("UNITEE_BACKEND.Entities.Department", b =>
+                {
+                    b.Navigation("ProductDepartments");
+                });
+
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Order", b =>
                 {
                     b.Navigation("Notifications");
@@ -715,12 +751,16 @@ namespace UNITEE_BACKEND.Migrations
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Product", b =>
                 {
+                    b.Navigation("ProductDepartments");
+
                     b.Navigation("Sizes");
                 });
 
             modelBuilder.Entity("UNITEE_BACKEND.Entities.User", b =>
                 {
                     b.Navigation("Carts");
+
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

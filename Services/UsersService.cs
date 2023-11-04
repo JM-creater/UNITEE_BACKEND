@@ -38,16 +38,22 @@ namespace UNITEE_BACKEND.Services
 
         public IEnumerable<User> GetAllSuppliers()
         {
-            return context.Users.Where(u => u.Role == (int)UserRole.Supplier).OrderByDescending(u => u.DateCreated).AsEnumerable();
+            return context.Users
+                          .Include(u => u.Products)
+                            .ThenInclude(u => u.Sizes)
+                          .Where(u => u.Role == (int)UserRole.Supplier)
+                          .OrderByDescending(u => u.DateCreated)
+                          .AsEnumerable();
         }
+
 
         public IEnumerable<User> GetAllSuppliersProducts(int departmentId)
         {
-            var supplierIdsWithProductsInDepartment = context.Products
-                                                             .Where(p => p.DepartmentId == departmentId)
-                                                             .Select(p => p.SupplierId)
-                                                             .Distinct()
-                                                             .ToList();
+            var supplierIdsWithProductsInDepartment = context.ProductDepartments
+                                                            .Where(pd => pd.DepartmentId == departmentId)
+                                                            .Select(pd => pd.Product.SupplierId)
+                                                            .Distinct()
+                                                            .ToList();
 
             return context.Users
                          .Where(u => u.Role == (int)UserRole.Supplier && supplierIdsWithProductsInDepartment.Contains(u.Id))
@@ -68,7 +74,10 @@ namespace UNITEE_BACKEND.Services
 
         public IEnumerable<User> GetAllCustomers()
         {
-            return context.Users.Where(c => c.Role == (int)UserRole.Customer).OrderByDescending(u => u.DateCreated).AsEnumerable();
+            return context.Users
+                          .Where(c => c.Role == (int)UserRole.Customer)
+                          .OrderByDescending(u => u.DateCreated)
+                          .AsEnumerable();
         }
 
         public async Task<User> GetCurrentUser()

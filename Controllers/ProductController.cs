@@ -28,11 +28,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var newProduct = await productService.AddProduct(request);
+
                 return Ok(newProduct);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
