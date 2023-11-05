@@ -104,12 +104,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpDelete("Delete/{productId}")]
-        public async Task<IActionResult> Delete([FromRoute] int productId)
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             try
             {
-                var result = await sizeQuantityService.DeleteSizeQuantity(productId);
+                var result = await sizeQuantityService.DeleteSizeQuantity(id);
 
                 return Ok(result);
             }
@@ -142,20 +142,6 @@ namespace UNITEE_BACKEND.Controllers
                 var sizeQuantity = await sizeQuantityService.AddSizeToProduct(productId, dto);
 
                 return CreatedAtAction(nameof(AddSizeToProduct), new { id = sizeQuantity.Id }, sizeQuantity);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [HttpDelete("{productId}/{sizeLabel}")]
-        public async Task<IActionResult> DeleteSizeFromProduct(int productId, string sizeLabel)
-        {
-            try
-            {
-                await sizeQuantityService.DeleteSizeFromProduct(productId, sizeLabel);
-                return Ok("Size deleted successfully");
             }
             catch (Exception e)
             {
