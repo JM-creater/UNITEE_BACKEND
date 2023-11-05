@@ -38,11 +38,11 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpGet("recommender")]
-        public async Task<IActionResult> GetRecommendProducts(string description, string size, string departmentName, string productType, string productName)
+        public async Task<IActionResult> GetRecommendProducts(string search)
         {
             try
             {
-                var products = await productService.RecommendProducts(description, size, departmentName, productType, productName);
+                var products = await productService.RecommendProducts(search);
 
                 return Ok(products);
             }

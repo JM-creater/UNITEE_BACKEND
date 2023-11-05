@@ -6,6 +6,7 @@ using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
+using UNITEE_BACKEND.Models.StaticClass;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace UNITEE_BACKEND.Services
@@ -94,31 +95,35 @@ namespace UNITEE_BACKEND.Services
             return Path.Combine("ProductImages", fileName);
         }
 
-        public async Task<IEnumerable<Product>> RecommendProducts(string description, string size, string departmentName, string productType, string productName)
+        public async Task<IEnumerable<Product>> RecommendProducts(string search)
         {
-            try
-            {
-                var products = await context.Products
-                                    .Include(p => p.Sizes)
-                                    .Include(p => p.ProductType)
-                                    .Where(p => p.Description.Contains(description) &&
-                                                p.Sizes.Any(s => s.Size == size) &&
-                                                p.ProductType.Product_Type == productType && 
-                                                p.ProductName == productName)
-                                    .ToListAsync();
-                return products;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
+            var searchToLower = search.ToLower();
+
+            return await context.Products
+                                .Include(p => p.Sizes)
+                                .Include(p => p.ProductDepartments).ThenInclude(pd => pd.Department)
+                                .Include(p => p.ProductType)
+                                .Include(p => p.Rating)
+                                .Where(p => p.ProductName.ToLower().Contains(searchToLower) ||
+                                            p.Description.ToLower().Contains(searchToLower) ||
+                                            p.Sizes.Any(s => s.Size.ToLower().Contains(searchToLower)) ||
+                                            p.ProductDepartments.Any(pd => pd.Department.Department_Name.ToLower().Contains(searchToLower)) ||
+                                            p.ProductType.Product_Type.ToLower().Contains(searchToLower))
+                                .OrderByDescending(p => p.Rating.Value)
+                                .Take(5)
+                                .ToListAsync();
         }
 
         public IEnumerable<Product> GetAll()
         {
             try
             {
-                var products = context.Products.Include(a => a.Sizes).AsEnumerable();
+                var products = context.Products
+                                      .Include(p => p.Supplier)
+                                      .Include(p => p.Sizes)
+                                      .Include(p => p.ProductType)
+                                      .Include(p => p.ProductDepartments)
+                                      .AsEnumerable();
 
                 return products;
             }
@@ -249,7 +254,9 @@ namespace UNITEE_BACKEND.Services
                 // Update sizes
                 foreach (var sizeQuantityDto in request.Sizes)
                 {
-                    var existingSize = existingProduct.Sizes.FirstOrDefault(s => s.Size == sizeQuantityDto.Size);
+                    var existingSize = existingProduct.Sizes
+                                                      .Where(s => s.Size == sizeQuantityDto.Size)
+                                                      .FirstOrDefault();
 
                     if (existingSize != null)
                     {

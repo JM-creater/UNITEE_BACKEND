@@ -13,10 +13,9 @@ namespace UNITEE_BACKEND.Services
         public Task<Dictionary<string, int>> GetSizeQuantitiesForProduct(int productId);
         public Task<SizeQuantity> Update(int id, UpdateSizeQuantityDto dto);
         public Task<SizeQuantity> Create(CreateSizeQuantityDto dto);
-        public Task<SizeQuantity> DeleteSizeQuantity(int productId);
         public Task<IEnumerable<GetSizeQuantityByIdDto>> GetSizesByProductId(int productId);
         public Task<SizeQuantity> AddSizeToProduct(int productId, SizeQuantityDto dto);
-        public Task<bool> DeleteSizeFromProduct(int productId, string sizeLabel);
         public Task<SizeQuantity> UpdateQuantity(int id, int productId, string size, int newQuantity);
+        public Task<SizeQuantity> DeleteSizeQuantity(int id);
     }
 }

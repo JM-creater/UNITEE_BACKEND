@@ -338,8 +338,6 @@ namespace UNITEE_BACKEND.Services
 
                 await context.SaveChangesAsync();
 
-                
-
                 order = await context.Orders
                                     .Include(u => u.User)
                                     .Include(c => c.Cart)
@@ -514,7 +512,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingNotification != null)
                 {
-                    existingNotification.Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on ${formattedDate}.";
+                    existingNotification.Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {formattedDate}.";
                     existingNotification.IsRead = false;
                 }
                 else

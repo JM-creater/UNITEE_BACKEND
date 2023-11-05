@@ -182,7 +182,8 @@ namespace UNITEE_BACKEND.DatabaseContext
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.Order)
                 .WithMany(o => o.Notifications)
-                .HasForeignKey(n => n.OrderId);
+                .HasForeignKey(n => n.OrderId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Order)

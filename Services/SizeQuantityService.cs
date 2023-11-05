@@ -124,29 +124,6 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task<SizeQuantity> DeleteSizeQuantity(int productId)
-        {
-            try
-            {
-                var sizeQuantity = await context.SizeQuantities
-                                                .Where(p => p.ProductId == productId)
-                                                .FirstOrDefaultAsync();
-
-                if (sizeQuantity == null)
-                    throw new KeyNotFoundException($"SizeQuantity with ID {productId} not found.");
-
-                context.SizeQuantities.Remove(sizeQuantity);
-                await this.Save();
-
-                return sizeQuantity;
-            }
-            catch (Exception e)
-            {
-
-                throw new Exception(e.Message);
-            }
-        }
-
         public async Task<IEnumerable<GetSizeQuantityByIdDto>> GetSizesByProductId(int productId)
         {
             try
@@ -199,28 +176,6 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-
-        public async Task<bool> DeleteSizeFromProduct(int productId, string sizeLabel)
-        {
-            try
-            {
-                var sizeQuantity = await context.SizeQuantities
-                .FirstOrDefaultAsync(a => a.ProductId == productId && a.Size == sizeLabel);
-
-                if (sizeQuantity == null)
-                    throw new Exception("Size for product not found");
-
-                context.SizeQuantities.Remove(sizeQuantity);
-                await this.Save();
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
-
         public async Task<SizeQuantity> UpdateQuantity(int id, int productId, string size, int newQuantity)
         {
             try
@@ -242,8 +197,30 @@ namespace UNITEE_BACKEND.Services
             {
                 throw new ArgumentException(e.Message);
             }
-        }   
-        
+        }
+
+        public async Task<SizeQuantity> DeleteSizeQuantity(int id)
+        {
+            try
+            {
+                var sizeQuantity = await context.SizeQuantities
+                                                .Where(p => p.Id == id)
+                                                .FirstOrDefaultAsync();
+
+                if (sizeQuantity == null)
+                    throw new InvalidOperationException("SizeQuantity not found.");
+
+                context.SizeQuantities.Remove(sizeQuantity);
+                await context.SaveChangesAsync();
+
+                return sizeQuantity;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
         public async Task<SizeQuantity> Save(SizeQuantity request)
         {
             var e = await context.SizeQuantities.AddAsync(request);
