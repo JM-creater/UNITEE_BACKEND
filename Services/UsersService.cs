@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
 using System.Security.Claims;
 using UNITEE_BACKEND.DatabaseContext;
+using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.Request;
@@ -28,7 +29,9 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<User> GetById(int id)
         {
-            var e = await context.Users.Where(a => a.Id == id).FirstOrDefaultAsync();
+            var e = await context.Users
+                                    .Include(a => a.Department)
+                                    .Where(a => a.Id == id).FirstOrDefaultAsync();
 
             if (e == null)
                 throw new Exception("User Not Found");
@@ -290,11 +293,42 @@ namespace UNITEE_BACKEND.Services
             return e.Entity;
         }
 
-        public async Task<User> Update(User request)
+        public async Task<User> Update(int id, UpdateCustomerRequest request)
         {
-            var e = context.Users.Update(request);
-            await this.Save();
-            return e.Entity;
+            var user = await context.Users.Where(e => e.Id == id).FirstOrDefaultAsync();
+
+            if(user == null)
+            {
+                throw new Exception("No User Found");
+            }
+
+            user.FirstName = request.firstName;
+            user.LastName = request.lastName;
+            user.Email = request.email;
+            user.DepartmentId = request.departmentId;
+            user.PhoneNumber = request.phoneNumber;
+            user.Gender = request.gender;
+
+            await context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<User> UpdateSupplier(int id, UpdateSupplierRequest request)
+        {
+            var supplier = await context.Users.Where(e => e.Id == id).FirstOrDefaultAsync();
+
+            if (supplier == null)
+            {
+                throw new Exception("No User Found");
+            }
+
+            supplier.ShopName = request.shopName;
+            supplier.Address = request.address;
+            supplier.Email = request.email;
+            supplier.PhoneNumber = request.phoneNumber;
+
+            await context.SaveChangesAsync();
+            return supplier;
         }
 
         public async Task<User> Delete(int id)

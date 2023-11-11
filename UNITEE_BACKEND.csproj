@@ -31,6 +31,7 @@
     <Folder Include="BIR\" />
     <Folder Include="CityPermit\" />
     <Folder Include="Images\" />
+    <Folder Include="ProofOfPayment\" />
     <Folder Include="SupplierImage\" />
     <Folder Include="StudyLoad\" />
     <Folder Include="SchoolPermit\" />

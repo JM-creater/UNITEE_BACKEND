@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UNITEE_BACKEND.DatabaseContext;
+using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
@@ -23,7 +24,7 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                if (!request.Id.HasValue && string.IsNullOrWhiteSpace(request.Email)) 
+                if (!request.Id.HasValue && string.IsNullOrWhiteSpace(request.Email))
                 {
                     return BadRequest("Provide either user ID or email for login");
                 }
@@ -124,16 +125,31 @@ namespace UNITEE_BACKEND.Controllers
             return Ok(suppliers);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update(User request)
+        [HttpPut("updateCustomer/{id}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCustomerRequest request)
         {
             try
             {
-                var e = await usersService.Update(request);
-                return Ok(e);
+                var user = await usersService.Update(id, request);
+                return Ok("Successfully Updated");
             }
             catch (Exception e)
             {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("updateSupplier/{id}")]
+        public async Task<IActionResult> UpdateSupplier([FromRoute] int id, [FromBody] UpdateSupplierRequest request)
+        {
+            try
+            {
+                var user = await usersService.UpdateSupplier(id, request);
+                return Ok("Successfully Updated");
+            }
+            catch (Exception e)
+            {
+
                 return BadRequest(e.Message);
             }
         }
