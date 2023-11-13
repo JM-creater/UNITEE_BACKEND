@@ -35,9 +35,18 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var notif = await context.Notifications
-                                         .Include(o => o.Order)
+                                         .Include(n => n.Order)
+                                            .ThenInclude(n => n.Cart)
+                                                .ThenInclude(n => n.Items)
+                                                    .ThenInclude(n => n.Product)
+                                                        .ThenInclude(n => n.Sizes)
+                                         .Include(n => n.Order)
+                                            .ThenInclude(n => n.User)
+                                         .Include(n => n.Order)
+                                            .ThenInclude(n => n.Cart)
+                                                .ThenInclude(n => n.Supplier)
                                          .Where(n => n.UserId == userId)
-                                         .OrderByDescending(o => o.DateCreated)
+                                         .OrderByDescending(n => n.DateCreated)
                                          .ToListAsync();
 
                 return notif;

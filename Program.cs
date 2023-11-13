@@ -8,6 +8,7 @@ using UNITEE_BACKEND.Models.ImageDirectory;
 using Microsoft.Extensions.Options;
 using Hangfire;
 using UNITEE_BACKEND.Models.SignalRNotification;
+using UNITEE_BACKEND.Hubs;
 
 // Variables
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,8 @@ builder.Services.AddHangfireServer();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// SignalR
+builder.Services.AddSignalR();
 
 // Repository Pattern
 builder.Services.AddScoped<IUsersService, UsersService>();
@@ -48,9 +51,6 @@ builder.Services.AddControllers()
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperConfigProfile));
-
-// SignalR
-builder.Services.AddSignalR();
 
 // Add Cors
 builder.Services.AddCors(options =>
@@ -159,5 +159,6 @@ app.UseHangfireServer();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();
