@@ -12,8 +12,8 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231103021753_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231111093040_test")]
+    partial class test
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -581,7 +581,7 @@ namespace UNITEE_BACKEND.Migrations
                     b.HasOne("UNITEE_BACKEND.Entities.Order", "Order")
                         .WithMany("Notifications")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Order");
