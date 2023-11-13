@@ -19,7 +19,6 @@ namespace UNITEE_BACKEND.Services
                              .Where(r => r.UserId == userId)
                              .ToListAsync();
 
-
         public async Task<Rating> SubmitRatingProduct(RatingRequest request)
         {
             try
@@ -30,7 +29,8 @@ namespace UNITEE_BACKEND.Services
                     Value = request.Value,
                     ProductId = request.ProductId,
                     SupplierId = request.SupplierId,
-                    DateCreated = DateTime.Now
+                    DateCreated = DateTime.Now,
+                    Role = RatingRole.Product
                 };
 
                 context.Ratings.Add(rating);
@@ -54,7 +54,8 @@ namespace UNITEE_BACKEND.Services
                     Value = request.Value,
                     ProductId = request.ProductId,
                     SupplierId = request.SupplierId,
-                    DateCreated = DateTime.Now
+                    DateCreated = DateTime.Now,
+                    Role = RatingRole.Supplier
                 };
 
                 context.Ratings.Add(rating);

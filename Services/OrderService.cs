@@ -50,6 +50,7 @@ namespace UNITEE_BACKEND.Services
                                     .ThenInclude(p => p.Product)
                             .Include(u => u.Cart)
                                 .ThenInclude(u => u.Supplier)
+                            .Include(u => u.User)
                             .Where(o => o.UserId == id)
                             .OrderByDescending(o => o.DateCreated)
                             .ToListAsync();
@@ -158,40 +159,38 @@ namespace UNITEE_BACKEND.Services
 
                 var cart = await context.Carts
                                         .Include(c => c.Items)
-                                        .FirstOrDefaultAsync(c => c.Id == request.CartId);
+                                        .ThenInclude(ci => ci.SizeQuantity)
+                                        .FirstOrDefaultAsync(c => c.Id == request.CartId && !c.IsDeleted);
 
                 if (cart != null)
                 {
-                    var supplierNotifications = new Notification
+                    foreach (var cartItem in cart.Items.Where(ci => request.CartItemIds.Contains(ci.Id) && !ci.IsDeleted))
                     {
-                        UserId = cart.SupplierId,
-                        OrderId = order.Id,
-                        Message = $"New order {order.OrderNumber} has been placed and requires your attention.",
-                        DateCreated = DateTime.Now,
-                        IsRead = false,
-                        UserRole = UserRole.Supplier
-                    };
-
-                    context.Notifications.Add(supplierNotifications);
-
-                    foreach (var cartItemId in request.CartItemIds)
-                    {
-                        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == cartItemId);
-
-                        if (cartItem != null)
+                        var sizeQuantity = cartItem.SizeQuantity;
+                        if (sizeQuantity != null && sizeQuantity.Quantity >= cartItem.Quantity)
                         {
-                            var orderItem = new OrderItem
-                            {
-                                OrderId = order.Id,
-                                ProductId = cartItem.ProductId,
-                                Quantity = cartItem.Quantity,
-                                SizeQuantityId = cartItem.SizeQuantityId
-                            };
-
-                            context.OrderItems.Add(orderItem);
-                            cartItem.IsDeleted = true;
+                            sizeQuantity.Quantity -= cartItem.Quantity; 
                         }
+                        else
+                        {
+                            throw new InvalidOperationException("Insufficient stock to complete the order.");
+                        }
+
+                        var orderItem = new OrderItem
+                        {
+                            OrderId = order.Id,
+                            ProductId = cartItem.ProductId,
+                            Quantity = cartItem.Quantity,
+                            SizeQuantityId = cartItem.SizeQuantityId
+                        };
+
+                        context.OrderItems.Add(orderItem);
+                        cartItem.IsDeleted = true;
                     }
+                }
+                else
+                {
+                    throw new InvalidOperationException("Cart not found or already processed.");
                 }
 
                 await context.SaveChangesAsync();
@@ -281,9 +280,8 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var order = await context.Orders
-                                         .Include(o => o.OrderItems)
-                                         .ThenInclude(oi => oi.SizeQuantity)
-                                         .FirstOrDefaultAsync(o => o.Id == orderId);
+                                         .Where(o => o.Id == orderId)
+                                         .FirstOrDefaultAsync();
 
                 if (order == null)
                 {
@@ -293,23 +291,6 @@ namespace UNITEE_BACKEND.Services
                 if (order.Status != Status.Pending)
                 {
                     throw new InvalidOperationException("Only orders with 'Pending' status can be approved");
-                }
-
-                foreach (var orderItem in order.OrderItems)
-                {
-                    var sizeQuantity = orderItem.SizeQuantity;
-
-                    if (sizeQuantity != null)
-                    {
-                        if (sizeQuantity.Quantity >= orderItem.Quantity)
-                        {
-                            sizeQuantity.Quantity -= orderItem.Quantity;
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException($"Insufficient stock for product {orderItem.ProductId} size {sizeQuantity.Id}");
-                        }
-                    }
                 }
 
                 order.Status = Status.Approved;

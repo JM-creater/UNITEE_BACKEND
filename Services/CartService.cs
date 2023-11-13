@@ -30,7 +30,7 @@ namespace UNITEE_BACKEND.Services
             if (user == null)
                 throw new Exception($"User with Id {id} not found");
 
-            user.Carts = context.Carts
+            user.Carts = await context.Carts
                                 .Include(c => c.Supplier)
                                 .Include(c => c.Items)
                                     .ThenInclude(i => i.Product)
@@ -40,7 +40,7 @@ namespace UNITEE_BACKEND.Services
                                             .ThenInclude(i => i.Sizes)
                                 .Where(c => c.UserId == user.Id && c.Items.Any(i => !i.IsDeleted)) 
                                 .OrderByDescending(c => c.DateCreated)
-                                .ToList();
+                                .ToListAsync();
 
             foreach (var cart in user.Carts)
             {

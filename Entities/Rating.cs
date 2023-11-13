@@ -16,5 +16,6 @@ namespace UNITEE_BACKEND.Entities
         public virtual User Supplier { get; set; }
         public int Value { get; set; }
         public DateTime DateCreated { get; set; }
+        public RatingRole Role { get; set; }
     }
 }
