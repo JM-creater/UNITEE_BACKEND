@@ -32,12 +32,14 @@
     <Folder Include="BIR\" />
     <Folder Include="CityPermit\" />
     <Folder Include="Images\" />
+    <Folder Include="BIR\" />
+    <Folder Include="CityPermit\" />
     <Folder Include="ProofOfPayment\" />
-    <Folder Include="SupplierImage\" />
-    <Folder Include="StudyLoad\" />
     <Folder Include="SchoolPermit\" />
+    <Folder Include="StudyLoad\" />
     <Folder Include="ProofOfPayment\" />
     <Folder Include="ProductImages\" />
+    <Folder Include="SupplierImage\" />
   </ItemGroup>
 
 </Project>

@@ -12,8 +12,8 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231114000448_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231114065226_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
