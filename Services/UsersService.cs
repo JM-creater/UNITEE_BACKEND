@@ -200,7 +200,7 @@ namespace UNITEE_BACKEND.Services
                 if (!user.IsActive)
                     throw new AuthenticationException("Account is deactivated");
 
-                if (!PasswordEncryptionService.VerifyPassword(request.Password, PasswordEncryptionService.EncryptPassword(request.Password)))
+                if (!PasswordEncryptionService.VerifyPassword(request.Password, user.Password))
                     throw new AuthenticationException("Invalid Password");
 
                 return (user, (UserRole)user.Role);

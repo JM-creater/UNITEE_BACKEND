@@ -14,7 +14,7 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPost("rate-product")]
-        public async Task<IActionResult> RatingProduct(RatingRequest request)
+        public async Task<IActionResult> RatingProduct([FromBody] RatingRequest request)
         {
             try
             {
@@ -29,7 +29,7 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPost("rate-supplier")]
-        public async Task<IActionResult> RatingSupplier(RatingRequest request)
+        public async Task<IActionResult> RatingSupplier([FromBody] RatingRequest request)
         {
             try
             {

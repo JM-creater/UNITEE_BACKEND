@@ -35,7 +35,8 @@ namespace UNITEE_BACKEND.Services
                       .AsEnumerable();
 
         public async Task<Order?> GetById(int id)
-            => await context.Orders.FirstOrDefaultAsync(o => o.Id == id);
+            => await context.Orders
+                            .FirstOrDefaultAsync(o => o.Id == id);
 
         public async Task<List<Order>> GetAllByUserId(int id)
             => await context.Orders
@@ -54,41 +55,6 @@ namespace UNITEE_BACKEND.Services
                             .Where(o => o.UserId == id)
                             .OrderByDescending(o => o.DateCreated)
                             .ToListAsync();
-
-        //public IEnumerable<Order> GetAllByUserId(int id)
-        //{
-        //    return context.Orders
-        //                  .Include(o => o.User)
-        //                      .ThenInclude(u => u.SupplierRatings)
-        //                  .Include(o => o.Cart)
-        //                      .ThenInclude(c => c.Items)
-        //                          .ThenInclude(i => i.Product)
-        //                              .ThenInclude(p => p.Ratings)
-        //                  .Include(o => o.Cart)
-        //                      .ThenInclude(c => c.Supplier)
-        //                  .Where(o => o.UserId == id)
-        //                  .OrderByDescending(o => o.DateCreated)
-        //                  .ToList(); 
-        //}
-
-        //public async Task<List<Order>> GetAllByUserId(int id)
-        //{
-        //    return await context.Orders
-        //        .Include(o => o.User)
-        //            .ThenInclude(u => u.SupplierRatings)
-        //        .Include(o => o.Cart)
-        //            .ThenInclude(c => c.Items)
-        //                .ThenInclude(item => item.Product)
-        //                    .ThenInclude(p => p.Ratings)
-        //                        .ThenInclude(rating => rating.User) 
-        //        .Include(o => o.Cart)
-        //            .ThenInclude(c => c.Supplier)
-        //                .ThenInclude(s => s.SupplierRatings)
-        //                    .ThenInclude(rating => rating.User) 
-        //        .Where(o => o.UserId == id && !o.IsDeleted)
-        //        .OrderByDescending(o => o.DateCreated)
-        //        .ToListAsync();
-        //}
 
         public async Task<List<Order>> GetAllBySupplierId(int supplierId)
         {
@@ -135,7 +101,6 @@ namespace UNITEE_BACKEND.Services
                     ProofOfPayment = imagePath,
                     ReferenceId = request.ReferenceId,
                     DateCreated = DateTime.Now,
-                    DateUpdated = DateTime.Now,
                     PaymentType = PaymentType.EMoney,
                     Status = Status.OrderPlaced,
                     OrderNumber = GenerateOrderNumber(DateTime.Now, nextId)
@@ -242,7 +207,7 @@ namespace UNITEE_BACKEND.Services
                         UserId = orderToUpdate.UserId,
                         OrderId = orderId,
                         Message = $"Your order {orderToUpdate.OrderNumber} status has been updated to Pending",
-                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now,
                         IsRead = false
                     };
 
@@ -294,6 +259,7 @@ namespace UNITEE_BACKEND.Services
                 }
 
                 order.Status = Status.Approved;
+                order.DateUpdated = DateTime.Now;
 
                 var existingNotification = await context.Notifications
                                                         .Where(n => n.OrderId == order.Id)
@@ -311,12 +277,13 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} has been approved!",
-                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now,
                         IsRead = false
                     };
                     context.Notifications.Add(notification);
                 }
 
+                context.Orders.Update(order);
                 await context.SaveChangesAsync();
 
                 order = await context.Orders
@@ -355,6 +322,7 @@ namespace UNITEE_BACKEND.Services
                 }
 
                 order.Status = Status.Denied;
+                order.DateUpdated = DateTime.Now;
 
                 var existingNotification = await context.Notifications
                                                         .Where(n => n.OrderId == order.Id)
@@ -372,7 +340,7 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} has been denied.",
-                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now,
                         IsRead = false
                     };
                     await service.AddNotification(notification);
@@ -417,6 +385,7 @@ namespace UNITEE_BACKEND.Services
                 }
 
                 order.Status = Status.Canceled;
+                order.DateUpdated = DateTime.Now;
 
                 var existingNotification = await context.Notifications
                                                         .Where(o => o.OrderId == order.Id)
@@ -434,7 +403,7 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} is canceled.",
-                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now,
                         IsRead = false
                     };
                     await service.AddNotification(notification);
@@ -484,6 +453,7 @@ namespace UNITEE_BACKEND.Services
                 string formattedDate = pickUpDate.ToString("MM/dd/yyyy");
 
                 order.Status = Status.ForPickUp;
+                order.DateUpdated = DateTime.Now;
 
                 order.EstimateDate = pickUpDate;
 
@@ -503,7 +473,7 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {formattedDate}.",
-                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now,
                         IsRead = false
                     };
                     await service.AddNotification(notification);
@@ -549,12 +519,11 @@ namespace UNITEE_BACKEND.Services
                 }
 
                 order.Status = Status.Completed;
-
-                var completionDate = DateTime.Now;
+                order.DateUpdated = DateTime.Now;
 
                 var existingNotification = await context.Notifications
-                    .Where(o => o.OrderId == order.Id)
-                    .FirstOrDefaultAsync();
+                                                        .Where(o => o.OrderId == order.Id)
+                                                        .FirstOrDefaultAsync();
 
                 if (existingNotification != null)
                 {
@@ -568,7 +537,7 @@ namespace UNITEE_BACKEND.Services
                         UserId = order.UserId,
                         OrderId = order.Id,
                         Message = $"Your order {order.OrderNumber} has been completed. Thank you for shopping with us!",
-                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now,
                         IsRead = false
                     };
                     await service.AddNotification(notification);

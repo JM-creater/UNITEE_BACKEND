@@ -11,7 +11,8 @@ namespace UNITEE_BACKEND.Entities
         public int OrderId { get; set; }
         public virtual Order Order { get; set; }
         public string Message { get; set; }
-        public DateTime DateCreated { get; set; } = DateTime.Now;
+        public DateTime DateCreated { get; set; } 
+        public DateTime DateUpdated { get; set; }
         public bool IsRead { get; set; }
         public UserRole UserRole { get; set; }
     }
