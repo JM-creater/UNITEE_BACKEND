@@ -35,12 +35,40 @@ namespace UNITEE_BACKEND.Services
         {
             try
             {
-                var existingUser = await context.Users
-                                                .Where(u => u.Email == request.Email || u.Id == request.Id)
-                                                .SingleOrDefaultAsync();
-                if (existingUser != null)
+                var existingUserId = await context.Users
+                                                  .Where(u => u.Id == request.Id)
+                                                  .FirstOrDefaultAsync();
+
+                if (existingUserId != null)
                 {
-                    throw new InvalidOperationException("A supplier with this email or user id already exists.");
+                    throw new InvalidOperationException("A supplier with ID already exists.");
+                }
+
+                var existingUserEmail = await context.Users
+                                                     .Where(u => u.Email == request.Email)
+                                                     .FirstOrDefaultAsync();
+
+                if (existingUserEmail != null)
+                {
+                    throw new InvalidOperationException("A supplier with email already exists.");
+                }
+
+                var existingUserShopName = await context.Users
+                                                        .Where(u => u.ShopName == request.ShopName) 
+                                                        .FirstOrDefaultAsync();
+
+                if (existingUserShopName != null) 
+                {
+                    throw new InvalidOperationException("A supplier with shop name already exists.");
+                }
+
+                var existingUserAddress = await context.Users
+                                                       .Where(u => u.Address == request.Address)
+                                                       .FirstOrDefaultAsync();
+
+                if (existingUserAddress != null) 
+                {
+                    throw new InvalidOperationException("A supplier with address already exists.");
                 }
 
                 var imagePath = await SaveImage(request.Image);
@@ -196,35 +224,42 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<User> UpdateSupplier(int id, SupplierRequest request)
         {
-            var existingSupplier = await context.Users.FirstOrDefaultAsync(a => a.Id == id);
-
-            if (existingSupplier == null)
+            try
             {
-                throw new Exception("Supplier Not Found");
-            }
+                var existingSupplier = await context.Users
+                                                    .Where(a => a.Id == id)
+                                                    .FirstOrDefaultAsync();
 
-            if (existingSupplier.Role != (int)UserRole.Supplier)
+                if (existingSupplier == null)
+                {
+                    throw new Exception("Supplier Not Found");
+                }
+
+                if (existingSupplier.Role != (int)UserRole.Supplier)
+                {
+                    throw new Exception("The provided ID does not correspond to a supplier");
+                }
+
+                if (request.Image != null)
+                {
+                    existingSupplier.Image = await SaveImage(request.Image);
+                }
+
+                existingSupplier.Email = request.Email;
+                existingSupplier.Password = request.Password;
+                existingSupplier.PhoneNumber = request.PhoneNumber;
+                existingSupplier.ShopName = request.ShopName;
+                existingSupplier.Address = request.Address;
+
+                context.Users.Update(existingSupplier);
+                await context.SaveChangesAsync();
+
+                return existingSupplier;
+            }
+            catch (Exception e)
             {
-                throw new Exception("The provided ID does not correspond to a supplier");
-            }
-
-            if (request.Image != null)
-            {
-                existingSupplier.Image = await SaveImage(request.Image);
-            }
-
-            existingSupplier.Email = request.Email;
-            existingSupplier.Password = request.Password;
-            existingSupplier.PhoneNumber = request.PhoneNumber;
-            existingSupplier.ShopName = request.ShopName;
-            existingSupplier.Address = request.Address;
-
-            await this.Save();
-
-            return existingSupplier;
+                throw new ArgumentException(e.Message);
+            }        
         }
-
-        async Task<int> Save()
-            => await context.SaveChangesAsync();
     }
 }

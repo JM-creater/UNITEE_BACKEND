@@ -61,9 +61,7 @@ builder.Services.AddCors(options =>
                           policy.WithOrigins("http://127.0.0.1:5173", "https://127.0.0.1:5173")
                                 .AllowAnyMethod()
                                 .AllowAnyHeader()
-                                .AllowCredentials()
-                                .SetIsOriginAllowed((host) => true)
-                                .WithMethods("OPTIONS");
+                                .AllowCredentials();
                       });
 });
 
@@ -155,6 +153,7 @@ app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseHangfireDashboard();
 app.UseHangfireServer();
+
 
 app.UseAuthorization();
 

@@ -15,29 +15,20 @@ namespace UNITEE_BACKEND.Services
     public class UsersService : IUsersService
     {
         private readonly AppDbContext context;
-        private readonly UserManager<User> userManager;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsersService(AppDbContext dbcontext, IHttpContextAccessor httpContext) 
+        public UsersService(AppDbContext dbcontext) 
         {
-            this.context = dbcontext;
-            this._httpContextAccessor = httpContext;
+            context = dbcontext;
         }
 
         public IEnumerable<User> GetAll()
             => context.Users.AsEnumerable();
 
         public async Task<User> GetById(int id)
-        {
-            var e = await context.Users
-                                    .Include(a => a.Department)
-                                    .Where(a => a.Id == id).FirstOrDefaultAsync();
-
-            if (e == null)
-                throw new Exception("User Not Found");
-
-            return e;
-        }
+            => await context.Users
+                            .Include(a => a.Department)
+                            .Where(a => a.Id == id)
+                            .FirstOrDefaultAsync();
 
         public IEnumerable<User> GetAllSuppliers()
         {
@@ -64,67 +55,102 @@ namespace UNITEE_BACKEND.Services
         }
 
 
-        public User GetSupplierById(int id)
-        {
-            return context.Users.FirstOrDefault(u => u.Id == id && u.Role == (int)UserRole.Supplier);
-        }
+        public async Task<List<User>> GetSupplierById(int id)
+            => await context.Users
+                            .Where(u => u.Id == id && u.Role == (int)UserRole.Supplier)
+                            .ToListAsync();
 
         public IEnumerable<Product> GetProductsBySupplierShop(int supplierId)
-        {
-            return context.Products.Where(p => p.SupplierId == supplierId).ToList();
-        }
+            => context.Products
+                      .Where(p => p.SupplierId == supplierId)
+                      .ToList();
 
 
         public IEnumerable<User> GetAllCustomers()
-        {
-            return context.Users
+            => context.Users
                           .Where(c => c.Role == (int)UserRole.Customer)
                           .OrderByDescending(u => u.DateCreated)
                           .AsEnumerable();
-        }
-
-        public async Task<User> GetCurrentUser()
-        {
-            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-                return null;
-
-            return await userManager.FindByIdAsync(userId);
-        }
 
         public async Task<User> Register(RegisterRequest request)
         {
-            var existingUser = await context.Users
-                .SingleOrDefaultAsync(u => u.Email == request.Email || u.Id == request.Id);
-
-            if (existingUser != null)
-                throw new Exception("A user with this email or user id already exists.");
-
-            var imagePath = await SaveImage(request.Image);
-            var studyLoadPath = await SaveStudyLoad(request.StudyLoad);
-            var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
-
-            var newUser = new User
+            try
             {
-                Id = request.Id,
-                DepartmentId = request.DepartmentId,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                Password = encryptedPassword,
-                PhoneNumber = request.PhoneNumber,
-                Gender = request.Gender,
-                Image = imagePath,
-                StudyLoad = studyLoadPath,
-                Role = (int)UserRole.Customer,
-                IsActive = false,
-                DateCreated = DateTime.UtcNow
-            };
+                var existingUserId = await context.Users
+                                                  .Where(u => u.Id == request.Id)
+                                                  .FirstOrDefaultAsync();
 
-            await context.Users.AddAsync(newUser);
-            await this.Save();
+                if (existingUserId != null)
+                {
+                    throw new InvalidOperationException("A user with ID already exists.");
+                }
 
-            return newUser;
+                var existingUserEmail = await context.Users
+                                                     .Where(u => u.Email == request.Email)
+                                                     .FirstOrDefaultAsync();
+
+                if (existingUserEmail != null)
+                {
+                    throw new InvalidOperationException("A user with email already exists.");
+                }
+
+                var existingUserFirstname = await context.Users
+                                                         .Where(u => u.FirstName == request.FirstName)
+                                                         .FirstOrDefaultAsync();
+
+                if (existingUserFirstname != null)
+                {
+                    throw new InvalidOperationException("A user with the same first name already exists.");
+                }
+
+                var existingUserLastname = await context.Users
+                                                        .Where(u => u.LastName == request.LastName)
+                                                        .FirstOrDefaultAsync();
+
+                if (existingUserLastname != null)
+                {
+                    throw new InvalidOperationException("A user with the same last name already exists.");
+                }
+
+                var existingUserPhonenumber = await context.Users
+                                                           .Where(u => u.PhoneNumber == request.PhoneNumber)
+                                                           .FirstOrDefaultAsync();
+
+                if (existingUserPhonenumber != null)
+                {
+                    throw new InvalidOperationException("A user with phone number already exists.");
+                }
+
+                var imagePath = await SaveImage(request.Image);
+                var studyLoadPath = await SaveStudyLoad(request.StudyLoad);
+                var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
+
+                var newUser = new User
+                {
+                    Id = request.Id,
+                    DepartmentId = request.DepartmentId,
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    Email = request.Email,
+                    Password = encryptedPassword,
+                    PhoneNumber = request.PhoneNumber,
+                    Gender = request.Gender,
+                    Image = imagePath,
+                    StudyLoad = studyLoadPath,
+                    Role = (int)UserRole.Customer,
+                    IsActive = false,
+                    DateCreated = DateTime.UtcNow
+                };
+
+                context.Users.Add(newUser);
+                await context.SaveChangesAsync();
+
+                return newUser;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
            
         // Profile Picture
@@ -207,7 +233,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -226,13 +252,14 @@ namespace UNITEE_BACKEND.Services
                 userExist.IsValidate = request.IsValidate;
                 userExist.IsActive = request.IsActive;
 
-                await this.Save();
+                context.Users.Update(userExist);
+                await context.SaveChangesAsync();
 
                 return userExist;
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -251,13 +278,14 @@ namespace UNITEE_BACKEND.Services
                 userExist.IsValidate = request.IsValidate;
                 userExist.IsActive = request.IsActive;
 
-                await this.Save();
+                context.Users.Update(userExist);
+                await context.SaveChangesAsync();
 
                 return userExist;
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -286,60 +314,58 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task<User> Save(User request)
-        {
-            var e = await context.Users.AddAsync(request);
-            await this.Save();
-            return e.Entity;
-        }
-
         public async Task<User> Update(int id, UpdateCustomerRequest request)
         {
-            var user = await context.Users.Where(e => e.Id == id).FirstOrDefaultAsync();
-
-            if(user == null)
+            try
             {
-                throw new Exception("No User Found");
+                var user = await context.Users
+                                    .Where(e => e.Id == id)
+                                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                    throw new InvalidOperationException("No User Found");
+
+                user.FirstName = request.firstName;
+                user.LastName = request.lastName;
+                user.Email = request.email;
+                user.DepartmentId = request.departmentId;
+                user.PhoneNumber = request.phoneNumber;
+                user.Gender = request.gender;
+
+                await context.SaveChangesAsync();
+                return user;
             }
-
-            user.FirstName = request.firstName;
-            user.LastName = request.lastName;
-            user.Email = request.email;
-            user.DepartmentId = request.departmentId;
-            user.PhoneNumber = request.phoneNumber;
-            user.Gender = request.gender;
-
-            await context.SaveChangesAsync();
-            return user;
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<User> UpdateSupplier(int id, UpdateSupplierRequest request)
         {
-            var supplier = await context.Users.Where(e => e.Id == id).FirstOrDefaultAsync();
-
-            if (supplier == null)
+            try
             {
-                throw new Exception("No User Found");
+                var supplier = await context.Users
+                                        .Where(e => e.Id == id)
+                                        .FirstOrDefaultAsync();
+
+                if (supplier == null)
+                {
+                    throw new Exception("No User Found");
+                }
+
+                supplier.ShopName = request.shopName;
+                supplier.Address = request.address;
+                supplier.Email = request.email;
+                supplier.PhoneNumber = request.phoneNumber;
+
+                await context.SaveChangesAsync();
+                return supplier;
             }
-
-            supplier.ShopName = request.shopName;
-            supplier.Address = request.address;
-            supplier.Email = request.email;
-            supplier.PhoneNumber = request.phoneNumber;
-
-            await context.SaveChangesAsync();
-            return supplier;
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
-
-        public async Task<User> Delete(int id)
-        {
-            var e = await this.GetById(id);
-            var result = context.Remove(e);
-            await Save();
-            return result.Entity;
-        }
-
-        async Task<int> Save()
-            => await context.SaveChangesAsync();
     }
 }

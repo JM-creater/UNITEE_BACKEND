@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UNITEE_BACKEND.Controllers
 {
@@ -44,11 +48,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var newUser = await usersService.Register(request);
+
                 return Ok(newUser);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -80,14 +85,22 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpGet("getSupplierById/{id}")]
-        public IActionResult GetSupplierById(int id)
+        public async Task<IActionResult> GetSupplierById(int id)
         {
-            var supplier = usersService.GetSupplierById(id);
-            if (supplier == null)
+            try
             {
-                return NotFound(new { Message = "Supplier not found." });
+                var supplier = usersService.GetSupplierById(id);
+                if (supplier == null)
+                {
+                    return NotFound(new { Message = "Supplier not found." });
+                }
+
+                return Ok(supplier);
             }
-            return Ok(supplier);
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpGet("getProductsBySupplierShop/{supplierId}")]
@@ -196,9 +209,5 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(e.Message);
             }
         }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
-            => Ok(await usersService.Delete(id));
     }
 }

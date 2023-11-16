@@ -9,16 +9,13 @@ namespace UNITEE_BACKEND.Services
     {
         public IEnumerable<User> GetAll();
         public IEnumerable<User> GetAllSuppliers();
-        public User GetSupplierById(int id);
+        public Task<List<User>> GetSupplierById(int id);
         public IEnumerable<Product> GetProductsBySupplierShop(int supplierId);
         public IEnumerable<User> GetAllCustomers();
-        public Task<User> GetCurrentUser();
         public IEnumerable<User> GetAllSuppliersProducts(int departmentId);
         public Task<User> GetById(int id);
-        public Task<User> Save(User request);
         public Task<User> Update(int id, UpdateCustomerRequest request);
         public Task<User> UpdateSupplier(int id, UpdateSupplierRequest request);
-        public Task<User> Delete(int id);
         public Task<User> Register(RegisterRequest request);
         public Task<(User user, UserRole role)> Login(LoginRequest request);
         public Task<User> ValidateUser(int id, ValidateUserRequest request);

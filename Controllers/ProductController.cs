@@ -121,29 +121,6 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("GetProductsForUser")]
-        public async Task<IActionResult> GetProductsForUser()
-        {
-            try
-            {
-                var user = await usersService.GetCurrentUser();
-
-                if (user == null)
-                    return Unauthorized();
-
-                var departmentId = user.DepartmentId;
-                if (!departmentId.HasValue)
-                    return BadRequest("Error!");
-
-                var products = await productService.GetProductsByDepartment(departmentId.Value);
-                return Ok(products);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
         [HttpPut("{productId}")]
         public async Task<IActionResult> Update([FromRoute] int productId, [FromForm] ProductUpdateRequest request)
         {

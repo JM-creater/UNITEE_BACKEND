@@ -89,6 +89,15 @@ namespace UNITEE_BACKEND.Services
         {
             try
             {
+                var existingReferenceID = await context.Orders
+                                                       .Where(o => o.ReferenceId == request.ReferenceId)
+                                                       .FirstOrDefaultAsync();
+
+                if (existingReferenceID != null)
+                {
+                    throw new InvalidOperationException("The Reference Id you provided already exists");
+                }
+
                 var imagePath = await ProofofPayment(request.ProofOfPayment);
 
                 int nextId = context.Orders.Any() ? context.Orders.Max(o => o.Id) + 1 : 1;
