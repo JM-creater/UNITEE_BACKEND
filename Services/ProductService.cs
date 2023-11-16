@@ -1,41 +1,39 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
+using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
-using UNITEE_BACKEND.Models.StaticClass;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace UNITEE_BACKEND.Services
 {
     public class ProductService : IProductService
     {
         private readonly AppDbContext context;
-        private readonly IMapper _mapper;
 
-        public ProductService(AppDbContext dbcontext, IMapper mapper)
+        public ProductService(AppDbContext dbcontext)
         {
-            this.context = dbcontext;
-            this._mapper = mapper;
+            context = dbcontext;
         }
 
         public async Task<int> AddProduct(ProductRequest request)
         {
             try
             {
-                var existingProduct = await context.Products
+                var existingProductName = await context.Products
                                                    .Where(p => p.ProductName == request.ProductName)
                                                    .FirstOrDefaultAsync();
 
-                if (existingProduct != null)
+                if (existingProductName != null)
                 {
-                    throw new ArgumentException("Product already exists");
+                    throw new ArgumentException("Product name already exists");
                 }
 
-                var imagePath = await ProductImage(request.Image);
+                var imagePath = await new ImagePathConfig().SaveProductImage(request.Image);
+                var frontImagePath = await new ImagePathConfig().SaveFrontImage(request.FrontViewImage);
+                var sideImagePath = await new ImagePathConfig().SaveSideImage(request.SideViewImage);
+                var backImagePath = await new ImagePathConfig().SaveBackImage(request.BackViewImage);
 
                 var newProduct = new Product
                 {
@@ -46,6 +44,9 @@ namespace UNITEE_BACKEND.Services
                     Category = request.Category,
                     Price = request.Price,
                     Image = imagePath,
+                    FrontViewImage = frontImagePath,
+                    SideViewImage = sideImagePath,
+                    BackViewImage = backImagePath,
                     IsActive = true
                 };
 
@@ -71,28 +72,6 @@ namespace UNITEE_BACKEND.Services
             {
                 throw new ArgumentException(e.Message);
             }
-        }
-
-        public async Task<string?> ProductImage(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "ProductImages");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("ProductImages", fileName);
         }
 
         public async Task<IEnumerable<Product>> RecommendProducts(string search)
@@ -242,7 +221,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (request.Image != null)
                 {
-                    existingProduct.Image = await ProductImage(request.Image); 
+                    existingProduct.Image = await new ImagePathConfig().SaveProductImage(request.Image); 
                 }
 
                 existingProduct.ProductTypeId = request.ProductTypeId;
@@ -319,7 +298,8 @@ namespace UNITEE_BACKEND.Services
 
                 existingProduct.IsActive = true;
 
-                await this.Save();
+                context.Products.Update(existingProduct);
+                await context.SaveChangesAsync();
 
                 return existingProduct;
             }
@@ -342,7 +322,8 @@ namespace UNITEE_BACKEND.Services
 
                 existingProduct.IsActive = false;
 
-                await this.Save();
+                context.Products.Update(existingProduct);
+                await context.SaveChangesAsync();
 
                 return existingProduct;
             }

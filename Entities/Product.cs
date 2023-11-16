@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using UNITEE_BACKEND.Dto;
-using UNITEE_BACKEND.Enum;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace UNITEE_BACKEND.Entities
 {
@@ -20,10 +16,12 @@ namespace UNITEE_BACKEND.Entities
         public string Description { get; set; }
         public string Category { get; set; }
         public string? Image { get; set; }
+        public string? FrontViewImage { get; set; }
+        public string? SideViewImage { get; set; }
+        public string? BackViewImage { get; set; }
         public float Price { get; set; }
         public bool IsActive { get; set; }
 
-        // Relation
         public ICollection<SizeQuantity> Sizes { get; set; } = new List<SizeQuantity>();
         public ICollection<ProductDepartment> ProductDepartments { get; set; } = new List<ProductDepartment>();
     }

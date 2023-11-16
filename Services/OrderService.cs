@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
+using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.SignalRNotification;
 
@@ -98,7 +99,7 @@ namespace UNITEE_BACKEND.Services
                     throw new InvalidOperationException("The Reference Id you provided already exists");
                 }
 
-                var imagePath = await ProofofPayment(request.ProofOfPayment);
+                var imagePath = await new ImagePathConfig().SaveProofofPayment(request.ProofOfPayment);
 
                 int nextId = context.Orders.Any() ? context.Orders.Max(o => o.Id) + 1 : 1;
 
@@ -225,28 +226,6 @@ namespace UNITEE_BACKEND.Services
                 
                 context.SaveChanges();
             }
-        }
-
-        public async Task<string?> ProofofPayment(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "ProofOfPayment");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("ProofOfPayment", fileName);
         }
 
         public async Task<Order> ApproveOrder(int orderId)

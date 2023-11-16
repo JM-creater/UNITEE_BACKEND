@@ -61,7 +61,9 @@ builder.Services.AddCors(options =>
                           policy.WithOrigins("http://127.0.0.1:5173", "https://127.0.0.1:5173")
                                 .AllowAnyMethod()
                                 .AllowAnyHeader()
-                                .AllowCredentials();
+                                .AllowCredentials()
+                                .SetIsOriginAllowed((host) => true)
+                                .WithMethods("OPTIONS");
                       });
 });
 
@@ -94,57 +96,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.ProductImages)),
-    RequestPath = $"/{imagePathOptions.ProductImages}"
-});
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.Images)),
-    RequestPath = $"/{imagePathOptions.Images}"
-});
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.SupplierImage)),
-    RequestPath = $"/{imagePathOptions.SupplierImage}"
-});
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.StudyLoad)),
-    RequestPath = $"/{imagePathOptions.StudyLoad}"
-});
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.BIR)),
-    RequestPath = $"/{imagePathOptions.BIR}"
-});
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.CityPermit)),
-    RequestPath = $"/{imagePathOptions.CityPermit}"
-});
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.SchoolPermit)),
-    RequestPath = $"/{imagePathOptions.SchoolPermit}"
-});
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.ProofOfPayment)),
-    RequestPath = $"/{imagePathOptions.ProofOfPayment}"
+        Path.Combine(Directory.GetCurrentDirectory(), imagePathOptions.PathImages)),
+    RequestPath = $"/{imagePathOptions.PathImages}"
 });
 
 app.UseCors(MyAllowSpecificOrigins);
@@ -153,7 +106,6 @@ app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseHangfireDashboard();
 app.UseHangfireServer();
-
 
 app.UseAuthorization();
 

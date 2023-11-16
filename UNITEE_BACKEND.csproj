@@ -30,17 +30,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BIR\" />
-    <Folder Include="CityPermit\" />
-    <Folder Include="Images\" />
-    <Folder Include="BIR\" />
-    <Folder Include="CityPermit\" />
-    <Folder Include="ProofOfPayment\" />
-    <Folder Include="SchoolPermit\" />
-    <Folder Include="StudyLoad\" />
-    <Folder Include="ProofOfPayment\" />
-    <Folder Include="ProductImages\" />
-    <Folder Include="SupplierImage\" />
+    <Folder Include="PathImages\BIR\" />
+    <Folder Include="PathImages\CityPermit\" />
+    <Folder Include="PathImages\FrontViewImage\" />
+    <Folder Include="PathImages\BackViewImage\" />
+    <Folder Include="PathImages\" />
+    <Folder Include="PathImages\SideViewImage\" />
+    <Folder Include="PathImages\ProofOfPayment\" />
+    <Folder Include="PathImages\SchoolPermit\" />
+    <Folder Include="PathImages\ProductImages\" />
+    <Folder Include="PathImages\SupplierImage\" />
   </ItemGroup>
 
 </Project>

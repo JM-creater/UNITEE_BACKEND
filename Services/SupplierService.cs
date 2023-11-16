@@ -3,6 +3,7 @@ using System.Net;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
+using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.Security;
 
@@ -71,10 +72,10 @@ namespace UNITEE_BACKEND.Services
                     throw new InvalidOperationException("A supplier with address already exists.");
                 }
 
-                var imagePath = await SaveImage(request.Image);
-                var imageBir = await SaveBIR(request.BIR);
-                var imageCityPermit = await SaveCityPermit(request.CityPermit);
-                var imageSchoolPermit = await SaveSchoolPermit(request.SchoolPermit);
+                var imagePath = await new ImagePathConfig().SaveSupplierImage(request.Image);
+                var imageBir = await new ImagePathConfig().SaveBIR(request.BIR);
+                var imageCityPermit = await new ImagePathConfig().SaveCityPermit(request.CityPermit);
+                var imageSchoolPermit = await new ImagePathConfig().SaveSchoolPermit(request.SchoolPermit);
                 var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
 
                 var newSupplier = new User
@@ -105,98 +106,6 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        // Profile Picture
-        public async Task<string?> SaveImage(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "SupplierImage");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("SupplierImage", fileName);
-        }
-
-        // BIR
-        public async Task<string?> SaveBIR(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "BIR");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("BIR", fileName);
-        }
-
-        // City Permit
-        public async Task<string?> SaveCityPermit(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "CityPermit");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("CityPermit", fileName);
-        }
-
-        // School Permit
-        public async Task<string?> SaveSchoolPermit(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "SchoolPermit");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("SchoolPermit", fileName);
-        }
-
         public async Task<User> UpdatePassword(int id, UpdatePasswordRequest request)
         {
             try
@@ -204,6 +113,7 @@ namespace UNITEE_BACKEND.Services
                 var supplier = await context.Users
                                             .Where(u => u.Id == id)
                                             .FirstOrDefaultAsync();
+
                 if (supplier == null)
                     throw new InvalidOperationException("Supplier not found");
 
@@ -242,7 +152,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (request.Image != null)
                 {
-                    existingSupplier.Image = await SaveImage(request.Image);
+                    existingSupplier.Image = await new ImagePathConfig().SaveSupplierImage(request.Image);
                 }
 
                 existingSupplier.Email = request.Email;

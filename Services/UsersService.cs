@@ -7,6 +7,7 @@ using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
+using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.Security;
 
@@ -121,8 +122,8 @@ namespace UNITEE_BACKEND.Services
                     throw new InvalidOperationException("A user with phone number already exists.");
                 }
 
-                var imagePath = await SaveImage(request.Image);
-                var studyLoadPath = await SaveStudyLoad(request.StudyLoad);
+                var imagePath = await new ImagePathConfig().SaveImage(request.Image);
+                var studyLoadPath = await new ImagePathConfig().SaveStudyLoad(request.StudyLoad);
                 var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
 
                 var newUser = new User
@@ -151,51 +152,6 @@ namespace UNITEE_BACKEND.Services
             {
                 throw new ArgumentException(e.Message);
             }
-        }
-           
-        // Profile Picture
-        public async Task<string?> SaveImage(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "Images");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("Images", fileName);
-        }
-
-        public async Task<string?> SaveStudyLoad(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "StudyLoad");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return Path.Combine("StudyLoad", fileName);
         }
 
         public async Task<(User user, UserRole role)> Login(LoginRequest request)
@@ -332,7 +288,9 @@ namespace UNITEE_BACKEND.Services
                 user.PhoneNumber = request.phoneNumber;
                 user.Gender = request.gender;
 
+                context.Users.Update(user);
                 await context.SaveChangesAsync();
+
                 return user;
             }
             catch (Exception e)
@@ -359,7 +317,9 @@ namespace UNITEE_BACKEND.Services
                 supplier.Email = request.email;
                 supplier.PhoneNumber = request.phoneNumber;
 
+                context.Users.Update(supplier);
                 await context.SaveChangesAsync();
+
                 return supplier;
             }
             catch (Exception e)

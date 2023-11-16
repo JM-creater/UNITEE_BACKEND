@@ -11,39 +11,64 @@ namespace UNITEE_BACKEND.Models.ImageDirectory
             _imagePathOptions = imagePathOptions.Value;
         }
 
+        public string GetMainFolderPath()
+        {
+            return _imagePathOptions.PathImages;
+        }
+
         public string GetImagePath()
         {
-            return _imagePathOptions.Images;
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.Images);
+        }
+
+        public string GetStudyLoadPath()
+        {
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.StudyLoad);
         }
 
         public string GetProductPath()
         {
-            return _imagePathOptions.ProductImages;
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.ProductImages);
+        }
+
+        public string GetFrontImagePath()
+        {
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.FrontViewImage);
+        }
+
+        public string GetSideImagePath()
+        {
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.SideViewImage);
+        }
+
+        public string GetBackImagePath()
+        {
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.BackViewImage);
         }
 
         public string GetSupplierPath()
         {
-            return _imagePathOptions.SupplierImage;
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.SupplierImage);
         }
 
         public string GetBIRPath()
         {
-            return _imagePathOptions.BIR;
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.BIR);
         }
 
         public string GetCityPermitPath()
         {
-            return _imagePathOptions.CityPermit;
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.CityPermit);
         }
 
         public string GetSchoolPermitPath()
         {
-            return _imagePathOptions.SchoolPermit;
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.SchoolPermit);
         }
 
         public string GetProofOfPayment()
         {
-            return _imagePathOptions.ProofOfPayment;
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.ProofOfPayment);
         }
     }
 }
