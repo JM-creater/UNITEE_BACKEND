@@ -11,6 +11,7 @@ namespace UNITEE_BACKEND.Services
         public Task<User> RegisterSupplier(SupplierRequest request);
         public Task<(User user, UserRole role)> Login(LoginRequest request);
         public IEnumerable<User> GetAll();
+        public Task<User> SupplierById(int id);
         public IEnumerable<User> GetAllSuppliers();
         public Task<List<User>> GetSupplierById(int id);
         public IEnumerable<Product> GetProductsBySupplierShop(int supplierId);

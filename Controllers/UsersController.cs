@@ -136,6 +136,20 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpGet("supplierId/{id}")]
+        public async Task<IActionResult> SupplierById([FromRoute] int id)
+        {
+            try
+            {
+                var supplier = await service.SupplierById(id);
+                return Ok(supplier);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet("getSuppliers")]
         public IActionResult GetSuppliers()
         {
@@ -170,7 +184,6 @@ namespace UNITEE_BACKEND.Controllers
 
             return Ok(products);
         }
-
 
         [HttpGet("getCustomers")]
         public IActionResult GetCustomers()
