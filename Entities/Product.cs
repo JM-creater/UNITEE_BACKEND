@@ -24,5 +24,6 @@ namespace UNITEE_BACKEND.Entities
 
         public ICollection<SizeQuantity> Sizes { get; set; } = new List<SizeQuantity>();
         public ICollection<ProductDepartment> ProductDepartments { get; set; } = new List<ProductDepartment>();
+        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
     }
 }

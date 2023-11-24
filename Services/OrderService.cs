@@ -111,6 +111,7 @@ namespace UNITEE_BACKEND.Services
                     ProofOfPayment = imagePath,
                     ReferenceId = request.ReferenceId,
                     DateCreated = DateTime.Now,
+                    DateUpdated = DateTime.Now,
                     PaymentType = PaymentType.EMoney,
                     Status = Status.OrderPlaced,
                     OrderNumber = GenerateOrderNumber(DateTime.Now, nextId)
@@ -134,38 +135,55 @@ namespace UNITEE_BACKEND.Services
 
                 var cart = await context.Carts
                                         .Include(c => c.Items)
-                                        .ThenInclude(ci => ci.SizeQuantity)
-                                        .FirstOrDefaultAsync(c => c.Id == request.CartId && !c.IsDeleted);
+                                        .FirstOrDefaultAsync(c => c.Id == request.CartId);
 
                 if (cart != null)
                 {
-                    foreach (var cartItem in cart.Items.Where(ci => request.CartItemIds.Contains(ci.Id) && !ci.IsDeleted))
+                    var supplierNotifications = new Notification
                     {
-                        var sizeQuantity = cartItem.SizeQuantity;
-                        if (sizeQuantity != null && sizeQuantity.Quantity >= cartItem.Quantity)
-                        {
-                            sizeQuantity.Quantity -= cartItem.Quantity; 
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Insufficient stock to complete the order.");
-                        }
+                        UserId = cart.SupplierId,
+                        OrderId = order.Id,
+                        Message = $"New order {order.OrderNumber} has been placed and requires your attention.",
+                        DateCreated = DateTime.Now,
+                        IsRead = false,
+                        UserRole = UserRole.Supplier
+                    };
 
-                        var orderItem = new OrderItem
-                        {
-                            OrderId = order.Id,
-                            ProductId = cartItem.ProductId,
-                            Quantity = cartItem.Quantity,
-                            SizeQuantityId = cartItem.SizeQuantityId
-                        };
+                    context.Notifications.Add(supplierNotifications);
 
-                        context.OrderItems.Add(orderItem);
-                        cartItem.IsDeleted = true;
+                    foreach (var cartItemId in request.CartItemIds)
+                    {
+                        var cartItem = cart.Items.FirstOrDefault(ci => ci.Id == cartItemId);
+
+                        if (cartItem != null)
+                        {
+                            var orderItem = new OrderItem
+                            {
+                                OrderId = order.Id,
+                                ProductId = cartItem.ProductId,
+                                Quantity = cartItem.Quantity,
+                                SizeQuantityId = cartItem.SizeQuantityId
+                            };
+
+                            var sizeQuantity = await context.SizeQuantities
+                                                            .FirstOrDefaultAsync(sq => sq.Id == cartItem.SizeQuantityId);
+
+                            if (sizeQuantity != null)
+                            {
+                                sizeQuantity.Quantity -= cartItem.Quantity;
+
+                                if (sizeQuantity.Quantity < 0)
+                                {
+                                    throw new InvalidOperationException("Insufficient stock for the product size.");
+                                }
+
+                                context.Update(sizeQuantity);
+                            }
+
+                            context.OrderItems.Add(orderItem);
+                            cartItem.IsDeleted = true;
+                        }
                     }
-                }
-                else
-                {
-                    throw new InvalidOperationException("Cart not found or already processed.");
                 }
 
                 await context.SaveChangesAsync();
@@ -179,6 +197,7 @@ namespace UNITEE_BACKEND.Services
                 throw new InvalidOperationException(e.Message);
             }
         }
+
 
         private string GenerateOrderNumber(DateTime dateCreated, int id)
         {

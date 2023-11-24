@@ -30,7 +30,6 @@ builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ISizeQuantityService, SizeQuantityService>();
 builder.Services.AddScoped<IOrderService, OrderService>();

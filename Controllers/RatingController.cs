@@ -5,7 +5,7 @@ using UNITEE_BACKEND.Services;
 namespace UNITEE_BACKEND.Controllers
 {
     [ApiController, Route("[controller]")]
-    public class RatingController : ControllerBase
+    public class RatingController : Controller
     {
         private readonly IRatingService service;
         public RatingController(IRatingService _service)
@@ -42,6 +42,35 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("average-product-rating/{productId}")]
+        public async Task<IActionResult> GetAverageProductRating(int productId)
+        {
+            try
+            {
+                var averageRating = await service.GetAverageProductRating(productId);
+                return Ok(new { AverageRating = averageRating });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("average-supplier-rating/{supplierId}")]
+        public async Task<IActionResult> GetAverageSupplierRating(int supplierId)
+        {
+            try
+            {
+                var averageRating = await service.GetAverageSupplierRating(supplierId);
+                return Ok(new { AverageRating = averageRating });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetRatingByUser(int userId)

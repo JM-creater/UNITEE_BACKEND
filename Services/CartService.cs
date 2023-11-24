@@ -56,7 +56,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -101,7 +101,8 @@ namespace UNITEE_BACKEND.Services
                 else
                 {
                     var sizeQuantity = await context.SizeQuantities
-                                                    .Where(sq => sq.ProductId == request.ProductId && sq.Size == request.Size)
+                                                    .Where(sq => sq.ProductId == request.ProductId &&
+                                                                 sq.Size == request.Size)
                                                     .FirstOrDefaultAsync();
 
                     if (sizeQuantity == null)
@@ -129,25 +130,18 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
         public async Task DeleteCart(int id)
         {
-            try
-            {
-                var cart = context.Carts.Find(id);
+            var cart = context.Carts.Find(id);
                 
-                if (cart != null)
-                {
-                    cart.IsDeleted = true;
-                    await context.SaveChangesAsync();
-                }
-            }
-            catch (Exception e)
+            if (cart != null)
             {
-                throw new Exception(e.Message);
+                cart.IsDeleted = true;
+                await context.SaveChangesAsync();
             }
         }
 
@@ -171,6 +165,7 @@ namespace UNITEE_BACKEND.Services
 
                 context.Carts.Remove(cart);
                 await context.SaveChangesAsync();
+
                 return cart;
             }
             catch (Exception e)
@@ -181,21 +176,26 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<Cart> Update(int id, CartAddRequest request)
         {
-            var existingCart = await context.Carts.FindAsync(id);
-
-            if (existingCart == null)
+            try
             {
-                throw new Exception("Cart cannot found");
+                var existingCart = await context.Carts.FindAsync(id);
+
+                if (existingCart == null)
+                {
+                    throw new Exception("Cart cannot found");
+                }
+
+                existingCart.Id = id;
+
+                context.Carts.Update(existingCart);
+                await context.SaveChangesAsync();
+
+                return existingCart;
             }
-
-            existingCart.Id = id;
-            //existingCart.UserId = request.UserId;
-            //existingCart.ProductId = request.ProductId;
-            //existingCart.Quantity = request.Quantity;
-
-            await this.Save();
-
-            return existingCart;
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<Cart> Save(Cart request)
