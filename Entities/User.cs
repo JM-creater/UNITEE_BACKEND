@@ -28,6 +28,7 @@ namespace UNITEE_BACKEND.Entities
         public bool IsValidate { get; set; }
         public string? PasswordResetToken { get; set; }
         public DateTime? ResetTokenExpires { get; set; }
+        public bool IsResetLinkUsed { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }
 

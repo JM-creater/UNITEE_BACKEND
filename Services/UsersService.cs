@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using MimeKit;
 using System.Security.Authentication;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
@@ -15,10 +18,12 @@ namespace UNITEE_BACKEND.Services
     public class UsersService : IUsersService
     {
         private readonly AppDbContext context;
+        private readonly IConfiguration configuration;
 
-        public UsersService(AppDbContext dbcontext) 
+        public UsersService(AppDbContext dbcontext, IConfiguration _configuration) 
         {
             context = dbcontext;
+            configuration = _configuration; 
         }
 
         public IEnumerable<User> GetAll()
@@ -438,6 +443,35 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        public async Task SendEmailAsync(string email, string subject, string message)
+        {
+            var emailSettings = configuration.GetSection("EmailSettings");
+            var mimeMessage = new MimeMessage();
+            mimeMessage.From.Add(new MailboxAddress(emailSettings["SenderName"], emailSettings["Sender"]));
+            mimeMessage.To.Add(MailboxAddress.Parse(email));
+            mimeMessage.Subject = subject;
+
+            mimeMessage.Body = new TextPart("html") { Text = message };
+
+            using (var client = new SmtpClient())
+            {
+                await client.ConnectAsync(emailSettings["MailServer"], int.Parse(emailSettings["MailPort"]), false);
+                client.AuthenticationMechanisms.Remove("XOAUTH2");
+                await client.AuthenticateAsync(emailSettings["Sender"], emailSettings["Password"]);
+                await client.SendAsync(mimeMessage);
+                await client.DisconnectAsync(true);
+            }
+        }
+
+        public async Task SendPasswordResetEmail(string email, string token)
+        {
+            string resetLink = $"http://127.0.0.1:5173/forgot_password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+            string subject = "Password Reset Request";
+            string message = $"Please click on the link to reset your password: <a href='{resetLink}'>Reset Password</a>";
+
+            await SendEmailAsync(email, subject, message);
+        }
+
         public async Task<User> ForgotPassword(string email)
         {
             try
@@ -453,9 +487,12 @@ namespace UNITEE_BACKEND.Services
 
                 user.PasswordResetToken = RandomToken.CreateRandomToken();
                 user.ResetTokenExpires = DateTime.Now.AddDays(1);
+                user.IsResetLinkUsed = false;
 
                 context.Users.Update(user);
                 await context.SaveChangesAsync();
+
+                await SendPasswordResetEmail(user.Email, user.PasswordResetToken);
 
                 return user;
             }
@@ -470,19 +507,18 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var user = await context.Users
-                                        .Where(u => u.Email == dto.Email &&
-                                                    u.PasswordResetToken == dto.Token &&
-                                                    u.ResetTokenExpires > DateTime.Now)
+                                        .Where(u => u.PasswordResetToken == dto.Token)
                                         .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user == null || user.ResetTokenExpires < DateTime.Now)
                 {
-                    throw new InvalidOperationException("Invalid token or token has expired.");
+                    throw new InvalidOperationException("Invalid Token.");
                 }
 
                 user.Password = PasswordEncryptionService.EncryptPassword(dto.NewPassword);
-                user.PasswordResetToken = null; 
-                user.ResetTokenExpires = null; 
+                user.PasswordResetToken = null;
+                user.ResetTokenExpires = null;
+                user.IsResetLinkUsed = true;
 
                 context.Users.Update(user);
                 await context.SaveChangesAsync();

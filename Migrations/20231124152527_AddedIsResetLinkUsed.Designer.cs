@@ -12,8 +12,8 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231124114905_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231124152527_AddedIsResetLinkUsed")]
+    partial class AddedIsResetLinkUsed
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -508,6 +508,9 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsResetLinkUsed")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsValidate")
                         .HasColumnType("bit");
 
@@ -562,6 +565,7 @@ namespace UNITEE_BACKEND.Migrations
                             FirstName = "Admin",
                             Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
                             IsActive = true,
+                            IsResetLinkUsed = false,
                             IsValidate = true,
                             LastName = "Admin",
                             Password = "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=",

@@ -67,6 +67,21 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpPost("send")]
+        public async Task<IActionResult> SendEmail([FromBody] EmailDto emailDto)
+        {
+            try
+            {
+                await service.SendEmailAsync(emailDto.Email, emailDto.Subject, emailDto.Message);
+
+                return Ok("Email sent successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal Server Error: " + ex.Message);
+            }
+        }
+
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(string email)
         {
@@ -88,8 +103,11 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var user = await service.ResetPassword(dto);
-
-                return Ok(user);
+                if (user != null)
+                {
+                    return Ok(user);
+                }
+                return BadRequest("Failed to reset password");
             }
             catch (Exception e)
             {
