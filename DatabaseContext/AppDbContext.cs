@@ -208,13 +208,13 @@ namespace UNITEE_BACKEND.DatabaseContext
 
             modelBuilder.Entity<Rating>()
                 .HasOne(r => r.Supplier)
-                .WithMany()
+                .WithMany(r => r.Ratings)
                 .HasForeignKey(r => r.SupplierId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Rating>()
                 .HasOne(r => r.Product)
-                .WithMany()
+                .WithMany(r => r.Ratings)
                 .HasForeignKey(r => r.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
 

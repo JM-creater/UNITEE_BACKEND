@@ -7,6 +7,9 @@ namespace UNITEE_BACKEND.Services
 {
     public interface IUsersService
     {
+        public Task<User> RegisterCustomer(RegisterRequest request);
+        public Task<User> RegisterSupplier(SupplierRequest request);
+        public Task<(User user, UserRole role)> Login(LoginRequest request);
         public IEnumerable<User> GetAll();
         public IEnumerable<User> GetAllSuppliers();
         public Task<List<User>> GetSupplierById(int id);
@@ -14,12 +17,13 @@ namespace UNITEE_BACKEND.Services
         public IEnumerable<User> GetAllCustomers();
         public IEnumerable<User> GetAllSuppliersProducts(int departmentId);
         public Task<User> GetById(int id);
-        public Task<User> Update(int id, UpdateCustomerRequest request);
-        public Task<User> UpdateSupplier(int id, UpdateSupplierRequest request);
-        public Task<User> Register(RegisterRequest request);
-        public Task<(User user, UserRole role)> Login(LoginRequest request);
-        public Task<User> ValidateUser(int id, ValidateUserRequest request);
+        public Task<User> ValidateCustomer(int id, ValidateUserRequest request);
         public Task<User> ValidateSupplier(int id, ValidateUserRequest request);
-        public Task<User> UpdatePassword(int id, UpdatePasswordRequest request);
+        public Task<User> UpdateCustomerProfile(int id, UpdateCustomerRequest request);
+        public Task<User> UpdateProfileSupplier(int id, UpdateSupplierRequest request);
+        public Task<User> UpdateCustomerPassword(int id, UpdatePasswordRequest request);
+        public Task<User> UpdateSupplierPassword(int id, UpdatePasswordRequest request);
+        public Task<User> ForgotPassword(string email);
+        public Task<User> ResetPassword(ResetPasswordDto dto);
     }
 }

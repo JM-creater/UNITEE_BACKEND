@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using UNITEE_BACKEND.Enum;
 
 namespace UNITEE_BACKEND.Entities

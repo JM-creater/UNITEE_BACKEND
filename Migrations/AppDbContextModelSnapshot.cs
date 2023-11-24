@@ -63,6 +63,9 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsOrdered")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -480,6 +483,9 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
@@ -509,12 +515,18 @@ namespace UNITEE_BACKEND.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RatingId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("ResetTokenExpires")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
@@ -542,6 +554,7 @@ namespace UNITEE_BACKEND.Migrations
                             Id = 20163482,
                             Address = "123 Main Street",
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@gmail.com",
                             FirstName = "Admin",
                             Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
@@ -693,13 +706,13 @@ namespace UNITEE_BACKEND.Migrations
             modelBuilder.Entity("UNITEE_BACKEND.Entities.Rating", b =>
                 {
                     b.HasOne("UNITEE_BACKEND.Entities.Product", "Product")
-                        .WithMany()
+                        .WithMany("Ratings")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("UNITEE_BACKEND.Entities.User", "Supplier")
-                        .WithMany()
+                        .WithMany("Ratings")
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -765,6 +778,8 @@ namespace UNITEE_BACKEND.Migrations
                 {
                     b.Navigation("ProductDepartments");
 
+                    b.Navigation("Ratings");
+
                     b.Navigation("Sizes");
                 });
 
@@ -773,6 +788,8 @@ namespace UNITEE_BACKEND.Migrations
                     b.Navigation("Carts");
 
                     b.Navigation("Products");
+
+                    b.Navigation("Ratings");
                 });
 #pragma warning restore 612, 618
         }

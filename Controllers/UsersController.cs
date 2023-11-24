@@ -1,26 +1,50 @@
-﻿using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
-using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 
 namespace UNITEE_BACKEND.Controllers
 {
     [ApiController, Route("[controller]")]
     public class UsersController : Controller
     {
-        private IUsersService usersService;
+        private IUsersService service;
         private readonly AppDbContext context;
 
-        public UsersController(IUsersService service, AppDbContext dbcontext)
+        public UsersController(IUsersService _service, AppDbContext dbcontext)
         {
-            usersService = service;
+            service = _service;
             context = dbcontext;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromForm] RegisterRequest request)
+        {
+            try
+            {
+                var newUser = await service.RegisterCustomer(request);
+
+                return Ok(newUser);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpPost("registerSupplier")]
+        public async Task<IActionResult> RegisterSupplierAccount([FromForm] SupplierRequest request)
+        {
+            try
+            {
+                var newSupplier = await service.RegisterSupplier(request);
+                return Ok(newSupplier);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpPost("login")]
@@ -33,7 +57,8 @@ namespace UNITEE_BACKEND.Controllers
                     return BadRequest("Provide either user ID or email for login");
                 }
 
-                var (user, role) = await usersService.Login(request);
+                var (user, role) = await service.Login(request);
+
                 return new JsonResult(new { user, role = role.ToString() });
             }
             catch (Exception e)
@@ -42,25 +67,40 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] RegisterRequest request)
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(string email)
         {
             try
             {
-                var newUser = await usersService.Register(request);
+                var user = await service.ForgotPassword(email);
 
-                return Ok(newUser);
+                return Ok(user);
             }
             catch (Exception e)
             {
-                return BadRequest(new { message = e.Message });
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            try
+            {
+                var user = await service.ResetPassword(dto);
+
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(usersService.GetAll());
+            return Ok(service.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -68,7 +108,8 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var e = await usersService.GetById(id);
+                var e = await service.GetById(id);
+
                 return Ok(e);
             }
             catch (Exception)
@@ -80,7 +121,8 @@ namespace UNITEE_BACKEND.Controllers
         [HttpGet("getSuppliers")]
         public IActionResult GetSuppliers()
         {
-            var suppliers = usersService.GetAllSuppliers();
+            var suppliers = service.GetAllSuppliers();
+
             return Ok(suppliers);
         }
 
@@ -89,7 +131,7 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var supplier = usersService.GetSupplierById(id);
+                var supplier = await service.GetSupplierById(id);
                 if (supplier == null)
                 {
                     return NotFound(new { Message = "Supplier not found." });
@@ -106,7 +148,8 @@ namespace UNITEE_BACKEND.Controllers
         [HttpGet("getProductsBySupplierShop/{supplierId}")]
         public IActionResult GetProductsBySupplierShop(int supplierId)
         {
-            var products = usersService.GetProductsBySupplierShop(supplierId);
+            var products = service.GetProductsBySupplierShop(supplierId);
+
             return Ok(products);
         }
 
@@ -114,7 +157,8 @@ namespace UNITEE_BACKEND.Controllers
         [HttpGet("getCustomers")]
         public IActionResult GetCustomers()
         {
-            var suppliers = usersService.GetAllCustomers();
+            var suppliers = service.GetAllCustomers();
+
             return Ok(suppliers);
         }
 
@@ -134,16 +178,17 @@ namespace UNITEE_BACKEND.Controllers
         [HttpGet("getSuppliersProduct/{departmentId}")]
         public IActionResult GetSuppliers(int departmentId)
         {
-            var suppliers = usersService.GetAllSuppliersProducts(departmentId);
+            var suppliers = service.GetAllSuppliersProducts(departmentId);
+
             return Ok(suppliers);
         }
 
-        [HttpPut("updateCustomer/{id}")]
+        [HttpPut("updateProfileCustomer/{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCustomerRequest request)
         {
             try
             {
-                var user = await usersService.Update(id, request);
+                var user = await service.UpdateCustomerProfile(id, request);
                 return Ok("Successfully Updated");
             }
             catch (Exception e)
@@ -152,12 +197,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpPut("updateSupplier/{id}")]
+        [HttpPut("updateProfileSupplier/{id}")]
         public async Task<IActionResult> UpdateSupplier([FromRoute] int id, [FromBody] UpdateSupplierRequest request)
         {
             try
             {
-                var user = await usersService.UpdateSupplier(id, request);
+                var user = await service.UpdateProfileSupplier(id, request);
                 return Ok("Successfully Updated");
             }
             catch (Exception e)
@@ -168,11 +213,11 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("validateCustomer/{id}")]
-        public async Task<IActionResult> ValidateUserAccount([FromRoute] int id, [FromBody] ValidateUserRequest request)
+        public async Task<IActionResult> ValidateCustomerAccount([FromRoute] int id, [FromBody] ValidateUserRequest request)
         {
             try
             {
-                var user = await usersService.ValidateUser(id, request);
+                var user = await service.ValidateCustomer(id, request);
                 return Ok(user);
             }
             catch (Exception e)
@@ -186,7 +231,7 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var user = await usersService.ValidateSupplier(id, request);
+                var user = await service.ValidateSupplier(id, request);
                 return Ok(user);
             }
             catch (Exception e)
@@ -196,13 +241,28 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("updateCustomerPassword/{id}")]
+        public async Task<IActionResult> UpdateCustomerPassword(int id, [FromBody] UpdatePasswordRequest request)
+        {
+            try
+            {
+                var supplier = await service.UpdateCustomerPassword(id, request);
+
+                return Ok(supplier);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("updateSupplierPassword/{id}")]
         public async Task<IActionResult> UpdateSupplierPassword(int id, [FromBody] UpdatePasswordRequest request)
         {
             try
             {
-                var user = await usersService.UpdatePassword(id, request);
+                var supplier = await service.UpdateSupplierPassword(id, request);
 
-                return Ok(user);
+                return Ok(supplier);
             }
             catch (Exception e)
             {

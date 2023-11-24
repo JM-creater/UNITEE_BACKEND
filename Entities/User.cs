@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UNITEE_BACKEND.Entities
 {
@@ -16,9 +14,9 @@ namespace UNITEE_BACKEND.Entities
         public string? LastName { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
-        public string PhoneNumber { get; set; } 
-        public string? Gender { get; set; } 
-        public string? ShopName { get; set; } 
+        public string PhoneNumber { get; set; }
+        public string? Gender { get; set; }
+        public string? ShopName { get; set; }
         public string? Address { get; set; }
         public string? Image { get; set; }
         public string? StudyLoad { get; set; }
@@ -28,10 +26,14 @@ namespace UNITEE_BACKEND.Entities
         public bool IsActive { get; set; }
         public int Role { get; set; }
         public bool IsValidate { get; set; }
+        public string? PasswordResetToken { get; set; }
+        public DateTime? ResetTokenExpires { get; set; }
         public DateTime DateCreated { get; set; }
+        public DateTime DateUpdated { get; set; }
 
         public ICollection<Cart> Carts { get; set; } = new List<Cart>();
         public ICollection<Product> Products { get; set; } = new List<Product>();
+        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
 
     }
 }

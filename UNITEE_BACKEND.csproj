@@ -11,6 +11,7 @@
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.5" />
     <PackageReference Include="Hangfire.Core" Version="1.8.5" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.5" />
+    <PackageReference Include="MailKit" Version="4.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
@@ -25,6 +26,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="MimeKit" Version="4.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.1" />
   </ItemGroup>
@@ -35,10 +37,12 @@
     <Folder Include="PathImages\FrontViewImage\" />
     <Folder Include="PathImages\BackViewImage\" />
     <Folder Include="PathImages\" />
+    <Folder Include="PathImages\Images\" />
     <Folder Include="PathImages\SideViewImage\" />
     <Folder Include="PathImages\ProofOfPayment\" />
     <Folder Include="PathImages\SchoolPermit\" />
     <Folder Include="PathImages\ProductImages\" />
+    <Folder Include="PathImages\StudyLoad\" />
     <Folder Include="PathImages\SupplierImage\" />
   </ItemGroup>
 
