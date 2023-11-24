@@ -29,6 +29,18 @@ namespace UNITEE_BACKEND.Services
         public IEnumerable<User> GetAll()
             => context.Users.AsEnumerable();
 
+        public async Task<User> SupplierById(int id)
+        {
+            var supplier = await context.Users.FindAsync(id);
+
+            if (supplier == null || supplier.Role != (int)UserRole.Supplier)
+            {
+                throw new InvalidOperationException("Supplier not found");
+            }
+
+            return supplier;
+        }
+
         public async Task<User> GetById(int id)
             => await context.Users
                             .Include(a => a.Department)
@@ -487,7 +499,6 @@ namespace UNITEE_BACKEND.Services
 
                 user.PasswordResetToken = RandomToken.CreateRandomToken();
                 user.ResetTokenExpires = DateTime.Now.AddDays(1);
-                user.IsResetLinkUsed = false;
 
                 context.Users.Update(user);
                 await context.SaveChangesAsync();
@@ -518,7 +529,6 @@ namespace UNITEE_BACKEND.Services
                 user.Password = PasswordEncryptionService.EncryptPassword(dto.NewPassword);
                 user.PasswordResetToken = null;
                 user.ResetTokenExpires = null;
-                user.IsResetLinkUsed = true;
 
                 context.Users.Update(user);
                 await context.SaveChangesAsync();
