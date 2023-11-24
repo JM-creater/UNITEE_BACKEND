@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UNITEE_BACKEND.DatabaseContext;
 
@@ -11,9 +12,11 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231124145408_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -505,9 +508,6 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsResetLinkUsed")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsValidate")
                         .HasColumnType("bit");
 
@@ -562,7 +562,6 @@ namespace UNITEE_BACKEND.Migrations
                             FirstName = "Admin",
                             Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
                             IsActive = true,
-                            IsResetLinkUsed = false,
                             IsValidate = true,
                             LastName = "Admin",
                             Password = "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=",
