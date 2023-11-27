@@ -8,6 +8,7 @@ using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
+using UNITEE_BACKEND.GenerateToken;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.Security;
@@ -49,6 +50,7 @@ namespace UNITEE_BACKEND.Services
             var seller = context.Users.Find(topSellerData.ShopId);
             return seller;
         }
+
 
         public IEnumerable<User> GetAll()
             => context.Users.AsEnumerable();
@@ -193,10 +195,50 @@ namespace UNITEE_BACKEND.Services
                     DateCreated = DateTime.Now
                 };
 
+                var confirmationToken = Guid.NewGuid().ToString();
+                newUser.EmailConfirmationToken = confirmationToken;
+
                 context.Users.Add(newUser);
                 await context.SaveChangesAsync();
 
+                await SendConfirmationEmail(newUser.Email, confirmationToken);
+
                 return newUser;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
+        public async Task SendConfirmationEmail(string email, string token)
+        {
+            string subject = "Confirm your email";
+            string confirmationLink = $"[Your API endpoint for confirmation]?token={token}";
+            string message = $"Please confirm your email by clicking on the following link: <a>{confirmationLink}</a>";
+
+            await SendEmailAsync(email, subject, message);
+        }
+
+        public async Task<User> ComfirmationCode(int id, string code)
+        {
+            try
+            {
+                var user = await context.Users.FindAsync(id);
+
+                if (user != null && user.Code == code)
+                {
+                    user.IsEmailConfirmed = true;
+                    user.EmailConfirmationToken = null;
+                    context.Update(user);
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new InvalidOperationException("User not found");
+                }
+
+                return user;
             }
             catch (Exception e)
             {

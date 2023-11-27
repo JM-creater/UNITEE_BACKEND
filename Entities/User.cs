@@ -30,10 +30,12 @@ namespace UNITEE_BACKEND.Entities
         public DateTime? ResetTokenExpires { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }
+        public string? Code { get; set; }
+        public string? EmailConfirmationToken { get; set; }
+        public bool IsEmailConfirmed { get; set; }
 
         public ICollection<Cart> Carts { get; set; } = new List<Cart>();
         public ICollection<Product> Products { get; set; } = new List<Product>();
         public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
-
     }
 }
