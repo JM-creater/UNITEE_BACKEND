@@ -10,6 +10,7 @@ namespace UNITEE_BACKEND.Services
         public Task<User> RegisterCustomer(RegisterRequest request);
         public Task<User> RegisterSupplier(SupplierRequest request);
         public Task<(User user, UserRole role)> Login(LoginRequest request);
+        public Task<User?> GetTopSellingSeller();
         public IEnumerable<User> GetAll();
         public Task<User> SupplierById(int id);
         public IEnumerable<User> GetAllSuppliers();

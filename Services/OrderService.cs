@@ -548,7 +548,7 @@ namespace UNITEE_BACKEND.Services
 
             string subject = "Your order has been delivered";
             string message = $"Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},<br><br>" +
-                             $"Your order with the reference {orderDetails.OrderNumber} has been successfully delivered." +
+                             $"Your order with the reference {orderDetails.OrderNumber} has been successfully received." +
                              $"<br><br>Items:<br>{string.Join("<br>", orderDetails.OrderItems.Select(oi => oi.Product.ProductName + " - Qty: " + oi.Quantity))}" +
                              $"<br><br>Total cost: {orderDetails.Total:C}" +
                              "<br><br>Please confirm and accept the order in the app within 5 days. " +
