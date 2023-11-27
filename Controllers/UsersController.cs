@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
-using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
 
@@ -10,7 +9,7 @@ namespace UNITEE_BACKEND.Controllers
     [ApiController, Route("[controller]")]
     public class UsersController : Controller
     {
-        private IUsersService service;
+        private readonly IUsersService service;
         private readonly AppDbContext context;
 
         public UsersController(IUsersService _service, AppDbContext dbcontext)
