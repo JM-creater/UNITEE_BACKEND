@@ -8,13 +8,11 @@ namespace UNITEE_BACKEND.Controllers
     [ApiController, Route("[controller]")]
     public class ProductController : Controller
     {
-        private IProductService productService;
-        private IUsersService usersService;
+        private readonly IProductService productService;
 
-        public ProductController(IProductService service, IUsersService uservice)
+        public ProductController(IProductService service)
         {
             productService = service;
-            usersService = uservice;
         }
 
         [HttpPost("addproduct")]
