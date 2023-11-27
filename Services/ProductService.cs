@@ -10,6 +10,7 @@ namespace UNITEE_BACKEND.Services
 {
     public class ProductService : IProductService
     {
+
         private readonly AppDbContext context;
 
         public ProductService(AppDbContext dbcontext)
@@ -91,6 +92,63 @@ namespace UNITEE_BACKEND.Services
                                 .OrderByDescending(p => p.Rating.Value)
                                 .Take(5)
                                 .ToListAsync();
+        }
+
+        public float CalculateProductRevenue(int productId)
+        {
+            float totalRevenue = 0;
+            var productOrderItems = context.OrderItems.Where(oi => oi.ProductId == productId);
+
+            foreach (var item in productOrderItems)
+            {
+                totalRevenue += item.Quantity * item.Product.Price;
+            }
+
+            return totalRevenue;
+        }
+
+        public IEnumerable<Product> GetTopSellingProducts(int topCount)
+        {
+            var products = context.Products.ToList();
+
+            return products.OrderByDescending(p => CalculateProductRevenue(p.ProductId))
+                          .Take(topCount);
+        }
+
+        public float CalculateShopProductRevenue(IEnumerable<OrderItem> orderItems, int productId)
+        {
+            float totalRevenue = 0;
+
+            foreach (var item in orderItems.Where(oi => oi.ProductId == productId))
+            {
+                totalRevenue += item.Quantity * item.Product.Price;
+            }
+
+            return totalRevenue;
+        }
+
+        public IEnumerable<Product> GetTopSellingProductsByShop(int shopId, int topCount)
+        {
+            try
+            {
+                var products = context.Products.Where(p => p.SupplierId == shopId).ToList();
+                var orderItems = context.OrderItems.Where(oi => oi.Product.SupplierId == shopId).ToList();
+
+                return products
+                    .Select(p => new
+                    {
+                        Product = p,
+                        Revenue = CalculateShopProductRevenue(orderItems, p.ProductId)
+                    })
+                    .OrderByDescending(x => x.Revenue)
+                    .Take(topCount)
+                    .Select(x => x.Product)
+                    .ToList();
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public IEnumerable<Product> GetAll()

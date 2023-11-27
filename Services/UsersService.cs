@@ -26,12 +26,39 @@ namespace UNITEE_BACKEND.Services
             configuration = _configuration; 
         }
 
+        public async Task<User?> GetTopSellingSeller()
+        {
+            var topSellerData = await context.OrderItems
+                                             .Include(oi => oi.Order)
+                                                .ThenInclude(o => o.User)
+                                             .Include(oi => oi.Product)
+                                             .Where(oi => oi.Order.IsDeleted == false)
+                                             .GroupBy(oi => oi.Product.SupplierId)
+                                             .Select(group => new {
+                                                 ShopId = group.Key,
+                                                 TotalSales = group.Sum(oi => oi.Product.Price * oi.Quantity)
+                                             })
+                                             .OrderByDescending(x => x.TotalSales)
+                                             .FirstOrDefaultAsync();
+
+            if (topSellerData == null)
+            {
+                throw new InvalidOperationException("Supplier not found");
+            }
+
+            var seller = context.Users.Find(topSellerData.ShopId);
+            return seller;
+        }
+
         public IEnumerable<User> GetAll()
             => context.Users.AsEnumerable();
 
         public async Task<User> SupplierById(int id)
         {
-            var supplier = await context.Users.FindAsync(id);
+            var supplier = await context.Users
+                                        .Include(u => u.Ratings)
+                                        .Where(u => u.Id == id)
+                                        .FirstOrDefaultAsync();
 
             if (supplier == null || supplier.Role != (int)UserRole.Supplier)
             {
@@ -52,6 +79,7 @@ namespace UNITEE_BACKEND.Services
             return context.Users
                           .Include(u => u.Products)
                             .ThenInclude(u => u.Sizes)
+                          .Include(u => u.Ratings)
                           .Where(u => u.Role == (int)UserRole.Supplier)
                           .OrderByDescending(u => u.DateCreated)
                           .AsEnumerable();

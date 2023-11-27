@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
+using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
 
@@ -115,6 +116,18 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpGet("getTopSellingSeller")]
+        public async Task<IActionResult> GetTopSellingSeller()
+        {
+            var topSeller = await service.GetTopSellingSeller();
+            if (topSeller == null)
+            {
+                return NotFound("No top selling seller found.");
+            }
+
+            return Ok(topSeller);
+        }
+
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -136,7 +149,7 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("supplierId/{id}")]
+        [HttpGet("getSupplierId/{id}")]
         public async Task<IActionResult> SupplierById([FromRoute] int id)
         {
             try

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
 
@@ -30,6 +31,19 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(new { message = e.Message });
             }
         }
+
+        [HttpGet("top-selling")]
+        public ActionResult<IEnumerable<Product>> GetTopSellingProducts(int topCount = 10)
+        {
+            return Ok(productService.GetTopSellingProducts(topCount));
+        }
+
+        [HttpGet("top-selling-by-shop/{shopId}")]
+        public ActionResult<IEnumerable<Product>> GetTopSellingProductsByShop(int shopId, int topCount = 10)
+        {
+            return Ok(productService.GetTopSellingProductsByShop(shopId, topCount));
+        }
+
 
         [HttpGet("recommender")]
         public async Task<IActionResult> GetRecommendProducts(string search)
