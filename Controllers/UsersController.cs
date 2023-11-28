@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
+using UNITEE_BACKEND.GenerateToken;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
 
@@ -11,11 +13,13 @@ namespace UNITEE_BACKEND.Controllers
     {
         private readonly IUsersService service;
         private readonly AppDbContext context;
+        private readonly JwtToken jwtToken;
 
-        public UsersController(IUsersService _service, AppDbContext dbcontext)
+        public UsersController(IUsersService _service, AppDbContext dbcontext, JwtToken _jwtToken)
         {
             service = _service;
             context = dbcontext;
+            jwtToken = _jwtToken;
         }
 
         [HttpPost("register")]
@@ -24,8 +28,8 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var newUser = await service.RegisterCustomer(request);
-
-                return Ok(newUser);
+                var token = jwtToken.GenerateJwtToken(newUser);
+                return Ok(new { newUser, Token = token });
             }
             catch (Exception e)
             {
@@ -59,11 +63,32 @@ namespace UNITEE_BACKEND.Controllers
 
                 var (user, role) = await service.Login(request);
 
-                return new JsonResult(new { user, role = role.ToString() });
+                if (user == null)
+                {
+                    return BadRequest("User not found");
+                }
+
+                var token = jwtToken.GenerateJwtToken(user);
+                return new JsonResult(new { user, Role = role.ToString(), Token = token });
             }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(int id, string code)
+        {
+            try
+            {
+                var user = await service.ComfirmationCode(id, code);
+
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
             }
         }
 

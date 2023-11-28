@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Security;
 
 namespace UNITEE_BACKEND.DatabaseContext
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Department> Departments { get; set; }
