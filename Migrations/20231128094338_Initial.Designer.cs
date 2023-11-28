@@ -12,7 +12,7 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231127175454_Initial")]
+    [Migration("20231128094338_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -681,7 +681,7 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<string>("CityPermit")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Code")
+                    b.Property<string>("ConfirmationCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DateCreated")

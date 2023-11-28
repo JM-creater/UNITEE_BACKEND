@@ -678,7 +678,7 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<string>("CityPermit")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Code")
+                    b.Property<string>("ConfirmationCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DateCreated")

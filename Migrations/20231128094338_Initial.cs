@@ -397,13 +397,13 @@ namespace UNITEE_BACKEND.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
                     IsValidate = table.Column<bool>(type: "bit", nullable: false),
+                    ConfirmationCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmailConfirmationToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsEmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordResetToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ResetTokenExpires = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmailConfirmationToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsEmailConfirmed = table.Column<bool>(type: "bit", nullable: false)
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -453,7 +453,7 @@ namespace UNITEE_BACKEND.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "Address", "BIR", "CityPermit", "Code", "DateCreated", "DateUpdated", "DepartmentId", "Email", "EmailConfirmationToken", "FirstName", "Gender", "Image", "IsActive", "IsEmailConfirmed", "IsValidate", "LastName", "Password", "PasswordResetToken", "PhoneNumber", "RatingId", "ResetTokenExpires", "Role", "SchoolPermit", "ShopName", "StudyLoad" },
+                columns: new[] { "Id", "Address", "BIR", "CityPermit", "ConfirmationCode", "DateCreated", "DateUpdated", "DepartmentId", "Email", "EmailConfirmationToken", "FirstName", "Gender", "Image", "IsActive", "IsEmailConfirmed", "IsValidate", "LastName", "Password", "PasswordResetToken", "PhoneNumber", "RatingId", "ResetTokenExpires", "Role", "SchoolPermit", "ShopName", "StudyLoad" },
                 values: new object[] { 20163482, "123 Main Street", null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "admin@gmail.com", null, "Admin", null, "Images/0d218025-7843-4cee-beed-0a62655a9664.png", true, false, true, "Admin", "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=", null, "639199431060", null, null, 3, null, null, null });
 
             migrationBuilder.CreateIndex(
