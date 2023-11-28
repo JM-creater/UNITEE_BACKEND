@@ -444,6 +444,34 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        public async Task<User> UpdateAdminProfile(int id, UpdateAdminRequest request)
+        {
+            try
+            {
+                var user = await context.Users
+                                        .Where(e => e.Id == id)
+                                        .FirstOrDefaultAsync();
+
+                if (user == null)
+                    throw new InvalidOperationException("No User Found");
+
+                user.FirstName = request.firstName;
+                user.LastName = request.lastName;
+                user.Email = request.email;
+                user.PhoneNumber = request.phoneNumber;
+                user.Gender = request.gender;
+
+                context.Users.Update(user);
+                await context.SaveChangesAsync();
+
+                return user;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
         public async Task<User> UpdateProfileSupplier(int id, UpdateSupplierRequest request)
         {
             try

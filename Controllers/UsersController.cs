@@ -265,6 +265,20 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpPut("updateProfileAdmin/{id}")]
+        public async Task<IActionResult> UpdateAdmin([FromRoute] int id, [FromBody] UpdateAdminRequest request)
+        {
+            try
+            {
+                var user = await service.UpdateAdminProfile(id, request);
+                return Ok("Successfully Updated");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpPut("updateProfileSupplier/{id}")]
         public async Task<IActionResult> UpdateSupplier([FromRoute] int id, [FromBody] UpdateSupplierRequest request)
         {
