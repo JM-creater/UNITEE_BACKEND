@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using System.Security.Authentication;
+using System.Text;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
@@ -177,6 +178,8 @@ namespace UNITEE_BACKEND.Services
                 var imagePath = await new ImagePathConfig().SaveImage(request.Image);
                 var studyLoadPath = await new ImagePathConfig().SaveStudyLoad(request.StudyLoad);
                 var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
+                var confirmationToken = RandomToken.CreateRandomToken();
+                var confirmationCode = RandomToken.GenerateConfirmationCode();
 
                 var newUser = new User
                 {
@@ -192,16 +195,15 @@ namespace UNITEE_BACKEND.Services
                     StudyLoad = studyLoadPath,
                     Role = (int)UserRole.Customer,
                     IsActive = false,
-                    DateCreated = DateTime.Now
+                    DateCreated = DateTime.Now,
+                    EmailConfirmationToken = confirmationToken,
+                    ConfirmationCode = confirmationCode
                 };
-
-                var confirmationToken = Guid.NewGuid().ToString();
-                newUser.EmailConfirmationToken = confirmationToken;
 
                 context.Users.Add(newUser);
                 await context.SaveChangesAsync();
 
-                await SendConfirmationEmail(newUser.Email, confirmationToken);
+                await SendConfirmationEmail(newUser.Email, newUser.ConfirmationCode);
 
                 return newUser;
             }
@@ -211,32 +213,36 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task SendConfirmationEmail(string email, string token)
+        public async Task SendConfirmationEmail(string email, string confirmationCode)
         {
-            string subject = "Confirm your email";
-            string confirmationLink = $"[Your API endpoint for confirmation]?token={token}";
-            string message = $"Please confirm your email by clicking on the following link: <a>{confirmationLink}</a>";
+            string subject = "Confirm Your Email Address";
+            string message = $"Hello,\n\nPlease confirm your email address using the following confirmation code: {confirmationCode}\n\nThank you!";
 
             await SendEmailAsync(email, subject, message);
         }
 
-        public async Task<User> ComfirmationCode(int id, string code)
+        public async Task<User> ConfirmEmail(string confirmationCode)
         {
             try
             {
-                var user = await context.Users.FindAsync(id);
+                var user = await context.Users
+                                        .Where(u => u.ConfirmationCode == confirmationCode)
+                                        .FirstOrDefaultAsync();
+                if (user == null)
+                    throw new ArgumentException("User not found.");
 
-                if (user != null && user.Code == code)
+                if (user.ConfirmationCode == confirmationCode)
                 {
                     user.IsEmailConfirmed = true;
                     user.EmailConfirmationToken = null;
-                    context.Update(user);
-                    await context.SaveChangesAsync();
                 }
                 else
                 {
-                    throw new InvalidOperationException("User not found");
+                    throw new InvalidOperationException("Invalid confirmation code.");
                 }
+
+                context.Users.Update(user);
+                await context.SaveChangesAsync();
 
                 return user;
             }
@@ -245,6 +251,7 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException(e.Message);
             }
         }
+
 
         public async Task<User> RegisterSupplier(SupplierRequest request)
         {

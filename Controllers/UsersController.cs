@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
+using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.GenerateToken;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
@@ -20,6 +21,21 @@ namespace UNITEE_BACKEND.Controllers
             service = _service;
             context = dbcontext;
             jwtToken = _jwtToken;
+        }
+
+        [HttpPost("send")]
+        public async Task<IActionResult> SendEmail([FromBody] EmailDto emailDto)
+        {
+            try
+            {
+                await service.SendEmailAsync(emailDto.Email, emailDto.Subject, emailDto.Message);
+
+                return Ok("Email sent successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal Server Error: " + ex.Message);
+            }
         }
 
         [HttpPost("register")]
@@ -78,34 +94,23 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPost("confirm-email")]
-        public async Task<IActionResult> ConfirmEmail(int id, string code)
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailDto confirmEmailDto)
         {
             try
             {
-                var user = await service.ComfirmationCode(id, code);
+                var user = await service.ConfirmEmail(confirmEmailDto.ConfirmationCode);
 
-                return Ok(user);
+                if (user.IsEmailConfirmed)
+                    return Ok("Email confirmed successfully.");
+                else
+                    return BadRequest("Failed to confirm email.");
             }
             catch (Exception e)
             {
-                throw new ArgumentException(e.Message);
+                return BadRequest(e.Message);
             }
         }
 
-        [HttpPost("send")]
-        public async Task<IActionResult> SendEmail([FromBody] EmailDto emailDto)
-        {
-            try
-            {
-                await service.SendEmailAsync(emailDto.Email, emailDto.Subject, emailDto.Message);
-
-                return Ok("Email sent successfully");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Internal Server Error: " + ex.Message);
-            }
-        }
 
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(string email)
