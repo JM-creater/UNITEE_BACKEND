@@ -18,6 +18,7 @@ namespace UNITEE_BACKEND.Models.Request
         public IFormFile? FrontViewImage { get; set; }
         public IFormFile? SideViewImage { get; set; }
         public IFormFile? BackViewImage { get; set; }
+        public IFormFile? SizeGuide { get; set; }
         public List<SizeQuantityDto> Sizes { get; set; } = new List<SizeQuantityDto>();
     }
 }

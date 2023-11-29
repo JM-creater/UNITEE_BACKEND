@@ -68,7 +68,20 @@ namespace UNITEE_BACKEND.Services
         public async Task MarkNotificationsAsRead(int userId)
         {
             var unreadNotifications = context.Notifications
-                .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Customer);
+                                             .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Customer);
+
+            foreach (var notification in unreadNotifications)
+            {
+                notification.IsRead = true;
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task MarkNotificationAsReadSupplier(int userId)
+        {
+            var unreadNotifications = context.Notifications
+                                                   .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Supplier);
 
             foreach (var notification in unreadNotifications)
             {

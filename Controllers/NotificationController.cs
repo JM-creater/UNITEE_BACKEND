@@ -50,6 +50,7 @@ namespace UNITEE_BACKEND.Controllers
         public async Task<IActionResult> GetUnreadNotifications(int userId)
         {
             var notifications = await service.GetUnreadNotifications(userId);
+
             return Ok(notifications);
         }
 
@@ -57,7 +58,16 @@ namespace UNITEE_BACKEND.Controllers
         public async Task<IActionResult> MarkNotificationsAsRead(int userId)
         {
             await service.MarkNotificationsAsRead(userId);
+
             return Ok(); 
+        }
+
+        [HttpPost("markReadSupplier/{userId}")]
+        public async Task<IActionResult> MarkNotificationsAsReadSupplier(int userId)
+        {
+            await service.MarkNotificationAsReadSupplier(userId);
+
+            return Ok();
         }
 
         [HttpGet("supplierUnread/{userId}")]

@@ -563,71 +563,78 @@ namespace UNITEE_BACKEND.Services
             }
 
             var itemsList = orderDetails.OrderItems.Select(oi => $@"
-                <tr>
-                    <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{oi.Product.ProductName}</td>
-                    <td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>Qty - {oi.Quantity}</td>
-                </tr>").ToList();
+        <tr>
+            <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{oi.Product.ProductName}</td>
+            <td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>Qty - {oi.Quantity}</td>
+        </tr>").ToList();
 
-            string subject = "Your order has been delivered";
+            string subject = "Your UNITEE Order Has Been Delivered!";
             string message = $@"
-                    <html>
-                    <head>
-                        <style>
-                            .email-body {{
-                                font - family: 'Arial', sans-serif;
-                                color: #333;
-                                margin: 0;
-                                padding: 0;
-                            }}
-                            .header {{
-                                background - color: #f4f4f4;
-                                padding: 20px;
-                                text-align: center;
-                                font-size: 24px;
-                                color: #333;
-                            }}
-                            .order-table {{
-                                width: 100%;
-                                border-collapse: collapse;
-                                margin-top: 20px;
-                            }}
-                            .order-table td {{
-                                padding: 10px;
-                                border-bottom: 1px solid #ddd;
-                            }}
-                            .total-cost {{
-                                text - align: right;
-                                margin-top: 10px;
-                            }}
-                            .footer {{
-                                margin - top: 20px;
-                                text-align: center;
-                                font-size: 14px;
-                                color: #999;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='email-body'>
-                            <div class='header'>Order Confirmation</div>
-                            <p>Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
-                            <p>Your order with the reference {orderDetails.OrderNumber} has been successfully received.</p>
-                            <table class='order-table'>
-                                <tr>
-                                    <th style='text-align: left;'>Product Name</th>
-                                    <th style='text-align: right;'>Quantity</th>
-                                </tr>
-                                {string.Join("", itemsList)}
-                            </table>
-                            <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
-                            <p>Please confirm and accept the order in the app within 5 days. If we don't hear from you within this period, payment will be automatically transferred.</p>
-                            <div class='footer'>Thank you for shopping with us! <br> UNITEE</div>
-                        </div>
-                    </body>
-                    </html>";
+            <html>
+            <head>
+                <style>
+                    .email-body {{
+                        font-family: 'Arial', sans-serif;
+                        color: #333;
+                        margin: 0;
+                        padding: 0;
+                    }}
+                    .header {{
+                        background-color: #4CAF50;
+                        padding: 20px;
+                        text-align: center;
+                        font-size: 24px;
+                        color: white;
+                    }}
+                    .order-table {{
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 20px;
+                    }}
+                    .order-table th {{
+                        background-color: #f2f2f2;
+                        padding: 10px;
+                        border-bottom: 1px solid #ddd;
+                    }}
+                    .order-table td {{
+                        padding: 10px;
+                        border-bottom: 1px solid #ddd;
+                    }}
+                    .total-cost {{
+                        text-align: right;
+                        margin-top: 20px;
+                        font-size: 18px;
+                    }}
+                    .footer {{
+                        margin-top: 20px;
+                        text-align: center;
+                        font-size: 14px;
+                        color: #999;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class='email-body'>
+                    <div class='header'>UNITEE Order Completion</div>
+                    <p>Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
+                    <p>We are happy to inform you that your order with the reference <strong>{orderDetails.OrderNumber}</strong> has been successfully delivered!</p>
+                    <table class='order-table'>
+                        <tr>
+                            <th style='text-align: left;'>Product Name</th>
+                            <th style='text-align: right;'>Quantity</th>
+                        </tr>
+                        {string.Join("", itemsList)}
+                    </table>
+                    <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
+                    <p>We hope you enjoy your purchase. Feel free to reach out for any further assistance.</p>
+                    <div class='footer'>Thank you for shopping with UNITEE!<br>Stay stylish!</div>
+                </div>
+            </body>
+            </html>";
 
             await SendEmailAsync(email, subject, message);
         }
+
 
 
         public async Task<Order> CompletedOrder(int orderId, string requestScheme, string requestHost, ImageDirectoryPath directoryPath)

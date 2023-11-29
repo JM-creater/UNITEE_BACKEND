@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
@@ -35,6 +34,7 @@ namespace UNITEE_BACKEND.Services
                 var frontImagePath = await new ImagePathConfig().SaveFrontImage(request.FrontViewImage);
                 var sideImagePath = await new ImagePathConfig().SaveSideImage(request.SideViewImage);
                 var backImagePath = await new ImagePathConfig().SaveBackImage(request.BackViewImage);
+                var sizeGuidePath = await new ImagePathConfig().SaveSizeGuide(request.SizeGuide);
 
                 var newProduct = new Product
                 {
@@ -48,6 +48,7 @@ namespace UNITEE_BACKEND.Services
                     FrontViewImage = frontImagePath,
                     SideViewImage = sideImagePath,
                     BackViewImage = backImagePath,
+                    SizeGuide = sizeGuidePath,
                     IsActive = true
                 };
 
@@ -64,7 +65,7 @@ namespace UNITEE_BACKEND.Services
                     }
                 }
 
-                await context.Products.AddAsync(newProduct);
+                context.Products.Add(newProduct);
                 await context.SaveChangesAsync();
 
                 return newProduct.ProductId;
@@ -280,6 +281,26 @@ namespace UNITEE_BACKEND.Services
                 if (request.Image != null)
                 {
                     existingProduct.Image = await new ImagePathConfig().SaveProductImage(request.Image); 
+                }
+
+                if (request.FrontViewImage != null)
+                {
+                    existingProduct.FrontViewImage = await new ImagePathConfig().SaveFrontImage(request.FrontViewImage);
+                }
+
+                if (request.SideViewImage != null)
+                {
+                    existingProduct.SideViewImage = await new ImagePathConfig().SaveSideImage(request.SideViewImage);
+                }
+
+                if (request.BackViewImage != null)
+                {
+                    existingProduct.BackViewImage = await new ImagePathConfig().SaveBackImage(request.BackViewImage);
+                }
+
+                if (request.SizeGuide != null)
+                {
+                    existingProduct.SizeGuide = await new ImagePathConfig().SaveSizeGuide(request.SizeGuide);
                 }
 
                 existingProduct.ProductTypeId = request.ProductTypeId;
