@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
@@ -15,8 +16,9 @@ namespace UNITEE_BACKEND.Controllers
         public OrderController(IOrderService service, ImageDirectoryPath _directoryPath)
         {
             orderService = service;
-            directoryPath = _directoryPath;
+            directoryPath = _directoryPath; 
         }
+
 
         [HttpPost]
         public async Task<IActionResult> AddOrder([FromForm] OrderRequest request)

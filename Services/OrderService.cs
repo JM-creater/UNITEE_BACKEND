@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using System.Drawing;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.SignalRNotification;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace UNITEE_BACKEND.Services
 {
@@ -513,6 +515,20 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        public string ConvertImageToBase64(string imagePath)
+        {
+            using (var image = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
+            {
+                using (var ms = new MemoryStream())
+                {
+                    image.CopyTo(ms);
+                    byte[] imageBytes = ms.ToArray();
+                    string base64String = Convert.ToBase64String(imageBytes);
+                    return base64String;
+                }
+            }
+        }
+
         public async Task SendEmailAsync(string email, string subject, string message)
         {
             var emailSettings = configuration.GetSection("EmailSettings");
@@ -546,41 +562,69 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException("Order not found or email does not match the order's user email.");
             }
 
-            string baseUrl = $"{requestScheme}://{requestHost}/";
-
-            var itemsWithImages = orderDetails.OrderItems.Select(oi => {
-                var relativeImagePath = directoryPath.GetProductPath(oi.Product.Image);
-                var absoluteImagePath = $"{baseUrl}{relativeImagePath.Replace("\\", "/")}";
-                return $@"
+            var itemsList = orderDetails.OrderItems.Select(oi => $@"
                 <tr>
-                    <td style='padding: 10px;'><img src='{absoluteImagePath}' alt='Product Image' style='width: 100px; height: auto;'></td>
-                    <td style='padding: 10px;'>{oi.Product.ProductName} - Qty: {oi.Quantity}</td>
-                </tr>";
-            }).ToList();
+                    <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{oi.Product.ProductName}</td>
+                    <td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>Qty - {oi.Quantity}</td>
+                </tr>").ToList();
 
             string subject = "Your order has been delivered";
-                    string message = $@"
-                <html>
-                <head>
-                    <style>
-                        .email-body {{ font-family: 'Arial', sans-serif; }}
-                        .product-image {{ width: 100px; height: auto; }}
-                        .product-details {{ padding-left: 10px; }}
-                    </style>
-                </head>
-                <body>
-                    <div class='email-body'>
-                        <p>Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
-                        <p>Your order with the reference {orderDetails.OrderNumber} has been successfully received.</p>
-                        <p>Items:</p>
-                        <table>{string.Join("", itemsWithImages)}</table>
-                        <p>Total cost: {orderDetails.Total:C}</p>
-                        <p>Please confirm and accept the order in the app within 5 days. If we don't hear from you within this period, payment will be automatically transferred.</p>
-                        <p>Thank you for shopping with us!</p>
-                        <p>UNITEE</p>
-                    </div>
-                </body>
-                </html>";
+            string message = $@"
+                    <html>
+                    <head>
+                        <style>
+                            .email-body {{
+                                font - family: 'Arial', sans-serif;
+                                color: #333;
+                                margin: 0;
+                                padding: 0;
+                            }}
+                            .header {{
+                                background - color: #f4f4f4;
+                                padding: 20px;
+                                text-align: center;
+                                font-size: 24px;
+                                color: #333;
+                            }}
+                            .order-table {{
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 20px;
+                            }}
+                            .order-table td {{
+                                padding: 10px;
+                                border-bottom: 1px solid #ddd;
+                            }}
+                            .total-cost {{
+                                text - align: right;
+                                margin-top: 10px;
+                            }}
+                            .footer {{
+                                margin - top: 20px;
+                                text-align: center;
+                                font-size: 14px;
+                                color: #999;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='email-body'>
+                            <div class='header'>Order Confirmation</div>
+                            <p>Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
+                            <p>Your order with the reference {orderDetails.OrderNumber} has been successfully received.</p>
+                            <table class='order-table'>
+                                <tr>
+                                    <th style='text-align: left;'>Product Name</th>
+                                    <th style='text-align: right;'>Quantity</th>
+                                </tr>
+                                {string.Join("", itemsList)}
+                            </table>
+                            <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
+                            <p>Please confirm and accept the order in the app within 5 days. If we don't hear from you within this period, payment will be automatically transferred.</p>
+                            <div class='footer'>Thank you for shopping with us! <br> UNITEE</div>
+                        </div>
+                    </body>
+                    </html>";
 
             await SendEmailAsync(email, subject, message);
         }

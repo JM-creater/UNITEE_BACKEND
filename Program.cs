@@ -43,6 +43,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<JwtToken>();
+builder.Services.AddScoped<ImageDirectoryPath>();
 
 // DbContext Configuration
 builder.Services.AddDbContext<AppDbContext>(options =>
