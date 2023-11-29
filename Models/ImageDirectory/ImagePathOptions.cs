@@ -14,5 +14,6 @@
         public string CityPermit { get; set; }
         public string SchoolPermit { get; set; }
         public string ProofOfPayment { get; set; }
+        public string SizeGuide { get; set; }
     }
 }

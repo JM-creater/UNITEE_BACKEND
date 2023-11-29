@@ -533,12 +533,12 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task SendOrderCompletedEmailAsync(string email, int orderId)
+        public async Task SendOrderCompletedEmailAsync(string email, int orderId, string requestScheme, string requestHost, ImageDirectoryPath directoryPath)
         {
             var orderDetails = await context.Orders
                                             .Where(o => o.Id == orderId && o.User.Email == email)
                                             .Include(o => o.OrderItems)
-                                            .ThenInclude(oi => oi.Product)
+                                                .ThenInclude(oi => oi.Product)
                                             .FirstOrDefaultAsync();
 
             if (orderDetails == null)
@@ -546,20 +546,47 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException("Order not found or email does not match the order's user email.");
             }
 
+            string baseUrl = $"{requestScheme}://{requestHost}/";
+
+            var itemsWithImages = orderDetails.OrderItems.Select(oi => {
+                var relativeImagePath = directoryPath.GetProductPath(oi.Product.Image);
+                var absoluteImagePath = $"{baseUrl}{relativeImagePath.Replace("\\", "/")}";
+                return $@"
+                <tr>
+                    <td style='padding: 10px;'><img src='{absoluteImagePath}' alt='Product Image' style='width: 100px; height: auto;'></td>
+                    <td style='padding: 10px;'>{oi.Product.ProductName} - Qty: {oi.Quantity}</td>
+                </tr>";
+            }).ToList();
+
             string subject = "Your order has been delivered";
-            string message = $"Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},<br><br>" +
-                             $"Your order with the reference {orderDetails.OrderNumber} has been successfully received." +
-                             $"<br><br>Items:<br>{string.Join("<br>", orderDetails.OrderItems.Select(oi => oi.Product.ProductName + " - Qty: " + oi.Quantity))}" +
-                             $"<br><br>Total cost: {orderDetails.Total:C}" +
-                             "<br><br>Please confirm and accept the order in the app within 5 days. " +
-                             "If we don't hear from you within this period, payment will be automatically transferred.<br><br>" +
-                             "Thank you for shopping with us!<br><br>" +
-                             "UNITEE";
+                    string message = $@"
+                <html>
+                <head>
+                    <style>
+                        .email-body {{ font-family: 'Arial', sans-serif; }}
+                        .product-image {{ width: 100px; height: auto; }}
+                        .product-details {{ padding-left: 10px; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='email-body'>
+                        <p>Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
+                        <p>Your order with the reference {orderDetails.OrderNumber} has been successfully received.</p>
+                        <p>Items:</p>
+                        <table>{string.Join("", itemsWithImages)}</table>
+                        <p>Total cost: {orderDetails.Total:C}</p>
+                        <p>Please confirm and accept the order in the app within 5 days. If we don't hear from you within this period, payment will be automatically transferred.</p>
+                        <p>Thank you for shopping with us!</p>
+                        <p>UNITEE</p>
+                    </div>
+                </body>
+                </html>";
 
             await SendEmailAsync(email, subject, message);
         }
 
-        public async Task<Order> CompletedOrder(int orderId)
+
+        public async Task<Order> CompletedOrder(int orderId, string requestScheme, string requestHost, ImageDirectoryPath directoryPath)
         {
             try
             {
@@ -607,7 +634,7 @@ namespace UNITEE_BACKEND.Services
                 context.Orders.Update(order);
                 await context.SaveChangesAsync();
 
-                await SendOrderCompletedEmailAsync(order.User.Email, orderId);
+                await SendOrderCompletedEmailAsync(order.User.Email, orderId, requestScheme, requestHost, directoryPath);
 
                 return order;
             }

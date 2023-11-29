@@ -35,8 +35,8 @@
     <Folder Include="PathImages\CityPermit\" />
     <Folder Include="PathImages\FrontViewImage\" />
     <Folder Include="PathImages\BackViewImage\" />
-    <Folder Include="PathImages\" />
     <Folder Include="PathImages\Images\" />
+    <Folder Include="PathImages\SizeGuide\" />
     <Folder Include="PathImages\SideViewImage\" />
     <Folder Include="PathImages\ProofOfPayment\" />
     <Folder Include="PathImages\SchoolPermit\" />

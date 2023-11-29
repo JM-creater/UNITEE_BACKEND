@@ -26,7 +26,7 @@ namespace UNITEE_BACKEND.Models.ImageDirectory
             return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.StudyLoad);
         }
 
-        public string GetProductPath()
+        public string GetProductPath(string? image)
         {
             return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.ProductImages);
         }
@@ -69,6 +69,11 @@ namespace UNITEE_BACKEND.Models.ImageDirectory
         public string GetProofOfPayment()
         {
             return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.ProofOfPayment);
+        }
+
+        public string GetSizeGuide()
+        {
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.SizeGuide);
         }
     }
 }

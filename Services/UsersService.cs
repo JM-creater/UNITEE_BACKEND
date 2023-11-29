@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using System.Security.Authentication;
-using System.Text;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
@@ -215,8 +214,30 @@ namespace UNITEE_BACKEND.Services
 
         public async Task SendConfirmationEmail(string email, string confirmationCode)
         {
-            string subject = "Confirm Your Email Address";
-            string message = $"Hello,\n\nPlease confirm your email address using the following confirmation code: {confirmationCode}\n\nThank you!";
+            string subject = "Verify Your Unitee Account Email";
+            string message = $@"
+                    <html>
+                    <head>
+                      <style>
+                        body {{ font-family: 'Arial', sans-serif; background-color: #f6f6f6; padding: 20px; }}
+                        .email-container {{ background-color: #ffffff; padding: 20px; border: 1px solid #dddddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+                        .email-header {{ color: #333333; font-size: 18px; font-weight: bold; margin-bottom: 30px; }}
+                        .confirmation-code {{ font-size: 24px; font-weight: bold; color: #333333; padding: 10px 0; }}
+                        .instructions {{ font-size: 14px; color: #555555; }}
+                        .footer {{ font-size: 12px; color: #999999; margin-top: 30px; }}
+                      </style>
+                    </head>
+                    <body>
+                      <div class='email-container'>
+                        <p class='email-header'>Verify Your Unitee Account Email</p>
+                        <p>Unitee has received a request to use this email address as your account. Please use the following code to finish setting up this email verification:</p>
+                        <p class='confirmation-code'>{confirmationCode}</p>
+                        <p class='instructions'>This code will expire in 24 hours.</p>
+                        <p class='instructions'>If you did not request this change or if you have any questions, please contact using this email unitee004@gmail.com.</p>
+                        <p class='footer'>Thank you for using Unitee!</p>
+                      </div>
+                    </body>
+                    </html>";
 
             await SendEmailAsync(email, subject, message);
         }
@@ -263,7 +284,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingUserId != null)
                 {
-                    throw new InvalidOperationException("A supplier with ID already exists.");
+                    throw new InvalidOperationException("A user with ID already exists.");
                 }
 
                 var existingUserEmail = await context.Users
@@ -272,7 +293,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingUserEmail != null)
                 {
-                    throw new InvalidOperationException("A supplier with email already exists.");
+                    throw new InvalidOperationException("A user with email already exists.");
                 }
 
                 var existingUserShopName = await context.Users
@@ -281,7 +302,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingUserShopName != null)
                 {
-                    throw new InvalidOperationException("A supplier with shop name already exists.");
+                    throw new InvalidOperationException("A user with shop name already exists.");
                 }
 
                 var existingUserAddress = await context.Users
@@ -290,7 +311,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingUserAddress != null)
                 {
-                    throw new InvalidOperationException("A supplier with address already exists.");
+                    throw new InvalidOperationException("A user with address already exists.");
                 }
 
                 var imagePath = await new ImagePathConfig().SaveSupplierImage(request.Image);
@@ -298,6 +319,8 @@ namespace UNITEE_BACKEND.Services
                 var imageCityPermit = await new ImagePathConfig().SaveCityPermit(request.CityPermit);
                 var imageSchoolPermit = await new ImagePathConfig().SaveSchoolPermit(request.SchoolPermit);
                 var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
+                var confirmationToken = RandomToken.CreateRandomToken();
+                var confirmationCode = RandomToken.GenerateConfirmationCode();
 
                 var newSupplier = new User
                 {
@@ -313,11 +336,15 @@ namespace UNITEE_BACKEND.Services
                     SchoolPermit = imageSchoolPermit,
                     Role = (int)UserRole.Supplier,
                     IsActive = false,
-                    DateCreated = DateTime.Now
+                    DateCreated = DateTime.Now,
+                    EmailConfirmationToken = confirmationToken,
+                    ConfirmationCode = confirmationCode
                 };
 
                 await context.Users.AddAsync(newSupplier);
                 await context.SaveChangesAsync();
+
+                await SendConfirmationEmail(newSupplier.Email, newSupplier.ConfirmationCode);
 
                 return newSupplier;
             }

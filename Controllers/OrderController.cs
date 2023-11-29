@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UNITEE_BACKEND.Entities;
+using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
 
@@ -9,9 +10,12 @@ namespace UNITEE_BACKEND.Controllers
     public class OrderController : Controller
     {
         private readonly IOrderService orderService;
-        public OrderController(IOrderService service)
+        private readonly ImageDirectoryPath directoryPath;
+
+        public OrderController(IOrderService service, ImageDirectoryPath _directoryPath)
         {
             orderService = service;
+            directoryPath = _directoryPath;
         }
 
         [HttpPost]
@@ -145,7 +149,7 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var order = await orderService.CompletedOrder(orderId);
+                var order = await orderService.CompletedOrder(orderId, Request.Scheme, Request.Host.ToString(), directoryPath);
 
                 return Ok(order);
             }

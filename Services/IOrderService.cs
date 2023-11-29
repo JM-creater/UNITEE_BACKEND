@@ -1,5 +1,6 @@
 ﻿using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
+using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 
 namespace UNITEE_BACKEND.Services
@@ -16,6 +17,6 @@ namespace UNITEE_BACKEND.Services
         public Task<Order> DeniedOrder(int orderId);
         public Task<Order> CanceledOrder(int orderId);
         public Task<Order> ForPickUp(int orderId);
-        public Task<Order> CompletedOrder(int orderId);
+        public Task<Order> CompletedOrder(int orderId, string requestScheme, string requestHost, ImageDirectoryPath directoryPath);
     }
 }
