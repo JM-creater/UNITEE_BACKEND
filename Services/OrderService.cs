@@ -201,7 +201,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -515,21 +515,27 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public string ConvertImageToBase64(string imagePath)
-        {
-            using (var image = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
-            {
-                using (var ms = new MemoryStream())
-                {
-                    image.CopyTo(ms);
-                    byte[] imageBytes = ms.ToArray();
-                    string base64String = Convert.ToBase64String(imageBytes);
-                    return base64String;
-                }
-            }
-        }
+        //public async Task SendEmailAsync(string email, string subject, string message)
+        //{
+        //    var emailSettings = configuration.GetSection("EmailSettings");
+        //    var mimeMessage = new MimeMessage();
+        //    mimeMessage.From.Add(new MailboxAddress(emailSettings["SenderName"], emailSettings["Sender"]));
+        //    mimeMessage.To.Add(MailboxAddress.Parse(email));
+        //    mimeMessage.Subject = subject;
 
-        public async Task SendEmailAsync(string email, string subject, string message)
+        //    mimeMessage.Body = new TextPart("html") { Text = message };
+
+        //    using (var client = new SmtpClient())
+        //    {
+        //        await client.ConnectAsync(emailSettings["MailServer"], int.Parse(emailSettings["MailPort"]), false);
+        //        client.AuthenticationMechanisms.Remove("XOAUTH2");
+        //        await client.AuthenticateAsync(emailSettings["Sender"], emailSettings["Password"]);
+        //        await client.SendAsync(mimeMessage);
+        //        await client.DisconnectAsync(true);
+        //    }
+        //}
+
+        public async Task SendEmailAsync(string email, string subject, string message, List<string> imagePaths = null)
         {
             var emailSettings = configuration.GetSection("EmailSettings");
             var mimeMessage = new MimeMessage();
@@ -537,7 +543,21 @@ namespace UNITEE_BACKEND.Services
             mimeMessage.To.Add(MailboxAddress.Parse(email));
             mimeMessage.Subject = subject;
 
-            mimeMessage.Body = new TextPart("html") { Text = message };
+            var builder = new BodyBuilder();
+
+            if (imagePaths != null)
+            {
+                foreach (var imagePath in imagePaths)
+                {
+                    var image = builder.LinkedResources.Add(imagePath);
+                    image.ContentId = MimeKit.Utils.MimeUtils.GenerateMessageId();
+                    // Replace the image URLs in the message with the respective CIDs
+                    message = message.Replace(imagePath, "cid:" + image.ContentId);
+                }
+            }
+
+            builder.HtmlBody = message;
+            mimeMessage.Body = builder.ToMessageBody();
 
             using (var client = new SmtpClient())
             {
@@ -549,7 +569,8 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task SendOrderCompletedEmailAsync(string email, int orderId, string requestScheme, string requestHost, ImageDirectoryPath directoryPath)
+
+        public async Task SendOrderCompletedEmailAsync(string email, int orderId)
         {
             var orderDetails = await context.Orders
                                             .Where(o => o.Id == orderId && o.User.Email == email)
@@ -562,82 +583,96 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException("Order not found or email does not match the order's user email.");
             }
 
-            var itemsList = orderDetails.OrderItems.Select(oi => $@"
-        <tr>
-            <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{oi.Product.ProductName}</td>
-            <td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>Qty - {oi.Quantity}</td>
-        </tr>").ToList();
+            var imagePaths = new List<string>();
+            var itemsList = orderDetails.OrderItems.Select(oi => {
+                string imagePath = "path_to_local_image_directory/" + oi.Product.Image;
+                imagePaths.Add(imagePath);
+                return $@"
+                    <tr>
+                        <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{oi.Product.ProductName}</td>
+                        <td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>Qty - {oi.Quantity}</td>
+                        <td style='padding: 10px; border-bottom: 1px solid #ddd;'><img src='{imagePath}' alt='{oi.Product.ProductName}' width='100' height='100'></td>
+                    </tr>";
+                    }).ToList();
 
             string subject = "Your UNITEE Order Has Been Delivered!";
             string message = $@"
-            <html>
-            <head>
-                <style>
-                    .email-body {{
-                        font-family: 'Arial', sans-serif;
-                        color: #333;
-                        margin: 0;
-                        padding: 0;
-                    }}
-                    .header {{
-                        background-color: #4CAF50;
-                        padding: 20px;
-                        text-align: center;
-                        font-size: 24px;
-                        color: white;
-                    }}
-                    .order-table {{
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 20px;
-                    }}
-                    .order-table th {{
-                        background-color: #f2f2f2;
-                        padding: 10px;
-                        border-bottom: 1px solid #ddd;
-                    }}
-                    .order-table td {{
-                        padding: 10px;
-                        border-bottom: 1px solid #ddd;
-                    }}
-                    .total-cost {{
-                        text-align: right;
-                        margin-top: 20px;
-                        font-size: 18px;
-                    }}
-                    .footer {{
-                        margin-top: 20px;
-                        text-align: center;
-                        font-size: 14px;
-                        color: #999;
-                    }}
-                </style>
-            </head>
-            <body>
-                <div class='email-body'>
-                    <div class='header'>UNITEE Order Completion</div>
-                    <p>Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
-                    <p>We are happy to inform you that your order with the reference <strong>{orderDetails.OrderNumber}</strong> has been successfully delivered!</p>
-                    <table class='order-table'>
-                        <tr>
-                            <th style='text-align: left;'>Product Name</th>
-                            <th style='text-align: right;'>Quantity</th>
-                        </tr>
-                        {string.Join("", itemsList)}
-                    </table>
-                    <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
-                    <p>We hope you enjoy your purchase. Feel free to reach out for any further assistance.</p>
-                    <div class='footer'>Thank you for shopping with UNITEE!<br>Stay stylish!</div>
-                </div>
-            </body>
-            </html>";
+                    <html>
+                    <head>
+                        <style>
+                            .email-body {{
+                                font-family: 'Arial', sans-serif;
+                                color: #333;
+                                margin: 0;
+                                padding: 0;
+                            }}
+                            .header {{
+                                background-color: #4CAF50;
+                                padding: 20px;
+                                text-align: center;
+                                font-size: 24px;
+                                color: white;
+                            }}
+                            .order-table {{
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 20px;
+                            }}
+                            .order-table th {{
+                                background-color: #f2f2f2;
+                                padding: 10px;
+                                border-bottom: 1px solid #ddd;
+                            }}
+                            .order-table td {{
+                                padding: 10px;
+                                border-bottom: 1px solid #ddd;
+                            }}
+                            .product-image {{
+                                max-width: 100px;
+                                max-height: 100px;
+                            }}
+                            .total-cost {{
+                                text-align: right;
+                                margin-top: 20px;
+                                font-size: 18px;
+                            }}
+                            .footer {{
+                                margin-top: 20px;
+                                text-align: center;
+                                font-size: 14px;
+                                color: #999;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='email-body'>
+                             <div class='header'>Order Completion</div>
+                             <p class=""greeting-user-name"">Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
+                             <p>We are happy to inform you that your order with the reference <strong>{orderDetails.OrderNumber}</strong> has been successfully delivered!</p>
+                             <table class='order-table'>
+                                 <tr>
+                                     <th style='text-align: left;'>Product Name</th>
+                                     <th style='text-align: right;'>Quantity</th>
+                                     <th style='text-align: center;'>Image</th>
+                                 </tr>
+                                  {string.Join("", itemsList)}
+                             </table>
+                             <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
+                             <p>We hope you enjoy your purchase. Feel free to reach out for any further assistance.</p>
+                             <footer>
+                                <img class=""student"" src=""Documents/character1.png"" alt="""">
+                                Thank you for shopping with UNITEE!<br>Stay stylish!</footer>
+                         </div>
+                    </body>
+                    </html>";
 
-            await SendEmailAsync(email, subject, message);
+            await SendEmailAsync(email, subject, message, imagePaths);
         }
 
 
 
-        public async Task<Order> CompletedOrder(int orderId, string requestScheme, string requestHost, ImageDirectoryPath directoryPath)
+
+        public async Task<Order> CompletedOrder(int orderId)
         {
             try
             {
@@ -685,7 +720,7 @@ namespace UNITEE_BACKEND.Services
                 context.Orders.Update(order);
                 await context.SaveChangesAsync();
 
-                await SendOrderCompletedEmailAsync(order.User.Email, orderId, requestScheme, requestHost, directoryPath);
+                await SendOrderCompletedEmailAsync(order.User.Email, orderId);
 
                 return order;
             }
