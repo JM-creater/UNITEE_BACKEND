@@ -618,59 +618,45 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<User> ForgotPassword(string email)
         {
-            try
+            var user = await context.Users
+                                    .Where(u => u.Email == email)
+                                    .FirstOrDefaultAsync();
+
+            if (user == null)
             {
-                var user = await context.Users
-                                        .Where(u => u.Email == email)
-                                        .FirstOrDefaultAsync();
-
-                if (user == null)
-                {
-                    throw new InvalidOperationException("User not found");
-                }
-
-                user.PasswordResetToken = RandomToken.CreateRandomToken();
-                user.ResetTokenExpires = DateTime.Now.AddDays(1);
-
-                context.Users.Update(user);
-                await context.SaveChangesAsync();
-
-                await SendPasswordResetEmail(user.Email, user.PasswordResetToken);
-
-                return user;
+                throw new InvalidOperationException("Email not yet registered");
             }
-            catch (Exception e)
-            {
-                throw new ArgumentException(e.Message);
-            }
+
+            user.PasswordResetToken = RandomToken.CreateRandomToken();
+            user.ResetTokenExpires = DateTime.Now.AddDays(1);
+
+            context.Users.Update(user);
+            await context.SaveChangesAsync();
+
+            await SendPasswordResetEmail(user.Email, user.PasswordResetToken);
+
+            return user;
         }
 
         public async Task<User> ResetPassword(ResetPasswordDto dto)
         {
-            try
+            var user = await context.Users
+                                    .Where(u => u.PasswordResetToken == dto.Token)
+                                    .FirstOrDefaultAsync();
+
+            if (user == null || user.ResetTokenExpires < DateTime.Now)
             {
-                var user = await context.Users
-                                        .Where(u => u.PasswordResetToken == dto.Token)
-                                        .FirstOrDefaultAsync();
-
-                if (user == null || user.ResetTokenExpires < DateTime.Now)
-                {
-                    throw new InvalidOperationException("Invalid Token.");
-                }
-
-                user.Password = PasswordEncryptionService.EncryptPassword(dto.NewPassword);
-                user.PasswordResetToken = null;
-                user.ResetTokenExpires = null;
-
-                context.Users.Update(user);
-                await context.SaveChangesAsync();
-
-                return user;
+                throw new InvalidOperationException("Invalid Token.");
             }
-            catch (Exception e)
-            {
-                throw new ArgumentException(e.Message);
-            }
+
+            user.Password = PasswordEncryptionService.EncryptPassword(dto.NewPassword);
+            user.PasswordResetToken = null;
+            user.ResetTokenExpires = null;
+
+            context.Users.Update(user);
+            await context.SaveChangesAsync();
+
+            return user;
         }
     }
 }
