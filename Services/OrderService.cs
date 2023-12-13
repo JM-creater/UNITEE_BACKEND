@@ -173,7 +173,8 @@ namespace UNITEE_BACKEND.Services
                             };
 
                             var sizeQuantity = await context.SizeQuantities
-                                                            .FirstOrDefaultAsync(sq => sq.Id == cartItem.SizeQuantityId);
+                                                            .Where(sq => sq.Id == cartItem.SizeQuantityId)
+                                                            .FirstOrDefaultAsync();
 
                             if (sizeQuantity != null)
                             {
