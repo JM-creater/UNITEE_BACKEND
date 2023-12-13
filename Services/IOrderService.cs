@@ -16,6 +16,6 @@ namespace UNITEE_BACKEND.Services
         public Task<Order> DeniedOrder(int orderId);
         public Task<Order> CanceledOrder(int orderId);
         public Task<Order> ForPickUp(int orderId);
-        public Task<Order> CompletedOrder(int orderId, string requestScheme, string requestHost, ImageDirectoryPath directoryPath);
+        public Task<Order> CompletedOrder(int orderId);
     }
 }

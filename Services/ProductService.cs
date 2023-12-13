@@ -226,6 +226,10 @@ namespace UNITEE_BACKEND.Services
                     Category = product.Category,
                     Price = product.Price,
                     Image = product.Image,
+                    FrontViewImage = product.FrontViewImage,
+                    SideViewImage = product.SideViewImage,
+                    BackViewImage = product.BackViewImage,
+                    SizeGuide = product.SizeGuide,
                     IsActive = product.IsActive,
                     Sizes = product.Sizes.Select(size => new SizeQuantityDto
                     {

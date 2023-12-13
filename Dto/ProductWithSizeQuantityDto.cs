@@ -11,6 +11,10 @@ namespace UNITEE_BACKEND.Dto
         public string? Category { get; set; }
         public float Price { get; set; }
         public string? Image { get; set; }
+        public string? FrontViewImage { get; set; }
+        public string? SideViewImage { get; set; }
+        public string? BackViewImage { get; set; }
+        public string? SizeGuide { get; set; }
         public bool IsActive { get; set; }
 
         // Relation
