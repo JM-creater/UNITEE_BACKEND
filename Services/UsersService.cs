@@ -609,7 +609,7 @@ namespace UNITEE_BACKEND.Services
 
         public async Task SendPasswordResetEmail(string email, string token)
         {
-            string resetLink = $"http://127.0.0.1:5173/forgot_password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
+            string resetLink = $"http://localhost:5173/forgot_password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
             string subject = "Password Reset Request";
             string message = $"Please click on the link to reset your password: <a href='{resetLink}'>Reset Password</a>";
 
