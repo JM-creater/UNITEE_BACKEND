@@ -12,7 +12,7 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231129120424_Initial")]
+    [Migration("20231219214254_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

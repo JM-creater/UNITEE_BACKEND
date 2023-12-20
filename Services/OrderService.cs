@@ -3,16 +3,13 @@ using Hangfire.Server;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using MimeKit;
-using System.Drawing;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.SignalRNotification;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace UNITEE_BACKEND.Services
 {
@@ -44,7 +41,8 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<Order?> GetById(int id)
             => await context.Orders
-                            .FirstOrDefaultAsync(o => o.Id == id);
+                            .Where(o => o.Id == id)
+                            .FirstOrDefaultAsync();
 
         public async Task<List<Order>> GetAllByUserId(int id)
             => await context.Orders
@@ -225,7 +223,7 @@ namespace UNITEE_BACKEND.Services
             {
                 orderToUpdate.Status = Status.Pending;
                 orderToUpdate.DateUpdated = DateTime.Now;
-                context.SaveChanges();
+                context.SaveChangesAsync();
 
                 hubContext.Clients.User(orderToUpdate.UserId.ToString())
                           .SendAsync("OrderStatusUpdated", "Your order status has been updated to Pending.");
@@ -251,7 +249,7 @@ namespace UNITEE_BACKEND.Services
                     context.Notifications.Add(notification);
                 }
                 
-                context.SaveChanges();
+                context.SaveChangesAsync();
             }
         }
 
@@ -552,7 +550,6 @@ namespace UNITEE_BACKEND.Services
                 {
                     var image = builder.LinkedResources.Add(imagePath);
                     image.ContentId = MimeKit.Utils.MimeUtils.GenerateMessageId();
-                    // Replace the image URLs in the message with the respective CIDs
                     message = message.Replace(imagePath, "cid:" + image.ContentId);
                 }
             }
