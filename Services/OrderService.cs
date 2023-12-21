@@ -512,27 +512,7 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        //public async Task SendEmailAsync(string email, string subject, string message)
-        //{
-        //    var emailSettings = configuration.GetSection("EmailSettings");
-        //    var mimeMessage = new MimeMessage();
-        //    mimeMessage.From.Add(new MailboxAddress(emailSettings["SenderName"], emailSettings["Sender"]));
-        //    mimeMessage.To.Add(MailboxAddress.Parse(email));
-        //    mimeMessage.Subject = subject;
-
-        //    mimeMessage.Body = new TextPart("html") { Text = message };
-
-        //    using (var client = new SmtpClient())
-        //    {
-        //        await client.ConnectAsync(emailSettings["MailServer"], int.Parse(emailSettings["MailPort"]), false);
-        //        client.AuthenticationMechanisms.Remove("XOAUTH2");
-        //        await client.AuthenticateAsync(emailSettings["Sender"], emailSettings["Password"]);
-        //        await client.SendAsync(mimeMessage);
-        //        await client.DisconnectAsync(true);
-        //    }
-        //}
-
-        public async Task SendEmailAsync(string email, string subject, string message, List<string> imagePaths = null)
+        public async Task SendEmailAsync(string email, string subject, string message)
         {
             var emailSettings = configuration.GetSection("EmailSettings");
             var mimeMessage = new MimeMessage();
@@ -540,20 +520,7 @@ namespace UNITEE_BACKEND.Services
             mimeMessage.To.Add(MailboxAddress.Parse(email));
             mimeMessage.Subject = subject;
 
-            var builder = new BodyBuilder();
-
-            if (imagePaths != null)
-            {
-                foreach (var imagePath in imagePaths)
-                {
-                    var image = builder.LinkedResources.Add(imagePath);
-                    image.ContentId = MimeKit.Utils.MimeUtils.GenerateMessageId();
-                    message = message.Replace(imagePath, "cid:" + image.ContentId);
-                }
-            }
-
-            builder.HtmlBody = message;
-            mimeMessage.Body = builder.ToMessageBody();
+            mimeMessage.Body = new TextPart("html") { Text = message };
 
             using (var client = new SmtpClient())
             {
@@ -564,7 +531,6 @@ namespace UNITEE_BACKEND.Services
                 await client.DisconnectAsync(true);
             }
         }
-
 
         public async Task SendOrderCompletedEmailAsync(string email, int orderId)
         {
@@ -579,19 +545,15 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException("Order not found or email does not match the order's user email.");
             }
 
-            var imagePaths = new List<string>();
             var itemsList = orderDetails.OrderItems.Select(oi => {
-                string imagePath = "path_to_local_image_directory/" + oi.Product.Image;
-                imagePaths.Add(imagePath);
                 return $@"
                     <tr>
                         <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{oi.Product.ProductName}</td>
                         <td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>Qty - {oi.Quantity}</td>
-                        <td style='padding: 10px; border-bottom: 1px solid #ddd;'><img src='{imagePath}' alt='{oi.Product.ProductName}' width='100' height='100'></td>
                     </tr>";
                     }).ToList();
 
-            string subject = "Your UNITEE Order Has Been Delivered!";
+            string subject = "Your UNITEE Order Has Been Claimed!";
             string message = $@"
                     <html>
                     <head>
@@ -644,7 +606,7 @@ namespace UNITEE_BACKEND.Services
                         <div class='email-body'>
                              <div class='header'>Order Completion</div>
                              <p class=""greeting-user-name"">Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
-                             <p>We are happy to inform you that your order with the reference <strong>{orderDetails.OrderNumber}</strong> has been successfully delivered!</p>
+                             <p>We are happy to inform you that your order with the reference <strong>{orderDetails.OrderNumber}</strong> has been successfully completed!</p>
                              <table class='order-table'>
                                  <tr>
                                      <th style='text-align: left;'>Product Name</th>
@@ -656,16 +618,13 @@ namespace UNITEE_BACKEND.Services
                              <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
                              <p>We hope you enjoy your purchase. Feel free to reach out for any further assistance.</p>
                              <footer>
-                                <img class=""student"" src=""Documents/character1.png"" alt="""">
                                 Thank you for shopping with UNITEE!<br>Stay stylish!</footer>
                          </div>
                     </body>
                     </html>";
 
-            await SendEmailAsync(email, subject, message, imagePaths);
+            await SendEmailAsync(email, subject, message);
         }
-
-
 
 
         public async Task<Order> CompletedOrder(int orderId)
@@ -673,10 +632,10 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var order = await context.Orders
-                                         .Include(o => o.User) 
-                                         .Include(o => o.OrderItems) 
-                                            .ThenInclude(oi => oi.Product)
-                                         .FirstOrDefaultAsync(o => o.Id == orderId); 
+                                          .Include(o => o.User)
+                                          .Include(o => o.OrderItems)
+                                             .ThenInclude(oi => oi.Product)
+                                          .FirstOrDefaultAsync(o => o.Id == orderId);
 
                 if (order == null)
                 {

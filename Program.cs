@@ -41,7 +41,7 @@ builder.Services.AddScoped<ISizeQuantityService, SizeQuantityService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+//builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<JwtToken>();
 
 // DbContext Configuration

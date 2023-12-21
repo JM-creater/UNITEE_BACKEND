@@ -59,7 +59,8 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var newSupplier = await service.RegisterSupplier(request);
-                return Ok(newSupplier);
+                var token = jwtToken.GenerateJwtToken(newSupplier);
+                return Ok(new { newSupplier, Token = token });
             }
             catch (Exception e)
             {
