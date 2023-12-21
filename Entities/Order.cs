@@ -17,7 +17,6 @@ namespace UNITEE_BACKEND.Entities
         public float Total { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }
-        public DateTime? EstimateDate { get; set; }
         public PaymentType PaymentType { get; set; }
         public Status Status { get; set; }
         public bool IsDeleted { get; set; } = false;

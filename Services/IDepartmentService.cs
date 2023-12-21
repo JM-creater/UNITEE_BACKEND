@@ -4,7 +4,7 @@ namespace UNITEE_BACKEND.Services
 {
     public interface IDepartmentService
     {
-        public IEnumerable<Department> GetAll();
+        public Task<IEnumerable<Department>> GetAll();
         public Task<Department> GetById(int id);
 
     }
