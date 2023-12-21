@@ -360,36 +360,44 @@ namespace UNITEE_BACKEND.Services
             {
                 User user = null;
 
-                if (request.Id.HasValue) 
+                if (request.Id.HasValue)
                 {
                     user = await context.Users
                                         .Where(u => u.Id == request.Id)
-                                        .SingleOrDefaultAsync();
+                                        .FirstOrDefaultAsync();
                 }
                 else if (!string.IsNullOrWhiteSpace(request.Email))
                 {
                     user = await context.Users
                                         .Where(u => u.Email == request.Email)
-                                        .SingleOrDefaultAsync();
+                                        .FirstOrDefaultAsync();
                 }
 
                 if (user == null)
-                    throw new AuthenticationException("Invalid user Id or Email");
+                {
+                    throw new AuthenticationException("Invalid user ID or Email");
+                }
 
                 if (!user.IsValidate)
+                {
                     throw new AuthenticationException("Waiting for validation");
+                }
 
                 if (!user.IsActive)
+                {
                     throw new AuthenticationException("Account is deactivated");
+                }
 
                 if (!PasswordEncryptionService.VerifyPassword(request.Password, user.Password))
+                {
                     throw new AuthenticationException("Invalid Password");
+                }
 
                 return (user, (UserRole)user.Role);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new ArgumentException(e.Message);
+                throw new AuthenticationException("Authentication failed", ex);
             }
         }
 

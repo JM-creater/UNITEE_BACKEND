@@ -137,14 +137,15 @@ namespace UNITEE_BACKEND.DatabaseContext
                     LastName = "Admin",
                     Password = PasswordEncryptionService.EncryptPassword("123456"),
                     Email = "admin@gmail.com",
-                    PhoneNumber = "639199431060",
-                    Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
+                    PhoneNumber = "09199431060",
+                    Image = "PathImages\\Images\\Admin Profile.png",
                     IsActive = true,
                     IsValidate = true,
                     Role = 3,
                     Address = "123 Main Street"
                 }
                 );
+
 
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Supplier)
