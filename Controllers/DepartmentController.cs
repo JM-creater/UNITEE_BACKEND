@@ -14,9 +14,9 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(departmentService.GetAll());
+            return Ok(await departmentService.GetAll());
         }
 
         [HttpGet("{id}")]

@@ -20,7 +20,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -48,7 +48,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -76,7 +76,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -104,7 +104,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -132,7 +132,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -160,7 +160,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -188,7 +188,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -216,7 +216,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -244,7 +244,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -272,7 +272,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -300,7 +300,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -328,7 +328,7 @@ public class ImagePathConfig
             Directory.CreateDirectory(subFolder);
         }
 
-        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+        var fileName = Path.GetFileName(imageFile.FileName);
         var filePath = Path.Combine(subFolder, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))

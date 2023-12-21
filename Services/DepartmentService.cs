@@ -13,8 +13,10 @@ namespace UNITEE_BACKEND.Services
             this.context = dbcontext;
         }
 
-        public IEnumerable<Department> GetAll()
-            => context.Departments.AsEnumerable();
+        public async Task<IEnumerable<Department>> GetAll()
+            => await context.Departments
+                            .Include(d => d.ProductDepartments)
+                            .ToListAsync();
 
         public async Task<Department> GetById(int id)
         {

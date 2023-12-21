@@ -468,8 +468,6 @@ namespace UNITEE_BACKEND.Services
                 order.Status = Status.ForPickUp;
                 order.DateUpdated = DateTime.Now;
 
-                order.EstimateDate = pickUpDate;
-
                 var existingNotification = await context.Notifications
                                                         .Where(o => o.OrderId == order.Id)
                                                         .FirstOrDefaultAsync();

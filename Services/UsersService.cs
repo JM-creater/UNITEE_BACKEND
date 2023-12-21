@@ -233,7 +233,7 @@ namespace UNITEE_BACKEND.Services
                         <p>Unitee has received a request to use this email address as your account. Please use the following code to finish setting up this email verification:</p>
                         <p class='confirmation-code'>{confirmationCode}</p>
                         <p class='instructions'>This code will expire in 24 hours.</p>
-                        <p class='instructions'>If you did not request this change or if you have any questions, please contact using this email unitee004@gmail.com.</p>
+                        <p class='instructions'>If you did not request this change or if you have any questions, please contact using this email unitee42@gmail.com.</p>
                         <p class='footer'>Thank you for using Unitee!</p>
                       </div>
                     </body>
