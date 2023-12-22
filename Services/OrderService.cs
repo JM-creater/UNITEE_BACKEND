@@ -392,9 +392,9 @@ namespace UNITEE_BACKEND.Services
                     throw new ArgumentException("Order not found");
                 }
 
-                if (order.Status != Status.Pending)
+                if (order.Status != Status.Pending && order.Status != Status.OrderPlaced)
                 {
-                    throw new InvalidOperationException("Only orders with 'Pending' status can be approved");
+                    throw new InvalidOperationException("Only orders with 'Pending' & 'Order Placed' status can be approved");
                 }
 
                 order.Status = Status.Canceled;
