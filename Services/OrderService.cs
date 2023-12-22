@@ -611,7 +611,6 @@ namespace UNITEE_BACKEND.Services
                                  <tr>
                                      <th style='text-align: left;'>Product Name</th>
                                      <th style='text-align: right;'>Quantity</th>
-                                     <th style='text-align: center;'>Image</th>
                                  </tr>
                                   {string.Join("", itemsList)}
                              </table>
