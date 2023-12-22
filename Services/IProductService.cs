@@ -8,6 +8,7 @@ namespace UNITEE_BACKEND.Services
     {
         public Task<int> AddProduct(ProductRequest request);
         public Task<IEnumerable<Product>> RecommendProducts(string search);
+        public Task<IEnumerable<Product>> RecommendProductsPurchase(int id);
         public IEnumerable<Product> GetTopSellingProducts(int topCount);
         public IEnumerable<Product> GetTopSellingProductsByShop(int shopId, int topCount);
         public IEnumerable<Product> GetAll();

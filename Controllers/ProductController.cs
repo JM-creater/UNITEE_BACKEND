@@ -58,6 +58,21 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpGet("recommendations/{id}")]
+        public async Task<IActionResult> GetRecommendations(int id)
+        {
+            try
+            {
+                var recommendedProducts = await productService.RecommendProductsPurchase(id);
+
+                return Ok(recommendedProducts);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet]
         public IActionResult GetAllProduct()
         {
