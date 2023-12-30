@@ -14,7 +14,6 @@ namespace UNITEE_BACKEND.Services
         public Task<IEnumerable<Cart>> GetCartByCustomer(int customerId);
         public Task DeleteCart(int id);
         public Task<Cart> Delete(int id);
-        public Task<Cart> Save(Cart request);
         public Task<Cart> Update(int id, CartAddRequest request);
     }
 }

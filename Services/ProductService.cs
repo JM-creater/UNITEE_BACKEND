@@ -134,8 +134,6 @@ namespace UNITEE_BACKEND.Services
             return recommendedProducts.Distinct().ToList();
         }
 
-
-
         public float CalculateProductRevenue(int productId)
         {
             float totalRevenue = 0;
