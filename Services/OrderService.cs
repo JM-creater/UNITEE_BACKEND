@@ -194,7 +194,7 @@ namespace UNITEE_BACKEND.Services
 
                 await context.SaveChangesAsync();
 
-                BackgroundJob.Schedule(() => UpdateOrderStatusToPending(order.Id, notification.Id), TimeSpan.FromSeconds(2));
+                BackgroundJob.Schedule(() => UpdateOrderStatusAndNotify(order.Id, notification.Id), TimeSpan.FromSeconds(2));
 
                 return order;
             }
@@ -207,6 +207,12 @@ namespace UNITEE_BACKEND.Services
         private string GenerateOrderNumber(DateTime dateCreated, int id)
         {
             return $"ORD-{dateCreated:yyMMdd}-{id:D5}";
+        }
+
+        public async Task UpdateOrderStatusAndNotify(int orderId, int id)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            UpdateOrderStatusToPending(orderId, id);
         }
 
         public void UpdateOrderStatusToPending(int orderId, int id)
@@ -223,7 +229,7 @@ namespace UNITEE_BACKEND.Services
 
                 var existingNotification = context.Notifications.Where(e => e.Id == id).First();
 
-                if (existingNotification != null) 
+                if (existingNotification != null)
                 {
                     existingNotification.Message = $"Your order {orderToUpdate.OrderNumber} status has been updated to Pending";
                     existingNotification.IsRead = false;
@@ -241,7 +247,7 @@ namespace UNITEE_BACKEND.Services
 
                     context.Notifications.Add(notification);
                 }
-                
+
                 context.SaveChangesAsync();
             }
         }
@@ -328,6 +334,23 @@ namespace UNITEE_BACKEND.Services
                     throw new InvalidOperationException("Only orders with 'Pending' status can be approved");
                 }
 
+                var orderItems = await context.OrderItems
+                                              .Where(oi => oi.OrderId == orderId)
+                                              .ToListAsync();
+
+                foreach (var orderItem in orderItems)
+                {
+                    var sizeQuantity = await context.SizeQuantities
+                                                    .Where(sq => sq.Id == orderItem.SizeQuantityId)
+                                                    .FirstOrDefaultAsync();
+
+                    if (sizeQuantity != null)
+                    {
+                        sizeQuantity.Quantity += orderItem.Quantity;
+                        context.Update(sizeQuantity);
+                    }
+                }
+
                 order.Status = Status.Denied;
                 order.DateUpdated = DateTime.Now;
 
@@ -391,6 +414,23 @@ namespace UNITEE_BACKEND.Services
                     throw new InvalidOperationException("Only orders with 'Pending' & 'Order Placed' status can be approved");
                 }
 
+                var orderItems = await context.OrderItems
+                                              .Where(oi => oi.OrderId == orderId)
+                                              .ToListAsync();
+
+                foreach (var orderItem in orderItems)
+                {
+                    var sizeQuantity = await context.SizeQuantities
+                                                    .Where(sq => sq.Id == orderItem.SizeQuantityId)
+                                                    .FirstOrDefaultAsync();
+
+                    if (sizeQuantity != null)
+                    {
+                        sizeQuantity.Quantity += orderItem.Quantity;
+                        context.Update(sizeQuantity);
+                    }
+                }
+
                 order.Status = Status.Canceled;
                 order.DateUpdated = DateTime.Now;
 
@@ -415,6 +455,8 @@ namespace UNITEE_BACKEND.Services
                     };
                     await service.AddNotification(notification);
                 }
+
+                order.IsDeleted = true;
 
                 context.Orders.Update(order);
                 await context.SaveChangesAsync();
