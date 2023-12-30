@@ -20,6 +20,7 @@ namespace UNITEE_BACKEND.DatabaseContext
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<ProductDepartment> ProductDepartments { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
         {
             
@@ -27,9 +28,6 @@ namespace UNITEE_BACKEND.DatabaseContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // to be remove
-            optionsBuilder.EnableSensitiveDataLogging();
-
             optionsBuilder.ConfigureWarnings(warnings =>
                 warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
         }

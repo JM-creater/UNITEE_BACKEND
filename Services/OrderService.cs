@@ -194,7 +194,7 @@ namespace UNITEE_BACKEND.Services
 
                 await context.SaveChangesAsync();
 
-                BackgroundJob.Schedule(() => UpdateOrderStatusAndNotify(order.Id, notification.Id), TimeSpan.FromSeconds(2));
+                BackgroundJob.Schedule(() => UpdateOrderStatusToPending(order.Id, notification.Id), TimeSpan.FromSeconds(2));
 
                 return order;
             }
@@ -204,16 +204,9 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-
         private string GenerateOrderNumber(DateTime dateCreated, int id)
         {
             return $"ORD-{dateCreated:yyMMdd}-{id:D5}";
-        }
-
-        public async Task UpdateOrderStatusAndNotify(int orderId, int id)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(2));
-            UpdateOrderStatusToPending(orderId, id);
         }
 
         public void UpdateOrderStatusToPending(int orderId, int id)
@@ -297,6 +290,7 @@ namespace UNITEE_BACKEND.Services
                 }
 
                 context.Orders.Update(order);
+
                 await context.SaveChangesAsync();
 
                 order = await context.Orders
@@ -421,8 +415,6 @@ namespace UNITEE_BACKEND.Services
                     };
                     await service.AddNotification(notification);
                 }
-
-                order.IsDeleted = true;
 
                 context.Orders.Update(order);
                 await context.SaveChangesAsync();
