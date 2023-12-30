@@ -638,7 +638,7 @@ namespace UNITEE_BACKEND.Services
                     </head>
                     <body>
                         <div class='email-body'>
-                             <div class='header'>Order Completion</div>
+                             <div class='header'>Order Completed</div>
                              <p class=""greeting-user-name"">Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
                              <p>We are happy to inform you that your order with the reference <strong>{orderDetails.OrderNumber}</strong> has been successfully completed!</p>
                              <table class='order-table'>
@@ -648,7 +648,7 @@ namespace UNITEE_BACKEND.Services
                                  </tr>
                                   {string.Join("", itemsList)}
                              </table>
-                             <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
+                             <div class='total-cost'><strong>Total cost:</strong> ₱{orderDetails.Total:C}</div>
                              <p>We hope you enjoy your purchase. Feel free to reach out for any further assistance.</p>
                              <footer>
                                 Thank you for shopping with UNITEE!<br>Stay stylish!</footer>
