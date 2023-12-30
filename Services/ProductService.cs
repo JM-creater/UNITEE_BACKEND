@@ -465,6 +465,23 @@ namespace UNITEE_BACKEND.Services
             return result.Entity;
         }
 
+        public async Task<int> GetQuantityBySize(int productId, int sizeQuantityId)
+        {
+            try
+            {
+                var sizeQuantity = await context.SizeQuantities
+                                                .Where(sq => sq.ProductId == productId
+                                                           && sq.Id == sizeQuantityId)
+                                                .FirstOrDefaultAsync();
+
+                return sizeQuantity?.Quantity ?? 0;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
         async Task<int> Save()
             => await context.SaveChangesAsync();
 

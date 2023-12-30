@@ -21,5 +21,6 @@ namespace UNITEE_BACKEND.Services
         public Task<IEnumerable<ProductWithSizeQuantityDto>> GetProductsBySupplier(int supplierId);
         public Task<Product> UpdateActivationStatus(int productId);
         public Task<Product> UpdateDectivationStatus(int productId);
+        public Task<int> GetQuantityBySize(int productId, int sizeQuantityId);
     }
 }
