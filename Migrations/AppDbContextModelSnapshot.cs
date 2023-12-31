@@ -417,9 +417,6 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<DateTime>("DateUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EstimateDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -767,13 +764,13 @@ namespace UNITEE_BACKEND.Migrations
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "admin@gmail.com",
                             FirstName = "Admin",
-                            Image = "Images/0d218025-7843-4cee-beed-0a62655a9664.png",
+                            Image = "PathImages\\Images\\Admin Profile.png",
                             IsActive = true,
                             IsEmailConfirmed = false,
                             IsValidate = true,
                             LastName = "Admin",
                             Password = "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=",
-                            PhoneNumber = "639199431060",
+                            PhoneNumber = "09199431060",
                             Role = 3
                         });
                 });

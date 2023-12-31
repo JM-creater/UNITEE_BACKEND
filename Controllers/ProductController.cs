@@ -187,6 +187,21 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpGet("getQuantity")]
+        public async Task<IActionResult> GetQuantity(int productId, int sizeQuantityId)
+        {
+            try
+            {
+                var quantity = await productService.GetQuantityBySize(productId, sizeQuantityId);
+
+                return Ok(quantity);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
