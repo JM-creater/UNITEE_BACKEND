@@ -375,7 +375,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (user == null)
                 {
-                    throw new AuthenticationException("Invalid user ID or Email");
+                    throw new AuthenticationException("User not registered");
                 }
 
                 if (!user.IsValidate)
@@ -395,9 +395,9 @@ namespace UNITEE_BACKEND.Services
 
                 return (user, (UserRole)user.Role);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                throw new AuthenticationException("Authentication failed", ex);
+                throw new AuthenticationException(e.Message);
             }
         }
 
