@@ -22,7 +22,7 @@ namespace UNITEE_BACKEND.Services
         public OrderService(AppDbContext dbcontext, INotificationService notificationService, IHubContext<NotificationHub> _hubContext, IConfiguration _configuration)
         {
             context = dbcontext;
-            this.service = notificationService;
+            service = notificationService;
             hubContext = _hubContext;
             configuration = _configuration;
         }
