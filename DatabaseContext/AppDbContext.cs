@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Security;
 
 namespace UNITEE_BACKEND.DatabaseContext
 {
-    public class AppDbContext : IdentityDbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Department> Departments { get; set; }
@@ -20,11 +19,6 @@ namespace UNITEE_BACKEND.DatabaseContext
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<ProductDepartment> ProductDepartments { get; set; }
-
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
-        {
-            
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -136,7 +130,7 @@ namespace UNITEE_BACKEND.DatabaseContext
                     FirstName = "Admin",
                     LastName = "Admin",
                     Password = PasswordEncryptionService.EncryptPassword("123456"),
-                    Email = "admin@gmail.com",
+                    Email = "garadojosephmartin98@gmail.com",
                     PhoneNumber = "09199431060",
                     Image = "PathImages\\Images\\Admin Profile.png",
                     IsActive = true,

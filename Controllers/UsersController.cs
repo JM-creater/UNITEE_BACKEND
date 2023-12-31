@@ -86,11 +86,12 @@ namespace UNITEE_BACKEND.Controllers
                 }
 
                 var token = jwtToken.GenerateJwtToken(user);
+
                 return new JsonResult(new { user, Role = role.ToString(), Token = token });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
