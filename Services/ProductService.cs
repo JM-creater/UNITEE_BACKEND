@@ -134,6 +134,23 @@ namespace UNITEE_BACKEND.Services
             return recommendedProducts.Distinct().ToList();
         }
 
+        public async Task<IEnumerable<Product>> GetSearchProductByUserDepartment(int userId)
+        {
+            var user = await context.Users
+                                    .Include(u => u.Department)
+                                    .Where(u => u.Id == userId)
+                                    .FirstOrDefaultAsync(); 
+
+            if (user?.DepartmentId == null)
+            {
+                return Enumerable.Empty<Product>(); 
+            }
+
+            return await context.Products
+                                .Where(p => p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
+                                .ToListAsync();
+        }
+
         public float CalculateProductRevenue(int productId)
         {
             float totalRevenue = 0;

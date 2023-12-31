@@ -73,6 +73,17 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpGet("searchByDepartment")]
+        public async Task<IActionResult> GetProductsByDepartment([FromQuery] int userId)
+        {
+            var products = await productService.GetSearchProductByUserDepartment(userId);
+
+            if (products == null || !products.Any())
+                return NotFound("No products found for the specified user department.");
+
+            return Ok(products);
+        }
+
         [HttpGet]
         public IActionResult GetAllProduct()
         {

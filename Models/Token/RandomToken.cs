@@ -12,7 +12,7 @@ namespace UNITEE_BACKEND.Models.Token
 
         public static string GenerateConfirmationCode()
         {
-            int length = 10;
+            int length = 5;
 
             const string validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             StringBuilder sb = new();
