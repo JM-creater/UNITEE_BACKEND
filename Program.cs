@@ -9,10 +9,14 @@ using Hangfire;
 using UNITEE_BACKEND.Models.SignalRNotification;
 using UNITEE_BACKEND.Hubs;
 using UNITEE_BACKEND.GenerateToken;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 // Variables
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var configuration = builder.Configuration;
 
 // HangFire Configuration
 builder.Services.AddHangfire(config =>
@@ -66,6 +70,29 @@ builder.Services.AddCors(options =>
                       });
 });
 
+// Adding Authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+
+// Adding Jwt Bearer
+    .AddJwtBearer(options =>
+    {
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidAudience = configuration["JWT:ValidAudience"],
+            ValidIssuer = configuration["JWT:ValidIssuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
+        };
+    });
+
 var app = builder.Build();
 
 var imagePathOptions = app.Services.GetRequiredService<IOptions<ImagePathOptions>>().Value;
@@ -95,6 +122,7 @@ app.MapHub<ChatHub>("/chathub");
 app.UseHangfireDashboard();
 app.UseHangfireServer();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
