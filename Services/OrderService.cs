@@ -1,5 +1,4 @@
 ﻿using Hangfire;
-using Hangfire.Server;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
