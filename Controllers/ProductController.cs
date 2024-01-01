@@ -84,6 +84,21 @@ namespace UNITEE_BACKEND.Controllers
             return Ok(products);
         }
 
+        [HttpGet("getQuantity")]
+        public async Task<IActionResult> GetQuantity(int productId, int sizeQuantityId)
+        {
+            try
+            {
+                var quantity = await productService.GetQuantityBySize(productId, sizeQuantityId);
+
+                return Ok(quantity);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet]
         public IActionResult GetAllProduct()
         {
