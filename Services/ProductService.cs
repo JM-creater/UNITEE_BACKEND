@@ -151,6 +151,21 @@ namespace UNITEE_BACKEND.Services
                                 .ToListAsync();
         }
 
+        public async Task<int> GetQuantityBySize(int productId, int sizeQuantityId)
+        {
+            try
+            {
+                var sizeQuantity = await context.SizeQuantities
+                                        .FirstOrDefaultAsync(sq => sq.ProductId == productId && sq.Id == sizeQuantityId);
+
+                return sizeQuantity?.Quantity ?? 0;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
         public float CalculateProductRevenue(int productId)
         {
             float totalRevenue = 0;
