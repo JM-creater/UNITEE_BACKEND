@@ -619,10 +619,50 @@ namespace UNITEE_BACKEND.Services
         {
             string resetLink = $"http://localhost:5173/forgot_password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
             string subject = "Password Reset Request";
-            string message = $"Please click on the link to reset your password: <a href='{resetLink}'>Reset Password</a>";
+            string message = $@"
+                <html>
+                    <head>
+                        <style>
+                            body {{
+                                font-family: 'Arial', sans-serif;
+                                color: #333;
+                                background-color: #f4f4f4;
+                                padding: 20px;
+                            }}
+                            .container {{
+                                max-width: 600px;
+                                margin: 0 auto;
+                                background: #fff;
+                                padding: 20px;
+                                border-radius: 8px;
+                                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                            }}
+                            .button {{
+                                display: inline-block;
+                                padding: 10px 20px;
+                                background-color: #007bff;
+                                border-radius: 5px;
+                                text-decoration: none;
+                                font-weight: bold;
+                            }}
+                            .button a {{
+                                color: #fff; 
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <h2>Password Reset Request</h2>
+                            <p>You requested a password reset for your account. Please click the button below to set a new password:</p>
+                            <a href='{resetLink}' class='button'>Reset Password</a>
+                            <p>If you did not request a password reset, please ignore this email.</p>
+                        </div>
+                    </body>
+                </html>";
 
             await SendEmailAsync(email, subject, message);
         }
+
 
         public async Task<User> ForgotPassword(string email)
         {
