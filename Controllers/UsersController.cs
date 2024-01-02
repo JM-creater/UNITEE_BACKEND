@@ -358,5 +358,20 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("validate-reset-token")]
+        public async Task<IActionResult> ValidateResetToken([FromQuery] string token)
+        {
+            try
+            {
+                var isValid = await service.IsResetTokenValid(token);
+
+                return Ok(new { isValid });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

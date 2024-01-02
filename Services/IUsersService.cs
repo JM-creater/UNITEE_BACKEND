@@ -30,5 +30,6 @@ namespace UNITEE_BACKEND.Services
         public Task SendEmailAsync(string email, string subject, string message);
         public Task<User> ForgotPassword(string email);
         public Task<User> ResetPassword(ResetPasswordDto dto);
+        public Task<bool> IsResetTokenValid(string token);
     }
 }
