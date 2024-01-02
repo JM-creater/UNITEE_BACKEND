@@ -13,7 +13,7 @@ namespace UNITEE_BACKEND.Services
         public Task<List<Cart>> GetByUserId(int userId);
         public Task<IEnumerable<Cart>> GetCartByCustomer(int customerId);
         public Task DeleteCart(int id);
-        public Task<Cart> Delete(int id);
+        public Task<CartItem> Delete(int cartId, int itemId);
         public Task<Cart> Update(int id, CartAddRequest request);
     }
 }

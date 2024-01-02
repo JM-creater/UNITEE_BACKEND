@@ -113,13 +113,14 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        [HttpDelete("delete/{cartId}/{itemId}")]
+        public async Task<IActionResult> Delete([FromRoute] int cartId, [FromRoute] int itemId)
         {
             try
             {
-                var deletedCart = await cartService.Delete(id);
-                return Ok(deletedCart);
+                var cartItem = await cartService.Delete(cartId, itemId);
+
+                return Ok(cartItem);
             }
             catch (Exception e)
             {
