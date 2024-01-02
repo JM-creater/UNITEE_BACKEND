@@ -149,34 +149,30 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task<Cart> Delete(int id)
+        public async Task<CartItem> Delete(int cartId, int itemId)
         {
             try
             {
-                var cart = await context.Carts
-                                        .Include(c => c.Items) 
-                                        .FirstOrDefaultAsync(c => c.Id == id);
+                var cartItem = await context.CartItems
+                                            .Include(ci => ci.SizeQuantity)
+                                            .FirstOrDefaultAsync(ci => ci.Id == itemId && ci.CartId == cartId); 
 
-                if (cart == null)
+                if (cartItem == null)
                 {
-                    throw new KeyNotFoundException($"No cart found with the ID: {id}");
+                    throw new InvalidOperationException($"No cart item found with Id: {itemId} in cart {cartId}");
                 }
 
-                if (cart.Items != null && cart.Items.Any())
-                {
-                    context.CartItems.RemoveRange(cart.Items);
-                }
-
-                context.Carts.Remove(cart);
+                context.CartItems.Remove(cartItem);
                 await context.SaveChangesAsync();
 
-                return cart;
+                return cartItem;
             }
             catch (Exception e)
             {
                 throw new ArgumentException(e.Message);
             }
         }
+
 
         public async Task<Cart> Update(int id, CartAddRequest request)
         {
