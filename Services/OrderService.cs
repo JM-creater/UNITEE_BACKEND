@@ -8,7 +8,6 @@ using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
-using UNITEE_BACKEND.Models.SignalRNotification;
 
 namespace UNITEE_BACKEND.Services
 {
@@ -16,14 +15,12 @@ namespace UNITEE_BACKEND.Services
     {
         private readonly AppDbContext context;
         private readonly INotificationService service;
-        private readonly IHubContext<NotificationHub> hubContext;
         private readonly IConfiguration configuration;
 
-        public OrderService(AppDbContext dbcontext, INotificationService notificationService, IHubContext<NotificationHub> _hubContext, IConfiguration _configuration)
+        public OrderService(AppDbContext dbcontext, INotificationService notificationService, IConfiguration _configuration)
         {
             context = dbcontext;
             service = notificationService;
-            hubContext = _hubContext;
             configuration = _configuration;
         }
 
@@ -222,9 +219,6 @@ namespace UNITEE_BACKEND.Services
                 orderToUpdate.Status = Status.Pending;
                 orderToUpdate.DateUpdated = DateTime.Now;
                 context.SaveChangesAsync();
-
-                hubContext.Clients.User(orderToUpdate.UserId.ToString())
-                          .SendAsync("OrderStatusUpdated", "Your order status has been updated to Pending.");
 
                 var existingNotification = context.Notifications.Where(e => e.Id == id).First();
 

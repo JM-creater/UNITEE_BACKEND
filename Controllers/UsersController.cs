@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
@@ -44,7 +45,9 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var newUser = await service.RegisterCustomer(request);
+
                 var token = jwtToken.GenerateJwtToken(newUser);
+
                 return Ok(new { newUser, Token = token });
             }
             catch (Exception e)
@@ -144,6 +147,21 @@ namespace UNITEE_BACKEND.Controllers
             catch (Exception e)
             {
                 return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("validate-reset-token")]
+        public async Task<IActionResult> ValidateResetToken([FromQuery] string token)
+        {
+            try
+            {
+                var isValid = await service.IsResetTokenValid(token);
+
+                return Ok(new { isValid });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
 
@@ -352,21 +370,6 @@ namespace UNITEE_BACKEND.Controllers
                 var supplier = await service.UpdateSupplierPassword(id, request);
 
                 return Ok(supplier);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [HttpGet("validate-reset-token")]
-        public async Task<IActionResult> ValidateResetToken([FromQuery] string token)
-        {
-            try
-            {
-                var isValid = await service.IsResetTokenValid(token);
-
-                return Ok(new { isValid });
             }
             catch (Exception e)
             {

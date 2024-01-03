@@ -6,12 +6,11 @@ using UNITEE_BACKEND.AutoMapperConfig;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using Microsoft.Extensions.Options;
 using Hangfire;
-using UNITEE_BACKEND.Models.SignalRNotification;
-using UNITEE_BACKEND.Hubs;
 using UNITEE_BACKEND.GenerateToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 // Variables
 var builder = WebApplication.CreateBuilder(args);
@@ -22,8 +21,6 @@ var configuration = builder.Configuration;
 builder.Services.AddHangfire(config =>
    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("default")));
 builder.Services.AddHangfireServer();
-// SignalR
-builder.Services.AddSignalR();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -115,9 +112,6 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseCors(MyAllowSpecificOrigins);
-
-app.MapHub<NotificationHub>("/notificationHub");
-app.MapHub<ChatHub>("/chathub");
 
 app.UseHangfireDashboard();
 app.UseHangfireServer();
