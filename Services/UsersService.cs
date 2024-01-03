@@ -709,14 +709,22 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<bool> IsResetTokenValid(string token)
         {
-            if (string.IsNullOrEmpty(token))
-                return false;
+            try
+            {
+                if (string.IsNullOrEmpty(token))
+                    return false;
 
-            var user = await context.Users
-                                    .Where(u => u.PasswordResetToken == token && u.ResetTokenExpires > DateTime.UtcNow)
-                                    .FirstOrDefaultAsync();
+                var user = await context.Users
+                                        .Where(u => u.PasswordResetToken == token
+                                                && u.ResetTokenExpires > DateTime.UtcNow)
+                                        .FirstOrDefaultAsync();
 
-            return user != null;
+                return user != null;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
     }
 }
