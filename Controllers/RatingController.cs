@@ -86,5 +86,20 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("top3/{supplierId}")]
+        public async Task<IActionResult> GetTop3RatingsBySupplier(int supplierId)
+        {
+            try
+            {
+                var top3Ratings = await service.GetTop3RatingsBySupplier(supplierId);
+
+                return Ok(top3Ratings);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }
