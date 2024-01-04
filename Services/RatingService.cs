@@ -82,5 +82,17 @@ namespace UNITEE_BACKEND.Services
 
             return sumOfRatings / totalNumberOfRatings;
         }
+
+        public async Task<IEnumerable<Rating>> GetTop3RatingsBySupplier(int supplierId)
+        {
+            return await context.Ratings
+                                .Include(r => r.Product)
+                                .Where(r => r.SupplierId == supplierId && r.Role == RatingRole.Product)
+                                .GroupBy(r => r.ProductId)
+                                .Select(group => group.OrderByDescending(r => r.Value).First())
+                                .Take(3)
+                                .ToListAsync();
+        }
+
     }
 }

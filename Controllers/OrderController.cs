@@ -61,6 +61,111 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpGet("weekly")]
+        public async Task<IActionResult> GetWeeklySales([FromQuery] DateTime startDate, [FromQuery] int supplierId)
+        {
+            try
+            {
+                var result = await orderService.GetWeeklySales(startDate, supplierId);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("monthly")]
+        public async Task<IActionResult> GetMonthlySales([FromQuery] int year, [FromQuery] int month, [FromQuery] int supplierId)
+        {
+            try
+            {
+                var result = await orderService.GetMonthlySales(year, month, supplierId);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("yearly")]
+        public async Task<IActionResult> GetYearlySales([FromQuery] int year, [FromQuery] int supplierId)
+        {
+            try
+            {
+                var result = await orderService.GetYearlySales(year, supplierId);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("weeklyAdmin")]
+        public async Task<IActionResult> GetWeeklySalesAdmin([FromQuery] DateTime startDate)
+        {
+            try
+            {
+                var result = await orderService.GetWeeklySalesAdmin(startDate);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("monthlyAdmin")]
+        public async Task<IActionResult> GetMonthlySalesAdmin([FromQuery] int year, [FromQuery] int month)
+        {
+            try
+            {
+                var result = await orderService.GetMonthlySalesAdmin(year, month);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("yearlyAdmin")]
+        public async Task<IActionResult> GetYearlySalesAdmin([FromQuery] int year)
+        {
+            try
+            {
+                var result = await orderService.GetYearlySalesAdmin(year);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("totalSales/{supplierId}")]
+        public async Task<IActionResult> GetTotalSales(int supplierId)
+        {
+            try
+            {
+                var totalSales = await orderService.GetTotalSalesBySupplierId(supplierId);
+
+                return Ok(totalSales);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpGet("receipt/{id}")]
         public async Task<IActionResult> GenerateReceipt(int id)
         {

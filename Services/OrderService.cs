@@ -54,6 +54,7 @@ namespace UNITEE_BACKEND.Services
                             .Include(u => u.Cart)
                                 .ThenInclude(u => u.Supplier)
                             .Include(u => u.User)
+                            .Include(u => u.OrderItems)
                             .Where(o => o.UserId == id)
                             .OrderByDescending(o => o.DateCreated)
                             .ToListAsync();
@@ -72,6 +73,109 @@ namespace UNITEE_BACKEND.Services
                         .Where(o => o.Cart.Supplier.Id == supplierId)
                         .OrderByDescending(o => o.DateCreated)
                         .ToListAsync();
+        }
+
+        public async Task<IEnumerable<float>> GetWeeklySales(DateTime startDate, int supplierId)
+        {
+            var endDate = startDate.AddDays(7);
+
+            return await context.Orders
+                                .Where(o => o.DateCreated >= startDate &&
+                                            o.DateCreated < endDate &&
+                                            o.Status == Status.Completed &&
+                                            o.Cart.SupplierId == supplierId)
+                                .Select(o => o.Total)
+                                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<float>> GetMonthlySales(int year, int month, int supplierId)
+        {
+            var startDate = new DateTime(year, month, 1);
+            var endDate = startDate.AddMonths(1);
+
+            return await context.Orders
+                                .Where(o => o.DateCreated >= startDate &&
+                                            o.DateCreated < endDate &&
+                                            o.Status == Status.Completed &&
+                                            o.Cart.SupplierId == supplierId)
+                                .Select(o => o.Total)
+                                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<float>> GetYearlySales(int year, int supplierId)
+        {
+            var startDate = new DateTime(year, 1, 1);
+            var endDate = startDate.AddYears(1);
+
+            var yearlySales = await context.Orders
+                                           .Where(o => o.DateCreated >= startDate &&
+                                                       o.DateCreated < endDate &&
+                                                       o.Status == Status.Completed &&
+                                                       o.Cart.SupplierId == supplierId)
+                                           .GroupBy(o => new { o.DateCreated.Year, o.DateCreated.Month })
+                                           .Select(g => new { Month = g.Key.Month, Total = g.Sum(o => o.Total) })
+                                           .OrderBy(g => g.Month)
+                                           .Select(g => g.Total)
+                                           .ToListAsync();
+
+            return yearlySales;
+        }
+
+        public async Task<IEnumerable<float>> GetWeeklySalesAdmin(DateTime startDate)
+        {
+            var endDate = startDate.AddDays(7);
+
+            return await context.Orders
+                                .Where(o => o.DateCreated >= startDate &&
+                                            o.DateCreated < endDate &&
+                                            o.Status == Status.Completed)
+                                .Select(o => o.Total)
+                                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<float>> GetMonthlySalesAdmin(int year, int month)
+        {
+            var startDate = new DateTime(year, month, 1);
+            var endDate = startDate.AddMonths(1);
+
+            return await context.Orders
+                                .Where(o => o.DateCreated >= startDate &&
+                                            o.DateCreated < endDate &&
+                                            o.Status == Status.Completed)
+                                .Select(o => o.Total)
+                                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<float>> GetYearlySalesAdmin(int year)
+        {
+            var startDate = new DateTime(year, 1, 1);
+            var endDate = startDate.AddYears(1);
+
+            var yearlySales = await context.Orders
+                                           .Where(o => o.DateCreated >= startDate &&
+                                                       o.DateCreated < endDate &&
+                                                       o.Status == Status.Completed)
+                                           .GroupBy(o => new { o.DateCreated.Year, o.DateCreated.Month })
+                                           .Select(g => new { Month = g.Key.Month, Total = g.Sum(o => o.Total) })
+                                           .OrderBy(g => g.Month)
+                                           .Select(g => g.Total)
+                                           .ToListAsync();
+
+            return yearlySales;
+        }
+
+
+        public async Task<decimal> GetTotalSalesBySupplierId(int supplierId)
+        {
+            var totalSales = (decimal)await context.Orders
+                                          .Include(o => o.OrderItems)
+                                            .ThenInclude(oi => oi.Product)
+                                          .Where(o => o.Status == Status.Completed && !o.IsDeleted)
+                                          .SelectMany(o => o.OrderItems)
+                                          .Where(oi => oi.Product.SupplierId == supplierId)
+                                          .SumAsync(oi => oi.Quantity * oi.Product.Price);
+
+            return totalSales;
         }
 
         public async Task<Order> GenerateReceipt(int id)
