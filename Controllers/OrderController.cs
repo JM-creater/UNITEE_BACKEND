@@ -79,7 +79,16 @@ namespace UNITEE_BACKEND.Controllers
         [HttpGet("BySupplier/{supplierId}")]
         public async Task<ActionResult<List<Order>>> GetBySupplier(int supplierId)
         {
-            return await orderService.GetAllBySupplierId(supplierId);
+            try
+            {
+                var order = await orderService.GetAllBySupplierId(supplierId);
+
+                return Ok(order);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPut("approvedOrder/{orderId}")]

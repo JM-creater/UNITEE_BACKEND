@@ -45,6 +45,8 @@ namespace UNITEE_BACKEND.Services
                                          .Include(n => n.Order)
                                             .ThenInclude(n => n.Cart)
                                                 .ThenInclude(n => n.Supplier)
+                                         .Include(n => n.Order)
+                                            .ThenInclude(n => n.OrderItems)
                                          .Where(n => n.UserId == userId)
                                          .OrderByDescending(n => n.DateCreated)
                                          .ToListAsync();

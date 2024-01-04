@@ -68,6 +68,7 @@ namespace UNITEE_BACKEND.Services
                             .ThenInclude(i => i.Items)
                             .ThenInclude(p => p.Product)
                             .ThenInclude(s => s.Sizes)
+                        .Include(oi => oi.OrderItems)
                         .Where(o => o.Cart.Supplier.Id == supplierId)
                         .OrderByDescending(o => o.DateCreated)
                         .ToListAsync();
@@ -641,7 +642,7 @@ namespace UNITEE_BACKEND.Services
                                  </tr>
                                   {string.Join("", itemsList)}
                              </table>
-                             <div class='total-cost'><strong>Total cost:</strong> ₱{orderDetails.Total:C}</div>
+                             <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
                              <p>We hope you enjoy your purchase. Feel free to reach out for any further assistance.</p>
                              <footer>
                                 Thank you for shopping with UNITEE!<br>Stay stylish!</footer>
