@@ -24,8 +24,8 @@ namespace UNITEE_BACKEND.Services
             configuration = _configuration;
         }
 
-        public IEnumerable<Order> GetAll()
-            => context.Orders
+        public async Task<IEnumerable<Order>> GetAll()
+            => await context.Orders
                       .Include(u => u.User)
                       .Include(c => c.Cart)
                         .ThenInclude(s => s.Supplier)
@@ -33,7 +33,8 @@ namespace UNITEE_BACKEND.Services
                         .ThenInclude(i => i.Items)
                         .ThenInclude(p => p.Product)
                         .ThenInclude(s => s.Sizes)
-                      .AsEnumerable();
+                       .Include(o => o.OrderItems)
+                      .ToListAsync();
 
         public async Task<Order?> GetById(int id)
             => await context.Orders
@@ -552,6 +553,25 @@ namespace UNITEE_BACKEND.Services
                         IsRead = false
                     };
                     await service.AddNotification(notification);
+                }
+
+                var cart = await context.Carts
+                                        .Include(c => c.Items)
+                                        .FirstOrDefaultAsync(c => c.Id == order.CartId);
+
+                if (cart != null)
+                {
+                    var supplierNotifications = new Notification
+                    {
+                        UserId = cart.SupplierId,
+                        OrderId = order.Id,
+                        Message = $"Order {order.OrderNumber} has been canceled and requires your attention.",
+                        DateCreated = DateTime.Now,
+                        IsRead = false,
+                        UserRole = UserRole.Supplier
+                    };
+
+                    context.Notifications.Add(supplierNotifications);
                 }
 
                 order.IsDeleted = true;
