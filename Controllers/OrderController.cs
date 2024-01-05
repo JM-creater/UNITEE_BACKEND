@@ -32,11 +32,11 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllOrder()
+        public async Task<IActionResult> GetAllOrder()
         {
             try
             {
-                var order = orderService.GetAll();
+                var order = await orderService.GetAll();
 
                 return Ok(order);
             }
