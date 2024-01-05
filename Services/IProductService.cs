@@ -15,7 +15,7 @@ namespace UNITEE_BACKEND.Services
         public IEnumerable<Product> GetTopSellingProductsByShop(int shopId, int topCount);
         public IEnumerable<Product> GetAll();
         public IEnumerable<Product> GetProductsByShopId(int shopId);
-        public IEnumerable<Product> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId);
+        public Task<IEnumerable<Product>> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId);
         public Task<Product> GetById(int productId);
         public Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId);
         public Task<Product> UpdateProduct(int productId, ProductUpdateRequest request);

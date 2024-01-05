@@ -318,6 +318,9 @@ namespace UNITEE_BACKEND.Services
                 var imageBir = await new ImagePathConfig().SaveBIR(request.BIR);
                 var imageCityPermit = await new ImagePathConfig().SaveCityPermit(request.CityPermit);
                 var imageSchoolPermit = await new ImagePathConfig().SaveSchoolPermit(request.SchoolPermit);
+                var imageBarangayClearance = await new ImagePathConfig().SaveBarangayClearance(request.BarangayClearance);
+                var imageValidIdFrontImage = await new ImagePathConfig().SaveValidIdFrontImage(request.ValidIdFrontImage);
+                var imageValidIdBackImage = await new ImagePathConfig().SaveValidIdBackImage(request.ValidIdBackImage);
                 var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
                 var confirmationToken = RandomToken.CreateRandomToken();
                 var confirmationCode = RandomToken.GenerateConfirmationCode();
@@ -334,6 +337,9 @@ namespace UNITEE_BACKEND.Services
                     BIR = imageBir,
                     CityPermit = imageCityPermit,
                     SchoolPermit = imageSchoolPermit,
+                    BarangayClearance = imageBarangayClearance,
+                    ValidIdFrontImage = imageValidIdFrontImage,
+                    ValidIdBackImage = imageValidIdBackImage,
                     Role = (int)UserRole.Supplier,
                     IsActive = false,
                     DateCreated = DateTime.Now,

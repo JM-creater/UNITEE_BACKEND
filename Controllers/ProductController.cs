@@ -128,11 +128,11 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpGet("ByShop/{shopId}/ByDepartment/{departmentId}")]
-        public IActionResult GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
+        public async Task<IActionResult> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
         {
-            var products = productService.GetProductsByShopIdAndDepartmentId(shopId, departmentId);
+            var products = await productService.GetProductsByShopIdAndDepartmentId(shopId, departmentId);
 
-            if (products == null || !products.Any())
+            if (products == null)
             {
                 return NotFound(new { Message = "No products found for this shop and department." });
             }

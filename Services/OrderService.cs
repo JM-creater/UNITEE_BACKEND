@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using UNITEE_BACKEND.DatabaseContext;
+using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.ImageDirectory;
@@ -497,7 +498,7 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task<Order> CanceledOrder(int orderId)
+        public async Task<Order> CanceledOrder(int orderId, CancellationDto dto)
         {
             try
             {
@@ -529,6 +530,8 @@ namespace UNITEE_BACKEND.Services
                         context.Update(sizeQuantity);
                     }
                 }
+
+                order.CancellationReason = dto.CancellationReason;
 
                 order.Status = Status.Canceled;
                 order.DateUpdated = DateTime.Now;

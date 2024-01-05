@@ -32,9 +32,9 @@ namespace UNITEE_BACKEND.GenerateToken
                 new Claim(ClaimTypes.Name, user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Expiration, DateTime.UtcNow.AddDays(7).ToString())
+                new Claim(ClaimTypes.Expiration, DateTime.Now.AddDays(1).ToString())
             }),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.Now.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);

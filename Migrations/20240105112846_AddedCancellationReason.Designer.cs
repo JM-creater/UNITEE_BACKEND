@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UNITEE_BACKEND.DatabaseContext;
 
@@ -11,9 +12,11 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240105112846_AddedCancellationReason")]
+    partial class AddedCancellationReason
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -480,9 +483,6 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<string>("BIR")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BarangayClearance")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CityPermit")
                         .HasColumnType("nvarchar(max)");
 
@@ -553,12 +553,6 @@ namespace UNITEE_BACKEND.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudyLoad")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ValidIdBackImage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ValidIdFrontImage")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

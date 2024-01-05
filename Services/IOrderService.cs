@@ -1,4 +1,5 @@
-﻿using UNITEE_BACKEND.Entities;
+﻿using UNITEE_BACKEND.Dto;
+using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 
@@ -21,7 +22,7 @@ namespace UNITEE_BACKEND.Services
         public Task<List<Order>> GetAllBySupplierId(int supplierId);
         public Task<Order> ApproveOrder(int orderId);
         public Task<Order> DeniedOrder(int orderId);
-        public Task<Order> CanceledOrder(int orderId);
+        public Task<Order> CanceledOrder(int orderId, CancellationDto dto);
         public Task<Order> ForPickUp(int orderId);
         public Task<Order> CompletedOrder(int orderId);
     }

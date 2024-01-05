@@ -247,15 +247,15 @@ namespace UNITEE_BACKEND.Services
             return context.Products.Include(s => s.Sizes).Where(p => p.SupplierId == shopId).AsEnumerable();
         }
 
-        public IEnumerable<Product> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
+        public async Task<IEnumerable<Product>> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
         {
-            return context.Products
-                  .Include(p => p.ProductDepartments)
-                      .ThenInclude(pd => pd.Department)
-                  .Include(p => p.Sizes)
-                  .Where(p => p.SupplierId == shopId &&
-                              p.ProductDepartments.Any(pd => pd.DepartmentId == departmentId))
-                  .ToList(); 
+            return await context.Products
+                          .Include(p => p.ProductDepartments)
+                              .ThenInclude(pd => pd.Department)
+                          .Include(p => p.Sizes)
+                          .Where(p => p.SupplierId == shopId &&
+                                      p.ProductDepartments.Any(pd => pd.DepartmentId == departmentId))
+                          .ToListAsync();
         }
 
         public async Task<Product> GetById(int productId)
@@ -444,8 +444,8 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var existingProduct = await context.Products
-                                                .Where(a => a.ProductId == productId)
-                                                .FirstOrDefaultAsync();
+                                                   .Where(a => a.ProductId == productId)
+                                                   .FirstOrDefaultAsync();
 
                 if (existingProduct == null)
                     throw new Exception("Product not found");
@@ -468,8 +468,8 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var existingProduct = await context.Products
-                                                .Where(a => a.ProductId == productId)
-                                                .FirstOrDefaultAsync();
+                                                   .Where(a => a.ProductId == productId)
+                                                   .FirstOrDefaultAsync();
 
                 if (existingProduct == null)
                     throw new Exception("Product not found");

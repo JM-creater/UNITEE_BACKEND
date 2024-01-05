@@ -16,5 +16,8 @@ namespace UNITEE_BACKEND.Models.Request
         public IFormFile? BIR { get; set; }
         public IFormFile? CityPermit { get; set; }
         public IFormFile? SchoolPermit { get; set; }
+        public IFormFile? BarangayClearance { get; set; }
+        public IFormFile? ValidIdFrontImage { get; set; }
+        public IFormFile? ValidIdBackImage { get; set; }
     }
 }
