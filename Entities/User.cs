@@ -23,6 +23,9 @@ namespace UNITEE_BACKEND.Entities
         public string? BIR { get; set; }
         public string? CityPermit { get; set; }
         public string? SchoolPermit { get; set; }
+        public string? BarangayClearance { get; set; }
+        public string? ValidIdFrontImage { get; set; } 
+        public string? ValidIdBackImage { get; set; }
         public bool IsActive { get; set; }
         public int Role { get; set; }
         public bool IsValidate { get; set; }

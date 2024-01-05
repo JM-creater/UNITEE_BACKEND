@@ -75,5 +75,20 @@ namespace UNITEE_BACKEND.Models.ImageDirectory
         {
             return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.SizeGuide);
         }
+
+        public string GetBarangayClearance()
+        {
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.BarangayClearance);
+        }
+
+        public string GetValidIdFrontImage()
+        {
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.ValidIdFrontImage);
+        }
+
+        public string GetValidIdBackImage()
+        {
+            return Path.Combine(_imagePathOptions.PathImages, _imagePathOptions.ValidIdBackImage);
+        }
     }
 }

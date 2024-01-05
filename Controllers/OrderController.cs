@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
@@ -227,11 +228,11 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("orderCanceled/{orderId}")]
-        public async Task<IActionResult> OrderCanceled(int orderId)
+        public async Task<IActionResult> OrderCanceled(int orderId, [FromBody] CancellationDto dto)
         {
             try
             {
-                var order = await orderService.CanceledOrder(orderId);
+                var order = await orderService.CanceledOrder(orderId, dto);
 
                 return Ok(order);
             }

@@ -15,5 +15,8 @@
         public string SchoolPermit { get; set; }
         public string ProofOfPayment { get; set; }
         public string SizeGuide { get; set; }
+        public string BarangayClearance { get; set; }
+        public string ValidIdFrontImage { get; set; }
+        public string ValidIdBackImage { get; set; }
     }
 }

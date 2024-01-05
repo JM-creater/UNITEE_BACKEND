@@ -20,6 +20,8 @@ namespace UNITEE_BACKEND.Entities
         public PaymentType PaymentType { get; set; }
         public Status Status { get; set; }
         public bool IsDeleted { get; set; } = false;
+        public string? CancellationReason { get; set; }
+
         public virtual ICollection<OrderItem>? OrderItems { get; set; }
         public virtual ICollection<Notification>? Notifications { get; set; }
     }
