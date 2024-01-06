@@ -14,13 +14,13 @@ namespace UNITEE_BACKEND.Services
         public Task<User> VerifyLater(int userId);
         public Task<User> VerifyEmail(int userId);
         public Task<User?> GetTopSellingSeller();
-        public IEnumerable<User> GetAll();
+        public Task<IEnumerable<User>> GetAll();
         public Task<User> SupplierById(int id);
-        public IEnumerable<User> GetAllSuppliers();
+        public Task<IEnumerable<User>> GetAllSuppliers();
         public Task<List<User>> GetSupplierById(int id);
-        public IEnumerable<Product> GetProductsBySupplierShop(int supplierId);
-        public IEnumerable<User> GetAllCustomers();
-        public IEnumerable<User> GetAllSuppliersProducts(int departmentId);
+        public Task<IEnumerable<Product>> GetProductsBySupplierShop(int supplierId);
+        public Task<IEnumerable<User>> GetAllCustomers();
+        public Task<IEnumerable<User>> GetAllSuppliersProducts(int departmentId);
         public Task<User> GetById(int id);
         public Task<User> ValidateCustomer(int id, ValidateUserRequest request);
         public Task<User> ValidateSupplier(int id, ValidateUserRequest request);
@@ -29,7 +29,6 @@ namespace UNITEE_BACKEND.Services
         public Task<User> UpdateProfileSupplier(int id, UpdateSupplierRequest request);
         public Task<User> UpdateCustomerPassword(int id, UpdatePasswordRequest request);
         public Task<User> UpdateSupplierPassword(int id, UpdatePasswordRequest request);
-        public Task SendEmailAsync(string email, string subject, string message);
         public Task<User> ForgotPassword(string email);
         public Task<User> ResetPassword(ResetPasswordDto dto);
         public Task<bool> IsResetTokenValid(string token);

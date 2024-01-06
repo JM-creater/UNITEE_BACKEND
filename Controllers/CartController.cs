@@ -8,7 +8,7 @@ namespace UNITEE_BACKEND.Controllers
     [ApiController, Route("[controller]")]
     public class CartController : Controller
     {
-        private ICartService cartService;
+        private readonly ICartService cartService;
 
         public CartController(ICartService service)
         {
@@ -21,6 +21,7 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var userRole = UserRole.Customer;
+
                 await cartService.AddToCart(userRole, request);
 
                 return Ok("Item added to cart");
@@ -47,7 +48,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -61,7 +62,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -75,7 +76,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -93,8 +94,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-
-                return BadRequest(e);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -109,7 +109,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -124,7 +124,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 

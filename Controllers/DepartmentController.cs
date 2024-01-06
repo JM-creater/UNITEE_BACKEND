@@ -6,17 +6,17 @@ namespace UNITEE_BACKEND.Controllers
     [ApiController, Route("[controller]")]
     public class DepartmentController : Controller
     {
-        private IDepartmentService departmentService;
+        private readonly IDepartmentService service;
 
-        public DepartmentController(IDepartmentService service)
+        public DepartmentController(IDepartmentService _service)
         {
-            departmentService = service;
+            service = _service;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await departmentService.GetAll());
+            return Ok(await service.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -24,12 +24,13 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var e = await departmentService.GetById(id);
-                return Ok(e);
+                var department = await service.GetById(id);
+
+                return Ok(department);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                return BadRequest(new { message = e.Message });
             }
         }
     }

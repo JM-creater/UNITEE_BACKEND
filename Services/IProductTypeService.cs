@@ -4,6 +4,6 @@ namespace UNITEE_BACKEND.Services
 {
     public interface IProductTypeService
     {
-        public IEnumerable<ProductType> GetAll();
+        public Task<IEnumerable<ProductType>> GetAll();
     }
 }

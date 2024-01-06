@@ -6,17 +6,24 @@ namespace UNITEE_BACKEND.Controllers
     [ApiController, Route("[controller]")]
     public class ProductTypeController : Controller
     {
-        private IProductTypeService productTypeService;
+        private readonly IProductTypeService service;
 
-        public ProductTypeController(IProductTypeService service) 
+        public ProductTypeController(IProductTypeService _service) 
         {
-            productTypeService = service;
+            service = _service;
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(productTypeService.GetAll());
+            try
+            {
+                return Ok(await service.GetAll());
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
     }
 }

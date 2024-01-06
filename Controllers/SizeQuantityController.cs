@@ -9,11 +9,11 @@ namespace UNITEE_BACKEND.Controllers
     [ApiController, Route("[controller]")]
     public class SizeQuantityController : Controller
     {
-        private ISizeQuantityService sizeQuantityService;
+        private readonly ISizeQuantityService service;
 
-        public SizeQuantityController(ISizeQuantityService service)
+        public SizeQuantityController(ISizeQuantityService _service)
         {
-            sizeQuantityService = service;
+            service = _service;
         }
 
         [HttpPost("createsizequantity")]
@@ -21,71 +21,13 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var sizeQuantity = await sizeQuantityService.AddSizeQuantity(request);
+                var sizeQuantity = await service.AddSizeQuantity(request);
 
                 return Ok(sizeQuantity);
             }
             catch (Exception e)
             {
-                return BadRequest(e);
-            }
-        }
-
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            try
-            {
-                return Ok(sizeQuantityService.GetAll());
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-        }
-
-        [HttpGet("byproduct/{id}")]
-        public async Task<IActionResult> GetByProductId([FromRoute] int id)
-        {
-            try
-            {
-                var sizeQuantities = await sizeQuantityService.GetByProductId(id);
-
-                return Ok(sizeQuantities);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [HttpGet("ForProduct/{productId}")]
-        public async Task<IActionResult> GetSizeQuantityProduct(int productId)
-        {
-            try
-            {
-                var sizeQuantities = await sizeQuantityService.GetSizeQuantitiesForProduct(productId);
-
-                return Ok(sizeQuantities);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateSizeQuantity([FromRoute] int id, [FromForm] UpdateSizeQuantityDto dto)
-        {
-            try
-            {
-                var sizequantity = await sizeQuantityService.Update(id, dto);
-
-                return Ok("Successfully Updated the Size and Quantity");
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -94,28 +36,86 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var sizeQuantity = await sizeQuantityService.Create(dto);
+                var sizeQuantity = await service.Create(dto);
 
                 return CreatedAtAction(nameof(AddSizeQuantity), new { id = sizeQuantity.Id }, sizeQuantity);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        [HttpPost("{productId}")]
+        public async Task<IActionResult> AddSizeToProduct(int productId, [FromBody] SizeQuantityDto dto)
         {
             try
             {
-                var result = await sizeQuantityService.DeleteSizeQuantity(id);
+                var sizeQuantity = await service.AddSizeToProduct(productId, dto);
 
-                return Ok(result);
+                return CreatedAtAction(nameof(AddSizeToProduct), new { id = sizeQuantity.Id }, sizeQuantity);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                return Ok(await service.GetAll());
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("byproduct/{id}")]
+        public async Task<IActionResult> GetByProductId([FromRoute] int id)
+        {
+            try
+            {
+                var sizeQuantities = await service.GetByProductId(id);
+
+                return Ok(sizeQuantities);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("ForProduct/{productId}")]
+        public async Task<IActionResult> GetSizeQuantityProduct(int productId)
+        {
+            try
+            {
+                var sizeQuantities = await service.GetSizeQuantitiesForProduct(productId);
+
+                return Ok(sizeQuantities);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpPut("Update/{id}")]
+        public async Task<IActionResult> UpdateSizeQuantity([FromRoute] int id, [FromForm] UpdateSizeQuantityDto dto)
+        {
+            try
+            {
+                var sizequantity = await service.Update(id, dto);
+
+                return Ok("Successfully Updated the Size and Quantity");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -124,28 +124,12 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var sizes = await sizeQuantityService.GetSizesByProductId(productId);
+                var sizes = await service.GetSizesByProductId(productId);
                 return Ok(sizes);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
-            }
-        }
-
-        // New Controller
-        [HttpPost("{productId}")]
-        public async Task<IActionResult> AddSizeToProduct(int productId, [FromBody] SizeQuantityDto dto)
-        {
-            try
-            {
-                var sizeQuantity = await sizeQuantityService.AddSizeToProduct(productId, dto);
-
-                return CreatedAtAction(nameof(AddSizeToProduct), new { id = sizeQuantity.Id }, sizeQuantity);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -154,13 +138,28 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var sizeQuantity = await sizeQuantityService.UpdateQuantity(id, productId, size, newQuantity);
+                var sizeQuantity = await service.UpdateQuantity(id, productId, size, newQuantity);
 
                 return Ok(sizeQuantity);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            try
+            {
+                var result = await service.DeleteSizeQuantity(id);
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
             }
         }
 

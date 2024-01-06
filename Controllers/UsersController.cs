@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
-using UNITEE_BACKEND.Entities;
-using UNITEE_BACKEND.GenerateToken;
 using UNITEE_BACKEND.Models.Request;
+using UNITEE_BACKEND.Models.Token;
 using UNITEE_BACKEND.Services;
 
 namespace UNITEE_BACKEND.Controllers
@@ -15,28 +12,13 @@ namespace UNITEE_BACKEND.Controllers
     {
         private readonly IUsersService service;
         private readonly AppDbContext context;
-        private readonly JwtToken jwtToken;
+        private readonly Tokens tokens;
 
-        public UsersController(IUsersService _service, AppDbContext dbcontext, JwtToken _jwtToken)
+        public UsersController(IUsersService _service, AppDbContext dbcontext, Tokens _tokens)
         {
             service = _service;
             context = dbcontext;
-            jwtToken = _jwtToken;
-        }
-
-        [HttpPost("send")]
-        public async Task<IActionResult> SendEmail([FromBody] EmailDto emailDto)
-        {
-            try
-            {
-                await service.SendEmailAsync(emailDto.Email, emailDto.Subject, emailDto.Message);
-
-                return Ok("Email sent successfully");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Internal Server Error: " + ex.Message);
-            }
+            tokens = _tokens;
         }
 
         [HttpPost("register")]
@@ -46,7 +28,7 @@ namespace UNITEE_BACKEND.Controllers
             {
                 var newUser = await service.RegisterCustomer(request);
 
-                var token = jwtToken.GenerateJwtToken(newUser);
+                var token = tokens.GenerateJwtToken(newUser);
 
                 return Ok(new { newUser, Token = token });
             }
@@ -62,7 +44,7 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var newSupplier = await service.RegisterSupplier(request);
-                var token = jwtToken.GenerateJwtToken(newSupplier);
+                var token = tokens.GenerateJwtToken(newSupplier);
                 return Ok(new { newSupplier, Token = token });
             }
             catch (Exception e)
@@ -88,7 +70,7 @@ namespace UNITEE_BACKEND.Controllers
                     return BadRequest("User not found");
                 }
 
-                var token = jwtToken.GenerateJwtToken(user);
+                var token = tokens.GenerateJwtToken(user);
 
                 return new JsonResult(new { user, Role = role.ToString(), Token = token });
             }
@@ -106,13 +88,13 @@ namespace UNITEE_BACKEND.Controllers
                 var user = await service.ConfirmEmail(confirmEmailDto.ConfirmationCode);
 
                 if (user.IsEmailConfirmed)
-                    return Ok("Email confirmed successfully.");
+                    return Ok(user);
                 else
                     return BadRequest("Failed to confirm email.");
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -127,7 +109,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -142,7 +124,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -197,19 +179,27 @@ namespace UNITEE_BACKEND.Controllers
         [HttpGet("getTopSellingSeller")]
         public async Task<IActionResult> GetTopSellingSeller()
         {
-            var topSeller = await service.GetTopSellingSeller();
-            if (topSeller == null)
+            try
             {
-                return NotFound("No top selling seller found.");
-            }
+                var topSeller = await service.GetTopSellingSeller();
 
-            return Ok(topSeller);
+                if (topSeller == null)
+                {
+                    return NotFound("No top selling seller found.");
+                }
+
+                return Ok(topSeller);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(service.GetAll());
+            return Ok(await service.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -217,13 +207,13 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var e = await service.GetById(id);
+                var user = await service.GetById(id);
 
-                return Ok(e);
+                return Ok(user);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -233,20 +223,28 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var supplier = await service.SupplierById(id);
+
                 return Ok(supplier);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
         [HttpGet("getSuppliers")]
-        public IActionResult GetSuppliers()
+        public async Task<IActionResult> GetSuppliers()
         {
-            var suppliers = service.GetAllSuppliers();
+            try
+            {
+                var suppliers = await service.GetAllSuppliers();
 
-            return Ok(suppliers);
+                return Ok(suppliers);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpGet("getSupplierById/{id}")]
@@ -264,45 +262,73 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
         [HttpGet("getProductsBySupplierShop/{supplierId}")]
-        public IActionResult GetProductsBySupplierShop(int supplierId)
+        public async Task<IActionResult> GetProductsBySupplierShop(int supplierId)
         {
-            var products = service.GetProductsBySupplierShop(supplierId);
+            try
+            {
+                var products = await service.GetProductsBySupplierShop(supplierId);
 
-            return Ok(products);
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpGet("getCustomers")]
-        public IActionResult GetCustomers()
+        public async Task<IActionResult> GetCustomers()
         {
-            var suppliers = service.GetAllCustomers();
+            try
+            {
+                var suppliers = await service.GetAllCustomers();
 
-            return Ok(suppliers);
+                return Ok(suppliers);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpGet("UserDepartment/{userId}")]
-        public IActionResult GetUserDepartment(int userId)
+        public async Task<IActionResult> GetUserDepartment(int userId)
         {
-            var user = context.Users.Find(userId);
-
-            if (user == null)
+            try
             {
-                return NotFound(new { Message = "User not found." });
-            }
+                var user = await context.Users.FindAsync(userId);
 
-            return Ok(new { departmentId = user.DepartmentId });
+                if (user == null)
+                {
+                    return NotFound(new { Message = "User not found." });
+                }
+
+                return Ok(new { departmentId = user.DepartmentId });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpGet("getSuppliersProduct/{departmentId}")]
-        public IActionResult GetSuppliers(int departmentId)
+        public async Task<IActionResult> GetSuppliers(int departmentId)
         {
-            var suppliers = service.GetAllSuppliersProducts(departmentId);
+            try
+            {
+                var suppliers = await service.GetAllSuppliersProducts(departmentId);
 
-            return Ok(suppliers);
+                return Ok(suppliers);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpPut("updateProfileCustomer/{id}")]
@@ -311,11 +337,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var user = await service.UpdateCustomerProfile(id, request);
-                return Ok("Successfully Updated");
+
+                return Ok(user);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -325,11 +352,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var user = await service.UpdateAdminProfile(id, request);
-                return Ok("Successfully Updated");
+
+                return Ok(user);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -339,12 +367,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var user = await service.UpdateProfileSupplier(id, request);
-                return Ok("Successfully Updated");
+
+                return Ok(user);
             }
             catch (Exception e)
             {
-
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -354,11 +382,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var user = await service.ValidateCustomer(id, request);
+
                 return Ok(user);
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -368,11 +397,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var user = await service.ValidateSupplier(id, request);
+
                 return Ok(user);
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -387,7 +417,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -402,7 +432,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
     }

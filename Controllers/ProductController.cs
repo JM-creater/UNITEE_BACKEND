@@ -31,15 +31,29 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpGet("top-selling")]
-        public ActionResult<IEnumerable<Product>> GetTopSellingProducts(int topCount = 10)
+        public async Task<ActionResult<IEnumerable<Product>>> GetTopSellingProducts(int topCount = 10)
         {
-            return Ok(productService.GetTopSellingProducts(topCount));
+            try
+            {
+                return Ok(await productService.GetTopSellingProducts(topCount));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpGet("top-selling-by-shop/{shopId}")]
-        public ActionResult<IEnumerable<Product>> GetTopSellingProductsByShop(int shopId, int topCount = 10)
+        public async Task<ActionResult<IEnumerable<Product>>> GetTopSellingProductsByShop(int shopId, int topCount = 10)
         {
-            return Ok(productService.GetTopSellingProductsByShop(shopId, topCount));
+            try
+            {
+                return Ok(await productService.GetTopSellingProductsByShop(shopId, topCount));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
 
@@ -54,7 +68,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -69,7 +83,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -95,49 +109,63 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
         [HttpGet]
-        public IActionResult GetAllProduct()
+        public async Task<IActionResult> GetAllProduct()
         {
             try
             {
-                var products = productService.GetAll();
+                var products = await productService.GetAll();
 
                 return Ok(products);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
         [HttpGet("ByShopProduct/{shopId}")]
-        public IActionResult GetProductsByShopId(int shopId)
+        public async Task<IActionResult> GetProductsByShopId(int shopId)
         {
-            var products = productService.GetProductsByShopId(shopId);
-
-            if (products == null || !products.Any())
+            try
             {
-                return NotFound(new { Message = "No products found for this shop." });
-            }
+                var products = await productService.GetProductsByShopId(shopId);
 
-            return Ok(products);
+                if (products == null)
+                {
+                    return NotFound(new { Message = "No products found for this shop." });
+                }
+
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpGet("ByShop/{shopId}/ByDepartment/{departmentId}")]
         public async Task<IActionResult> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
         {
-            var products = await productService.GetProductsByShopIdAndDepartmentId(shopId, departmentId);
-
-            if (products == null)
+            try
             {
-                return NotFound(new { Message = "No products found for this shop and department." });
-            }
+                var products = await productService.GetProductsByShopIdAndDepartmentId(shopId, departmentId);
 
-            return Ok(products);
+                if (products == null)
+                {
+                    return NotFound(new { Message = "No products found for this shop and department." });
+                }
+
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
         }
 
         [HttpGet("{productId}")]
@@ -145,12 +173,13 @@ namespace UNITEE_BACKEND.Controllers
         {
             try
             {
-                var e = await productService.GetById(productId);
-                return Ok(e);
+                var products = await productService.GetById(productId);
+
+                return Ok(products);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -160,11 +189,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var products = await productService.GetProductsBySupplier(supplierId);
+
                 return Ok(products);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -175,11 +205,11 @@ namespace UNITEE_BACKEND.Controllers
             {
                 var updatedProduct = await productService.UpdateProduct(productId, request);
 
-                return Ok("Successfully Update a Product");
+                return Ok(updatedProduct);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -190,11 +220,11 @@ namespace UNITEE_BACKEND.Controllers
             {
                 var product = await productService.UpdateActivationStatus(productId);
 
-                return Ok("Successfully Activated");
+                return Ok(product);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -205,11 +235,11 @@ namespace UNITEE_BACKEND.Controllers
             {
                 var product = await productService.UpdateDectivationStatus(productId);
 
-                return Ok("Successfully Deactivated");
+                return Ok(product);
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 

@@ -12,8 +12,8 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240105112846_AddedCancellationReason")]
-    partial class AddedCancellationReason
+    [Migration("20240106064444_create")]
+    partial class create
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -483,6 +483,9 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<string>("BIR")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("BarangayClearance")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CityPermit")
                         .HasColumnType("nvarchar(max)");
 
@@ -504,6 +507,12 @@ namespace UNITEE_BACKEND.Migrations
 
                     b.Property<string>("EmailConfirmationToken")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EmailVerificationSentTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EmailVerificationStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
@@ -555,6 +564,12 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<string>("StudyLoad")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ValidIdBackImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ValidIdFrontImage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
@@ -571,6 +586,8 @@ namespace UNITEE_BACKEND.Migrations
                             DateCreated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "garadojosephmartin98@gmail.com",
+                            EmailVerificationSentTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EmailVerificationStatus = 0,
                             FirstName = "Admin",
                             Image = "PathImages\\Images\\Admin Profile.png",
                             IsActive = true,
