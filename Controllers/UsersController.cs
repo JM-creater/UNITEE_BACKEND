@@ -131,6 +131,21 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpPost("verify-email/{userId}")]
+        public async Task<IActionResult> VerifyEmail(int userId)
+        {
+            try
+            {
+                var user = await service.VerifyEmail(userId);
+
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(string email)
         {

@@ -267,16 +267,23 @@ namespace UNITEE_BACKEND.Services
 
                     return user;
                 }
-                else if (user.EmailVerificationStatus == "Pending" && user.ConfirmationCode == confirmationCode)
+                else if (user.EmailVerificationStatus == "Pending")
                 {
-                    user.EmailVerificationStatus = "Verified"; 
+                    user.EmailVerificationStatus = "Verified";
                     user.EmailConfirmationToken = null;
                     user.IsEmailConfirmed = true;
+                    user.ConfirmationCode = null; 
+                }
+                else if (user.EmailVerificationStatus == "Deferred")
+                {
+                    user.EmailVerificationStatus = "Verified";
                     user.EmailConfirmationToken = null;
+                    user.IsEmailConfirmed = true;
+                    user.ConfirmationCode = null;
                 }
                 else
                 {
-                    throw new InvalidOperationException("Invalid confirmation code.");
+                    throw new InvalidOperationException("Invalid confirmation code or status.");
                 }
 
                 context.Users.Update(user);
@@ -289,6 +296,51 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException(e.Message);
             }
         }
+
+
+        //public async Task<User> ConfirmEmail(string confirmationCode)
+        //{
+        //    try
+        //    {
+        //        var user = await context.Users
+        //                                .Where(u => u.ConfirmationCode == confirmationCode)
+        //                                .FirstOrDefaultAsync();
+
+        //        if (user == null)
+        //            throw new ArgumentException("User not found.");
+
+        //        if (user.EmailVerificationStatus == "Pending" && DateTime.Now > user.EmailVerificationSentTime.AddHours(24))
+        //        {
+        //            user.EmailVerificationStatus = "Expired";
+        //            await SendConfirmationEmail(user.Email, confirmationCode);
+
+        //            context.Users.Update(user);
+        //            await context.SaveChangesAsync();
+
+        //            return user;
+        //        }
+        //        else if (user.EmailVerificationStatus == "Pending" && user.EmailVerificationStatus == "Deferred" && user.ConfirmationCode == confirmationCode)
+        //        {
+        //            user.EmailVerificationStatus = "Verified"; 
+        //            user.EmailConfirmationToken = null;
+        //            user.IsEmailConfirmed = true;
+        //            user.EmailConfirmationToken = null;
+        //        }
+        //        else
+        //        {
+        //            throw new InvalidOperationException("Invalid confirmation code.");
+        //        }
+
+        //        context.Users.Update(user);
+        //        await context.SaveChangesAsync();
+
+        //        return user;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw new ArgumentException(e.Message);
+        //    }
+        //}
 
         public async Task<User> VerifyLater(int userId)
         {
@@ -304,6 +356,26 @@ namespace UNITEE_BACKEND.Services
                 }
 
                 context.Users.Update(user);
+                await context.SaveChangesAsync();
+
+                return user;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
+        public async Task<User> VerifyEmail(int userId)
+        {
+            try
+            {
+                var user = await context.Users 
+                                        .Where(u => u.Id == userId)
+                                        .FirstOrDefaultAsync();
+
+                await SendConfirmationEmail(user.Email, user.ConfirmationCode);
+
                 await context.SaveChangesAsync();
 
                 return user;
