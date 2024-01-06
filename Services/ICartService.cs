@@ -7,7 +7,7 @@ namespace UNITEE_BACKEND.Services
     public interface ICartService
     {
         public Task AddToCart(UserRole userRole, CartAddRequest request);
-        public IEnumerable<Cart> GetAll();
+        public Task<IEnumerable<Cart>> GetAll();
         public Task<Cart> GetById(int id);
         public Task<List<Cart>> GetMyCart(int userId);
         public Task<List<Cart>> GetByUserId(int userId);

@@ -22,8 +22,8 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var existingProductName = await context.Products
-                                                   .Where(p => p.ProductName == request.ProductName)
-                                                   .FirstOrDefaultAsync();
+                                                       .Where(p => p.ProductName == request.ProductName)
+                                                       .FirstOrDefaultAsync();
 
                 if (existingProductName != null)
                 {
@@ -136,19 +136,26 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<IEnumerable<Product>> GetSearchProductByUserDepartment(int userId)
         {
-            var user = await context.Users
+            try
+            {
+                var user = await context.Users
                                     .Include(u => u.Department)
                                     .Where(u => u.Id == userId)
-                                    .FirstOrDefaultAsync(); 
+                                    .FirstOrDefaultAsync();
 
-            if (user?.DepartmentId == null)
-            {
-                return Enumerable.Empty<Product>(); 
+                if (user?.DepartmentId == null)
+                {
+                    return Enumerable.Empty<Product>();
+                }
+
+                return await context.Products
+                                    .Where(p => p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
+                                    .ToListAsync();
             }
-
-            return await context.Products
-                                .Where(p => p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
-                                .ToListAsync();
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<int> GetQuantityBySize(int productId, int sizeQuantityId)
@@ -156,7 +163,8 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var sizeQuantity = await context.SizeQuantities
-                                        .FirstOrDefaultAsync(sq => sq.ProductId == productId && sq.Id == sizeQuantityId);
+                                        .Where(sq => sq.ProductId == productId && sq.Id == sizeQuantityId)
+                                        .FirstOrDefaultAsync();
 
                 return sizeQuantity?.Quantity ?? 0;
             }
@@ -179,12 +187,19 @@ namespace UNITEE_BACKEND.Services
             return totalRevenue;
         }
 
-        public IEnumerable<Product> GetTopSellingProducts(int topCount)
+        public async Task<IEnumerable<Product>> GetTopSellingProducts(int topCount)
         {
-            var products = context.Products.ToList();
+            try
+            {
+                var products = await context.Products.ToListAsync();
 
-            return products.OrderByDescending(p => CalculateProductRevenue(p.ProductId))
-                          .Take(topCount);
+                return products.OrderByDescending(p => CalculateProductRevenue(p.ProductId))
+                              .Take(topCount);
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public float CalculateShopProductRevenue(IEnumerable<OrderItem> orderItems, int productId)
@@ -199,12 +214,12 @@ namespace UNITEE_BACKEND.Services
             return totalRevenue;
         }
 
-        public IEnumerable<Product> GetTopSellingProductsByShop(int shopId, int topCount)
+        public async Task<IEnumerable<Product>> GetTopSellingProductsByShop(int shopId, int topCount)
         {
             try
             {
-                var products = context.Products.Where(p => p.SupplierId == shopId).ToList();
-                var orderItems = context.OrderItems.Where(oi => oi.Product.SupplierId == shopId).ToList();
+                var products = await context.Products.Where(p => p.SupplierId == shopId).ToListAsync();
+                var orderItems = await context.OrderItems.Where(oi => oi.Product.SupplierId == shopId).ToListAsync();
 
                 return products
                     .Select(p => new
@@ -223,40 +238,39 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public IEnumerable<Product> GetAll()
+        public async Task<IEnumerable<Product>> GetAll()
         {
             try
             {
-                var products = context.Products
-                                      .Include(p => p.Supplier)
-                                      .Include(p => p.Sizes)
-                                      .Include(p => p.ProductType)
-                                      .Include(p => p.ProductDepartments)
-                                      .AsEnumerable();
+                var products = await context.Products
+                                            .Include(p => p.Supplier)
+                                            .Include(p => p.Sizes)
+                                            .Include(p => p.ProductType)
+                                            .Include(p => p.ProductDepartments)
+                                            .ToListAsync();
 
                 return products;
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
-        public IEnumerable<Product> GetProductsByShopId(int shopId)
-        {
-            return context.Products.Include(s => s.Sizes).Where(p => p.SupplierId == shopId).AsEnumerable();
-        }
+        public async Task<IEnumerable<Product>> GetProductsByShopId(int shopId)
+            => await context.Products
+                            .Include(s => s.Sizes)
+                            .Where(p => p.SupplierId == shopId)
+                            .ToListAsync();
 
         public async Task<IEnumerable<Product>> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
-        {
-            return await context.Products
-                          .Include(p => p.ProductDepartments)
-                              .ThenInclude(pd => pd.Department)
-                          .Include(p => p.Sizes)
-                          .Where(p => p.SupplierId == shopId &&
+            => await context.Products
+                            .Include(p => p.ProductDepartments)
+                               .ThenInclude(pd => pd.Department)
+                            .Include(p => p.Sizes)
+                            .Where(p => p.SupplierId == shopId &&
                                       p.ProductDepartments.Any(pd => pd.DepartmentId == departmentId))
-                          .ToListAsync();
-        }
+                            .ToListAsync();
 
         public async Task<Product> GetById(int productId)
         {

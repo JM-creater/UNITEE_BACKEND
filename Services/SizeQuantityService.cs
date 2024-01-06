@@ -14,12 +14,12 @@ namespace UNITEE_BACKEND.Services
 
         public SizeQuantityService(AppDbContext dbcontext, IMapper mapper)
         {
-            this.context = dbcontext;
-            this._mapper = mapper;
+            context = dbcontext;
+            _mapper = mapper;
         }
 
-        public IEnumerable<SizeQuantity> GetAll()
-            => context.SizeQuantities.AsEnumerable();
+        public async Task<IEnumerable<SizeQuantity>> GetAll()
+            => await context.SizeQuantities.ToListAsync();
 
         public async Task<SizeQuantity> AddSizeQuantity(SizeRequest request)
         {
@@ -33,13 +33,13 @@ namespace UNITEE_BACKEND.Services
                 };
 
                 await context.SizeQuantities.AddAsync(newSizeQuantity);
-                await this.Save();
+                await context.SaveChangesAsync();
 
                 return newSizeQuantity;
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -48,8 +48,8 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var sizesAndQuantities = await context.SizeQuantities
-                .Where(sq => sq.ProductId == productId)
-                .ToListAsync();
+                                                      .Where(sq => sq.ProductId == productId)
+                                                      .ToListAsync();
 
                 if (sizesAndQuantities == null || sizesAndQuantities.Count == 0)
                 {
@@ -60,7 +60,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -68,7 +68,9 @@ namespace UNITEE_BACKEND.Services
         {
             try
             {
-                var sizeQuantities = await context.SizeQuantities.Where(sq => sq.ProductId == productId).ToListAsync();
+                var sizeQuantities = await context.SizeQuantities
+                                                  .Where(sq => sq.ProductId == productId)
+                                                  .ToListAsync();
 
                 var result = new Dictionary<string, int>();
 
@@ -81,7 +83,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
     
@@ -89,21 +91,22 @@ namespace UNITEE_BACKEND.Services
         {
             try
             {
-                var sizequantity = await context.SizeQuantities.FirstOrDefaultAsync(a => a.Id == id);
+                var sizequantity = await context.SizeQuantities
+                                                .Where(a => a.Id == id)
+                                                .FirstOrDefaultAsync();
 
                 if (sizequantity == null)
-                    throw new Exception("SizeQuantity Not Found");
+                    throw new InvalidOperationException("SizeQuantity Not Found");
 
                 _mapper.Map(dto, sizequantity);
 
-                await this.Save();
+                await context.SaveChangesAsync();
 
                 return sizequantity;
-
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -112,15 +115,16 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var sizeQuantity = _mapper.Map<SizeQuantity>(dto);
+
                 await context.SizeQuantities.AddAsync(sizeQuantity);
-                await this.Save();
+
+                await context.SaveChangesAsync();
 
                 return sizeQuantity;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-
-                throw;
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -129,24 +133,24 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var sizes = await context.SizeQuantities
-                .Where(sq => sq.ProductId == productId)
-                .ToListAsync();
+                                         .Where(sq => sq.ProductId == productId)
+                                         .ToListAsync();
 
                 return _mapper.Map<IEnumerable<GetSizeQuantityByIdDto>>(sizes);
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
-        // New Services
         public async Task<SizeQuantity> AddSizeToProduct(int productId, SizeQuantityDto dto)
         {
             try
             {
                 var existingSize = await context.SizeQuantities
-                    .FirstOrDefaultAsync(sq => sq.ProductId == productId && sq.Size == dto.Size);
+                                                .Where(sq => sq.ProductId == productId && sq.Size == dto.Size)
+                                                .FirstOrDefaultAsync();
 
                 SizeQuantity sizeQuantity;
 
@@ -172,7 +176,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -220,16 +224,5 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException(e.Message);
             }
         }
-
-        public async Task<SizeQuantity> Save(SizeQuantity request)
-        {
-            var e = await context.SizeQuantities.AddAsync(request);
-            await context.SaveChangesAsync();
-            return e.Entity;
-        }
-
-        async Task<int> Save()
-           => await context.SaveChangesAsync();
-
     }
 }

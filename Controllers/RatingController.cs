@@ -24,7 +24,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -39,7 +39,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -49,11 +49,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var averageRating = await service.GetAverageProductRating(productId);
+
                 return Ok(new { AverageRating = averageRating });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -63,11 +64,12 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var averageRating = await service.GetAverageSupplierRating(supplierId);
+
                 return Ok(new { AverageRating = averageRating });
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -83,7 +85,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -96,9 +98,9 @@ namespace UNITEE_BACKEND.Controllers
 
                 return Ok(top3Ratings);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return BadRequest(new { message = e.Message });
             }
         }
     }

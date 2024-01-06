@@ -1,4 +1,5 @@
-﻿using UNITEE_BACKEND.DatabaseContext;
+﻿using Microsoft.EntityFrameworkCore;
+using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Entities;
 
 namespace UNITEE_BACKEND.Services
@@ -9,10 +10,10 @@ namespace UNITEE_BACKEND.Services
 
         public ProductTypeService(AppDbContext dbcontext)
         {
-            this.context = dbcontext;
+            context = dbcontext;
         }
 
-        public IEnumerable<ProductType> GetAll()
-            => context.ProductTypes.AsEnumerable();
+        public async Task<IEnumerable<ProductType>> GetAll()
+            => await context.ProductTypes.ToListAsync();
     }
 }

@@ -6,9 +6,8 @@ namespace UNITEE_BACKEND.Services
 {
     public interface ISizeQuantityService
     {
-        public IEnumerable<SizeQuantity> GetAll();
+        public Task<IEnumerable<SizeQuantity>> GetAll();
         public Task<SizeQuantity> AddSizeQuantity(SizeRequest request);
-        public Task<SizeQuantity> Save(SizeQuantity request);
         public Task<IEnumerable<SizeQuantity>> GetByProductId(int productId);
         public Task<Dictionary<string, int>> GetSizeQuantitiesForProduct(int productId);
         public Task<SizeQuantity> Update(int id, UpdateSizeQuantityDto dto);

@@ -11,7 +11,7 @@ namespace UNITEE_BACKEND.Controllers
 
         public NotificationController(INotificationService notificationService)
         {
-            this.service = notificationService;
+            service = notificationService;
         }
 
         [HttpPost]
@@ -81,7 +81,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
 
@@ -95,7 +95,7 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
             }
         }
     }

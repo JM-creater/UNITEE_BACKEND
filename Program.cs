@@ -6,11 +6,10 @@ using UNITEE_BACKEND.AutoMapperConfig;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using Microsoft.Extensions.Options;
 using Hangfire;
-using UNITEE_BACKEND.GenerateToken;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
+using UNITEE_BACKEND.Models.Token;
 
 // Variables
 var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +35,7 @@ builder.Services.AddScoped<ISizeQuantityService, SizeQuantityService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
-builder.Services.AddScoped<JwtToken>();
+builder.Services.AddScoped<Tokens>();
 
 // DbContext Configuration
 builder.Services.AddDbContext<AppDbContext>(options =>

@@ -1,14 +1,10 @@
-﻿using MailKit.Net.Smtp;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using MimeKit;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Security.Authentication;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
-using UNITEE_BACKEND.GenerateToken;
+using UNITEE_BACKEND.Models.Email;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.Security;
@@ -52,8 +48,8 @@ namespace UNITEE_BACKEND.Services
         }
 
 
-        public IEnumerable<User> GetAll()
-            => context.Users.AsEnumerable();
+        public async Task<IEnumerable<User>> GetAll()
+            => await context.Users.ToListAsync();
 
         public async Task<User> SupplierById(int id)
         {
@@ -76,27 +72,27 @@ namespace UNITEE_BACKEND.Services
                             .Where(a => a.Id == id)
                             .FirstOrDefaultAsync();
 
-        public IEnumerable<User> GetAllSuppliers()
+        public async Task<IEnumerable<User>> GetAllSuppliers()
         {
-            return context.Users
+            return await context.Users
                           .Include(u => u.Products)
                             .ThenInclude(u => u.Sizes)
                           .Include(u => u.Ratings)
                           .Where(u => u.Role == (int)UserRole.Supplier)
                           .OrderByDescending(u => u.DateCreated)
-                          .AsEnumerable();
+                          .ToListAsync();
         }
 
 
-        public IEnumerable<User> GetAllSuppliersProducts(int departmentId)
+        public async Task<IEnumerable<User>> GetAllSuppliersProducts(int departmentId)
         {
-            var supplierIdsProductDepartment = context.ProductDepartments
+            var supplierIdsProductDepartment = await context.ProductDepartments
                                                             .Where(pd => pd.DepartmentId == departmentId)
                                                             .Select(pd => pd.Product.SupplierId)
                                                             .Distinct()
-                                                            .ToList();
+                                                            .ToListAsync();
 
-            return context.Users
+            return await context.Users
                           .Where(u => u.Role == (int)UserRole.Supplier && supplierIdsProductDepartment.Contains(u.Id))
                           .Include(u => u.Products)
                              .ThenInclude(u => u.Sizes)
@@ -105,7 +101,7 @@ namespace UNITEE_BACKEND.Services
                           .Include(u => u.Products)
                              .ThenInclude(u => u.ProductDepartments)
                                 .ThenInclude(u => u.Department)
-                         .AsEnumerable();
+                         .ToListAsync();
         }
 
         public async Task<List<User>> GetSupplierById(int id)
@@ -113,17 +109,17 @@ namespace UNITEE_BACKEND.Services
                             .Where(u => u.Id == id && u.Role == (int)UserRole.Supplier)
                             .ToListAsync();
 
-        public IEnumerable<Product> GetProductsBySupplierShop(int supplierId)
-            => context.Products
-                      .Where(p => p.SupplierId == supplierId)
-                      .ToList();
+        public async Task<IEnumerable<Product>> GetProductsBySupplierShop(int supplierId)
+            => await context.Products
+                            .Where(p => p.SupplierId == supplierId)
+                            .ToListAsync();
 
 
-        public IEnumerable<User> GetAllCustomers()
-            => context.Users
-                          .Where(c => c.Role == (int)UserRole.Customer)
-                          .OrderByDescending(u => u.DateCreated)
-                          .AsEnumerable();
+        public async Task<IEnumerable<User>> GetAllCustomers()
+            => await context.Users
+                            .Where(c => c.Role == (int)UserRole.Customer)
+                            .OrderByDescending(u => u.DateCreated)
+                            .ToListAsync();
 
         public async Task<User> RegisterCustomer(RegisterRequest request)
         {
@@ -177,8 +173,8 @@ namespace UNITEE_BACKEND.Services
                 var imagePath = await new ImagePathConfig().SaveImage(request.Image);
                 var studyLoadPath = await new ImagePathConfig().SaveStudyLoad(request.StudyLoad);
                 var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
-                var confirmationToken = RandomToken.CreateRandomToken();
-                var confirmationCode = RandomToken.GenerateConfirmationCode();
+                var confirmationToken = Tokens.CreateRandomToken();
+                var confirmationCode = Tokens.GenerateConfirmationCode();
 
                 var newUser = new User
                 {
@@ -193,12 +189,12 @@ namespace UNITEE_BACKEND.Services
                     Image = imagePath,
                     StudyLoad = studyLoadPath,
                     Role = (int)UserRole.Customer,
-                    IsActive = true,
+                    IsActive = false,
                     DateCreated = DateTime.Now,
                     EmailConfirmationToken = confirmationToken,
                     ConfirmationCode = confirmationCode,
-                    IsValidate = true,
-                    EmailVerificationStatus = "Pending",
+                    IsValidate = false,
+                    EmailVerificationStatus = EmailStatus.Pending,
                     EmailVerificationSentTime = DateTime.Now
 
                 };
@@ -206,7 +202,9 @@ namespace UNITEE_BACKEND.Services
                 context.Users.Add(newUser);
                 await context.SaveChangesAsync();
 
-                await SendConfirmationEmail(newUser.Email, newUser.ConfirmationCode);
+                var emailConfig = new EmailConfig(configuration);
+
+                await emailConfig.SendConfirmationEmail(newUser.Email, newUser.ConfirmationCode);
 
                 return newUser;
             }
@@ -214,36 +212,6 @@ namespace UNITEE_BACKEND.Services
             {
                 throw new ArgumentException(e.Message);
             }
-        }
-
-        public async Task SendConfirmationEmail(string email, string confirmationCode)
-        {
-            string subject = "Verify Your Unitee Account Email";
-            string message = $@"
-                    <html>
-                    <head>
-                      <style>
-                        body {{ font-family: 'Arial', sans-serif; background-color: #f6f6f6; padding: 20px; }}
-                        .email-container {{ background-color: #ffffff; padding: 20px; border: 1px solid #dddddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
-                        .email-header {{ color: #333333; font-size: 18px; font-weight: bold; margin-bottom: 30px; }}
-                        .confirmation-code {{ font-size: 24px; font-weight: bold; color: #333333; padding: 10px 0; }}
-                        .instructions {{ font-size: 14px; color: #555555; }}
-                        .footer {{ font-size: 12px; color: #999999; margin-top: 30px; }}
-                      </style>
-                    </head>
-                    <body>
-                      <div class='email-container'>
-                        <p class='email-header'>Verify Your Unitee Account Email</p>
-                        <p>Unitee has received a request to use this email address as your account. Please use the following code to finish setting up this email verification:</p>
-                        <p class='confirmation-code'>{confirmationCode}</p>
-                        <p class='instructions'>This code will expire in 24 hours.</p>
-                        <p class='instructions'>If you did not request this change or if you have any questions, please contact using this email unitee42@gmail.com.</p>
-                        <p class='footer'>Thank you for using Unitee!</p>
-                      </div>
-                    </body>
-                    </html>";
-
-            await SendEmailAsync(email, subject, message);
         }
 
         public async Task<User> ConfirmEmail(string confirmationCode)
@@ -257,26 +225,27 @@ namespace UNITEE_BACKEND.Services
                 if (user == null)
                     throw new ArgumentException("User not found.");
 
-                if (user.EmailVerificationStatus == "Pending" && DateTime.Now > user.EmailVerificationSentTime.AddHours(24))
+                if (user.EmailVerificationStatus == EmailStatus.Pending && DateTime.Now > user.EmailVerificationSentTime.AddHours(24))
                 {
-                    user.EmailVerificationStatus = "Expired";
-                    await SendConfirmationEmail(user.Email, confirmationCode);
+                    user.EmailVerificationStatus = EmailStatus.Expired;
+                    var emailConfig = new EmailConfig(configuration);
+                    await emailConfig.SendConfirmationEmail(user.Email, confirmationCode);
 
                     context.Users.Update(user);
                     await context.SaveChangesAsync();
 
                     return user;
                 }
-                else if (user.EmailVerificationStatus == "Pending")
+                else if (user.EmailVerificationStatus == EmailStatus.Pending)
                 {
-                    user.EmailVerificationStatus = "Verified";
+                    user.EmailVerificationStatus = EmailStatus.Verified;
                     user.EmailConfirmationToken = null;
                     user.IsEmailConfirmed = true;
                     user.ConfirmationCode = null; 
                 }
-                else if (user.EmailVerificationStatus == "Deferred")
+                else if (user.EmailVerificationStatus == EmailStatus.Deferred)
                 {
-                    user.EmailVerificationStatus = "Verified";
+                    user.EmailVerificationStatus = EmailStatus.Verified;
                     user.EmailConfirmationToken = null;
                     user.IsEmailConfirmed = true;
                     user.ConfirmationCode = null;
@@ -297,51 +266,6 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-
-        //public async Task<User> ConfirmEmail(string confirmationCode)
-        //{
-        //    try
-        //    {
-        //        var user = await context.Users
-        //                                .Where(u => u.ConfirmationCode == confirmationCode)
-        //                                .FirstOrDefaultAsync();
-
-        //        if (user == null)
-        //            throw new ArgumentException("User not found.");
-
-        //        if (user.EmailVerificationStatus == "Pending" && DateTime.Now > user.EmailVerificationSentTime.AddHours(24))
-        //        {
-        //            user.EmailVerificationStatus = "Expired";
-        //            await SendConfirmationEmail(user.Email, confirmationCode);
-
-        //            context.Users.Update(user);
-        //            await context.SaveChangesAsync();
-
-        //            return user;
-        //        }
-        //        else if (user.EmailVerificationStatus == "Pending" && user.EmailVerificationStatus == "Deferred" && user.ConfirmationCode == confirmationCode)
-        //        {
-        //            user.EmailVerificationStatus = "Verified"; 
-        //            user.EmailConfirmationToken = null;
-        //            user.IsEmailConfirmed = true;
-        //            user.EmailConfirmationToken = null;
-        //        }
-        //        else
-        //        {
-        //            throw new InvalidOperationException("Invalid confirmation code.");
-        //        }
-
-        //        context.Users.Update(user);
-        //        await context.SaveChangesAsync();
-
-        //        return user;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new ArgumentException(e.Message);
-        //    }
-        //}
-
         public async Task<User> VerifyLater(int userId)
         {
             try
@@ -352,7 +276,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (user != null)
                 {
-                    user.EmailVerificationStatus = "Deferred"; 
+                    user.EmailVerificationStatus = EmailStatus.Deferred; 
                 }
 
                 context.Users.Update(user);
@@ -374,7 +298,8 @@ namespace UNITEE_BACKEND.Services
                                         .Where(u => u.Id == userId)
                                         .FirstOrDefaultAsync();
 
-                await SendConfirmationEmail(user.Email, user.ConfirmationCode);
+                var emailConfig = new EmailConfig(configuration);
+                await emailConfig.SendConfirmationEmail(user.Email, user.ConfirmationCode);
 
                 await context.SaveChangesAsync();
 
@@ -434,8 +359,8 @@ namespace UNITEE_BACKEND.Services
                 var imageValidIdFrontImage = await new ImagePathConfig().SaveValidIdFrontImage(request.ValidIdFrontImage);
                 var imageValidIdBackImage = await new ImagePathConfig().SaveValidIdBackImage(request.ValidIdBackImage);
                 var encryptedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
-                var confirmationToken = RandomToken.CreateRandomToken();
-                var confirmationCode = RandomToken.GenerateConfirmationCode();
+                var confirmationToken = Tokens.CreateRandomToken();
+                var confirmationCode = Tokens.GenerateConfirmationCode();
 
                 var newSupplier = new User
                 {
@@ -453,17 +378,18 @@ namespace UNITEE_BACKEND.Services
                     ValidIdFrontImage = imageValidIdFrontImage,
                     ValidIdBackImage = imageValidIdBackImage,
                     Role = (int)UserRole.Supplier,
-                    IsActive = true,
+                    IsActive = false,
                     DateCreated = DateTime.Now,
                     EmailConfirmationToken = confirmationToken,
                     ConfirmationCode = confirmationCode,
-                    IsValidate = true
+                    IsValidate = false
                 };
 
                 await context.Users.AddAsync(newSupplier);
                 await context.SaveChangesAsync();
 
-                await SendConfirmationEmail(newSupplier.Email, newSupplier.ConfirmationCode);
+                var emailConfig = new EmailConfig(configuration);
+                await emailConfig.SendConfirmationEmail(newSupplier.Email, newSupplier.ConfirmationCode);
 
                 return newSupplier;
             }
@@ -714,116 +640,62 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task SendEmailAsync(string email, string subject, string message)
-        {
-            var emailSettings = configuration.GetSection("EmailSettings");
-            var mimeMessage = new MimeMessage();
-            mimeMessage.From.Add(new MailboxAddress(emailSettings["SenderName"], emailSettings["Sender"]));
-            mimeMessage.To.Add(MailboxAddress.Parse(email));
-            mimeMessage.Subject = subject;
-
-            mimeMessage.Body = new TextPart("html") { Text = message };
-
-            using (var client = new SmtpClient())
-            {
-                await client.ConnectAsync(emailSettings["MailServer"], int.Parse(emailSettings["MailPort"]), false);
-                client.AuthenticationMechanisms.Remove("XOAUTH2");
-                await client.AuthenticateAsync(emailSettings["Sender"], emailSettings["Password"]);
-                await client.SendAsync(mimeMessage);
-                await client.DisconnectAsync(true);
-            }
-        }
-
-        public async Task SendPasswordResetEmail(string email, string token)
-        {
-            string resetLink = $"http://localhost:5173/forgot_password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
-            string subject = "Password Reset Request";
-            string message = $@"
-                <html>
-                    <head>
-                        <style>
-                            body {{
-                                font-family: 'Arial', sans-serif;
-                                color: #333;
-                                background-color: #f4f4f4;
-                                padding: 20px;
-                            }}
-                            .container {{
-                                max-width: 600px;
-                                margin: 0 auto;
-                                background: #fff;
-                                padding: 20px;
-                                border-radius: 8px;
-                                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                            }}
-                            .button {{
-                                display: inline-block;
-                                padding: 10px 20px;
-                                background-color: #007bff;
-                                border-radius: 5px;
-                                text-decoration: none;
-                                font-weight: bold;
-                            }}
-                            .button a {{
-                                color: #fff; 
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='container'>
-                            <h2>Password Reset Request</h2>
-                            <p>You requested a password reset for your account. Please click the button below to set a new password:</p>
-                            <a href='{resetLink}' class='button'>Reset Password</a>
-                            <p>If you did not request a password reset, please ignore this email.</p>
-                        </div>
-                    </body>
-                </html>";
-
-            await SendEmailAsync(email, subject, message);
-        }
-
-
         public async Task<User> ForgotPassword(string email)
         {
-            var user = await context.Users
+            try
+            {
+                var user = await context.Users
                                     .Where(u => u.Email == email)
                                     .FirstOrDefaultAsync();
 
-            if (user == null)
-            {
-                throw new InvalidOperationException("Email not yet registered");
+                if (user == null)
+                {
+                    throw new InvalidOperationException("Email not yet registered");
+                }
+
+                user.PasswordResetToken = Tokens.CreateRandomToken();
+                user.ResetTokenExpires = DateTime.Now.AddDays(1);
+
+                context.Users.Update(user);
+                await context.SaveChangesAsync();
+
+                var emailConfig = new EmailConfig(configuration);
+                await emailConfig.SendPasswordResetEmail(user.Email, user.PasswordResetToken);
+
+                return user;
             }
-
-            user.PasswordResetToken = RandomToken.CreateRandomToken();
-            user.ResetTokenExpires = DateTime.Now.AddDays(1);
-
-            context.Users.Update(user);
-            await context.SaveChangesAsync();
-
-            await SendPasswordResetEmail(user.Email, user.PasswordResetToken);
-
-            return user;
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<User> ResetPassword(ResetPasswordDto dto)
         {
-            var user = await context.Users
+            try
+            {
+                var user = await context.Users
                                     .Where(u => u.PasswordResetToken == dto.Token)
                                     .FirstOrDefaultAsync();
 
-            if (user == null || user.ResetTokenExpires < DateTime.Now)
-            {
-                throw new InvalidOperationException("Invalid Token.");
+                if (user == null || user.ResetTokenExpires < DateTime.Now)
+                {
+                    throw new InvalidOperationException("Invalid Token.");
+                }
+
+                user.Password = PasswordEncryptionService.EncryptPassword(dto.NewPassword);
+                user.PasswordResetToken = null;
+                user.ResetTokenExpires = null;
+
+                context.Users.Update(user);
+                await context.SaveChangesAsync();
+
+                return user;
             }
-
-            user.Password = PasswordEncryptionService.EncryptPassword(dto.NewPassword);
-            user.PasswordResetToken = null;
-            user.ResetTokenExpires = null;
-
-            context.Users.Update(user);
-            await context.SaveChangesAsync();
-
-            return user;
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<bool> IsResetTokenValid(string token)

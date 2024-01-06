@@ -11,10 +11,10 @@ namespace UNITEE_BACKEND.Services
         public Task<IEnumerable<Product>> RecommendProductsPurchase(int id);
         public Task<IEnumerable<Product>> GetSearchProductByUserDepartment(int userId);
         public Task<int> GetQuantityBySize(int productId, int sizeQuantityId);
-        public IEnumerable<Product> GetTopSellingProducts(int topCount);
-        public IEnumerable<Product> GetTopSellingProductsByShop(int shopId, int topCount);
-        public IEnumerable<Product> GetAll();
-        public IEnumerable<Product> GetProductsByShopId(int shopId);
+        public Task<IEnumerable<Product>> GetTopSellingProducts(int topCount);
+        public Task<IEnumerable<Product>> GetTopSellingProductsByShop(int shopId, int topCount);
+        public Task<IEnumerable<Product>> GetAll();
+        public Task<IEnumerable<Product>> GetProductsByShopId(int shopId);
         public Task<IEnumerable<Product>> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId);
         public Task<Product> GetById(int productId);
         public Task<IEnumerable<Product>> GetProductsByDepartment(int departmentId);

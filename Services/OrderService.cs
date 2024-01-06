@@ -1,12 +1,12 @@
 ﻿using Hangfire;
 using MailKit.Net.Smtp;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
+using UNITEE_BACKEND.Models.Email;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 
@@ -62,8 +62,7 @@ namespace UNITEE_BACKEND.Services
                             .ToListAsync();
 
         public async Task<List<Order>> GetAllBySupplierId(int supplierId)
-        {
-            return await context.Orders
+            => await context.Orders
                         .Include(u => u.User)
                         .Include(c => c.Cart)
                             .ThenInclude(s => s.Supplier)
@@ -75,101 +74,144 @@ namespace UNITEE_BACKEND.Services
                         .Where(o => o.Cart.Supplier.Id == supplierId)
                         .OrderByDescending(o => o.DateCreated)
                         .ToListAsync();
-        }
 
         public async Task<IEnumerable<float>> GetWeeklySales(DateTime startDate, int supplierId)
         {
-            var endDate = startDate.AddDays(7);
+            try
+            {
+                var endDate = startDate.AddDays(7);
 
-            return await context.Orders
-                                .Where(o => o.DateCreated >= startDate &&
-                                            o.DateCreated < endDate &&
-                                            o.Status == Status.Completed &&
-                                            o.Cart.SupplierId == supplierId)
-                                .Select(o => o.Total)
-                                .ToListAsync();
+                return await context.Orders
+                                    .Where(o => o.DateCreated >= startDate &&
+                                                o.DateCreated < endDate &&
+                                                o.Status == Status.Completed &&
+                                                o.Cart.SupplierId == supplierId)
+                                    .Select(o => o.Total)
+                                    .ToListAsync();
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<IEnumerable<float>> GetMonthlySales(int year, int month, int supplierId)
         {
-            var startDate = new DateTime(year, month, 1);
-            var endDate = startDate.AddMonths(1);
+            try
+            {
+                var startDate = new DateTime(year, month, 1);
+                var endDate = startDate.AddMonths(1);
 
-            return await context.Orders
-                                .Where(o => o.DateCreated >= startDate &&
-                                            o.DateCreated < endDate &&
-                                            o.Status == Status.Completed &&
-                                            o.Cart.SupplierId == supplierId)
-                                .Select(o => o.Total)
-                                .ToListAsync();
+                return await context.Orders
+                                    .Where(o => o.DateCreated >= startDate &&
+                                                o.DateCreated < endDate &&
+                                                o.Status == Status.Completed &&
+                                                o.Cart.SupplierId == supplierId)
+                                    .Select(o => o.Total)
+                                    .ToListAsync();
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<IEnumerable<float>> GetYearlySales(int year, int supplierId)
         {
-            var startDate = new DateTime(year, 1, 1);
-            var endDate = startDate.AddYears(1);
+            try
+            {
+                var startDate = new DateTime(year, 1, 1);
+                var endDate = startDate.AddYears(1);
 
-            var yearlySales = await context.Orders
-                                           .Where(o => o.DateCreated >= startDate &&
-                                                       o.DateCreated < endDate &&
-                                                       o.Status == Status.Completed &&
-                                                       o.Cart.SupplierId == supplierId)
-                                           .GroupBy(o => new { o.DateCreated.Year, o.DateCreated.Month })
-                                           .Select(g => new { Month = g.Key.Month, Total = g.Sum(o => o.Total) })
-                                           .OrderBy(g => g.Month)
-                                           .Select(g => g.Total)
-                                           .ToListAsync();
+                var yearlySales = await context.Orders
+                                               .Where(o => o.DateCreated >= startDate &&
+                                                           o.DateCreated < endDate &&
+                                                           o.Status == Status.Completed &&
+                                                           o.Cart.SupplierId == supplierId)
+                                               .GroupBy(o => new { o.DateCreated.Year, o.DateCreated.Month })
+                                               .Select(g => new { Month = g.Key.Month, Total = g.Sum(o => o.Total) })
+                                               .OrderBy(g => g.Month)
+                                               .Select(g => g.Total)
+                                               .ToListAsync();
 
-            return yearlySales;
+                return yearlySales;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<IEnumerable<float>> GetWeeklySalesAdmin(DateTime startDate)
         {
-            var endDate = startDate.AddDays(7);
+            try
+            {
+                var endDate = startDate.AddDays(7);
 
-            return await context.Orders
-                                .Where(o => o.DateCreated >= startDate &&
-                                            o.DateCreated < endDate &&
-                                            o.Status == Status.Completed)
-                                .Select(o => o.Total)
-                                .ToListAsync();
+                return await context.Orders
+                                    .Where(o => o.DateCreated >= startDate &&
+                                                o.DateCreated < endDate &&
+                                                o.Status == Status.Completed)
+                                    .Select(o => o.Total)
+                                    .ToListAsync();
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         public async Task<IEnumerable<float>> GetMonthlySalesAdmin(int year, int month)
         {
-            var startDate = new DateTime(year, month, 1);
-            var endDate = startDate.AddMonths(1);
+            try
+            {
+                var startDate = new DateTime(year, month, 1);
+                var endDate = startDate.AddMonths(1);
 
-            return await context.Orders
-                                .Where(o => o.DateCreated >= startDate &&
-                                            o.DateCreated < endDate &&
-                                            o.Status == Status.Completed)
-                                .Select(o => o.Total)
-                                .ToListAsync();
+                return await context.Orders
+                                    .Where(o => o.DateCreated >= startDate &&
+                                                o.DateCreated < endDate &&
+                                                o.Status == Status.Completed)
+                                    .Select(o => o.Total)
+                                    .ToListAsync();
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<IEnumerable<float>> GetYearlySalesAdmin(int year)
         {
-            var startDate = new DateTime(year, 1, 1);
-            var endDate = startDate.AddYears(1);
+            try
+            {
+                var startDate = new DateTime(year, 1, 1);
+                var endDate = startDate.AddYears(1);
 
-            var yearlySales = await context.Orders
-                                           .Where(o => o.DateCreated >= startDate &&
-                                                       o.DateCreated < endDate &&
-                                                       o.Status == Status.Completed)
-                                           .GroupBy(o => new { o.DateCreated.Year, o.DateCreated.Month })
-                                           .Select(g => new { Month = g.Key.Month, Total = g.Sum(o => o.Total) })
-                                           .OrderBy(g => g.Month)
-                                           .Select(g => g.Total)
-                                           .ToListAsync();
+                var yearlySales = await context.Orders
+                                               .Where(o => o.DateCreated >= startDate &&
+                                                           o.DateCreated < endDate &&
+                                                           o.Status == Status.Completed)
+                                               .GroupBy(o => new { o.DateCreated.Year, o.DateCreated.Month })
+                                               .Select(g => new { Month = g.Key.Month, Total = g.Sum(o => o.Total) })
+                                               .OrderBy(g => g.Month)
+                                               .Select(g => g.Total)
+                                               .ToListAsync();
 
-            return yearlySales;
+                return yearlySales;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
 
         public async Task<decimal> GetTotalSalesBySupplierId(int supplierId)
         {
-            var totalSales = (decimal)await context.Orders
+            try
+            {
+                var totalSales = (decimal)await context.Orders
                                           .Include(o => o.OrderItems)
                                             .ThenInclude(oi => oi.Product)
                                           .Where(o => o.Status == Status.Completed && !o.IsDeleted)
@@ -177,21 +219,33 @@ namespace UNITEE_BACKEND.Services
                                           .Where(oi => oi.Product.SupplierId == supplierId)
                                           .SumAsync(oi => oi.Quantity * oi.Product.Price);
 
-            return totalSales;
+                return totalSales;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<Order> GenerateReceipt(int id)
         {
-            var order = await context.Orders
-                                .Include(a => a.Cart)
-                                    .ThenInclude(c => c.Items)
-                                    .ThenInclude(c => c.Product)
-                                .Where(a => a.Id == id).FirstOrDefaultAsync();
+            try
+            {
+                var order = await context.Orders
+                               .Include(a => a.Cart)
+                                   .ThenInclude(c => c.Items)
+                                   .ThenInclude(c => c.Product)
+                               .Where(a => a.Id == id).FirstOrDefaultAsync();
 
-            if (order == null)
-                throw new Exception("Order not found");
+                if (order == null)
+                    throw new InvalidOperationException("Order not found");
 
-            return order;
+                return order;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<Order> AddOrder(OrderRequest request)
@@ -414,7 +468,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -426,7 +480,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (order == null)
                 {
-                    throw new ArgumentException("Order not found");
+                    throw new InvalidOperationException("Order not found");
                 }
 
                 if (order.Status != Status.Pending)
@@ -494,7 +548,7 @@ namespace UNITEE_BACKEND.Services
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -506,7 +560,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (order == null) 
                 {
-                    throw new ArgumentException("Order not found");
+                    throw new InvalidOperationException("Order not found");
                 }
 
                 if (order.Status != Status.Pending && order.Status != Status.OrderPlaced)
@@ -609,7 +663,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (order == null)
                 {
-                    throw new ArgumentException("Order not found");
+                    throw new InvalidOperationException("Order not found");
                 }
 
                 if (order.Status != Status.Approved)
@@ -667,120 +721,6 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task SendEmailAsync(string email, string subject, string message)
-        {
-            var emailSettings = configuration.GetSection("EmailSettings");
-            var mimeMessage = new MimeMessage();
-            mimeMessage.From.Add(new MailboxAddress(emailSettings["SenderName"], emailSettings["Sender"]));
-            mimeMessage.To.Add(MailboxAddress.Parse(email));
-            mimeMessage.Subject = subject;
-
-            mimeMessage.Body = new TextPart("html") { Text = message };
-
-            using (var client = new SmtpClient())
-            {
-                await client.ConnectAsync(emailSettings["MailServer"], int.Parse(emailSettings["MailPort"]), false);
-                client.AuthenticationMechanisms.Remove("XOAUTH2");
-                await client.AuthenticateAsync(emailSettings["Sender"], emailSettings["Password"]);
-                await client.SendAsync(mimeMessage);
-                await client.DisconnectAsync(true);
-            }
-        }
-
-        public async Task SendOrderCompletedEmailAsync(string email, int orderId)
-        {
-            var orderDetails = await context.Orders
-                                            .Where(o => o.Id == orderId && o.User.Email == email)
-                                            .Include(o => o.OrderItems)
-                                                .ThenInclude(oi => oi.Product)
-                                            .FirstOrDefaultAsync();
-
-            if (orderDetails == null)
-            {
-                throw new ArgumentException("Order not found or email does not match the order's user email.");
-            }
-
-            var itemsList = orderDetails.OrderItems.Select(oi => {
-                return $@"
-                    <tr>
-                        <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{oi.Product.ProductName}</td>
-                        <td style='padding: 10px; border-bottom: 1px solid #ddd; text-align: right;'>Qty - {oi.Quantity}</td>
-                    </tr>";
-                    }).ToList();
-
-            string subject = "Your UNITEE Order Has Been Claimed!";
-            string message = $@"
-                    <html>
-                    <head>
-                        <style>
-                            .email-body {{
-                                font-family: 'Arial', sans-serif;
-                                color: #333;
-                                margin: 0;
-                                padding: 0;
-                            }}
-                            .header {{
-                                background-color: #4CAF50;
-                                padding: 20px;
-                                text-align: center;
-                                font-size: 24px;
-                                color: white;
-                            }}
-                            .order-table {{
-                                width: 100%;
-                                border-collapse: collapse;
-                                margin-top: 20px;
-                            }}
-                            .order-table th {{
-                                background-color: #f2f2f2;
-                                padding: 10px;
-                                border-bottom: 1px solid #ddd;
-                            }}
-                            .order-table td {{
-                                padding: 10px;
-                                border-bottom: 1px solid #ddd;
-                            }}
-                            .product-image {{
-                                max-width: 100px;
-                                max-height: 100px;
-                            }}
-                            .total-cost {{
-                                text-align: right;
-                                margin-top: 20px;
-                                font-size: 18px;
-                            }}
-                            .footer {{
-                                margin-top: 20px;
-                                text-align: center;
-                                font-size: 14px;
-                                color: #999;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='email-body'>
-                             <div class='header'>Order Completed</div>
-                             <p class=""greeting-user-name"">Hi {orderDetails.User.FirstName} {orderDetails.User.LastName},</p>
-                             <p>We are happy to inform you that your order with the reference <strong>{orderDetails.OrderNumber}</strong> has been successfully completed!</p>
-                             <table class='order-table'>
-                                 <tr>
-                                     <th style='text-align: left;'>Product Name</th>
-                                     <th style='text-align: right;'>Quantity</th>
-                                 </tr>
-                                  {string.Join("", itemsList)}
-                             </table>
-                             <div class='total-cost'><strong>Total cost:</strong> {orderDetails.Total:C}</div>
-                             <p>We hope you enjoy your purchase. Feel free to reach out for any further assistance.</p>
-                             <footer>
-                                Thank you for shopping with UNITEE!<br>Stay stylish!</footer>
-                         </div>
-                    </body>
-                    </html>";
-
-            await SendEmailAsync(email, subject, message);
-        }
-
-
         public async Task<Order> CompletedOrder(int orderId)
         {
             try
@@ -793,7 +733,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (order == null)
                 {
-                    throw new ArgumentException("Order not found");
+                    throw new InvalidOperationException("Order not found");
                 }
 
                 if (order.Status != Status.ForPickUp)
@@ -829,7 +769,8 @@ namespace UNITEE_BACKEND.Services
                 context.Orders.Update(order);
                 await context.SaveChangesAsync();
 
-                await SendOrderCompletedEmailAsync(order.User.Email, orderId);
+                var emailConfig = new EmailConfig(configuration);
+                await emailConfig.SendOrderCompletedEmailAsync(order.User.Email, orderId);
 
                 return order;
             }

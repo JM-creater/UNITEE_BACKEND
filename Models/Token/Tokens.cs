@@ -1,18 +1,39 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using UNITEE_BACKEND.Entities;
 
-namespace UNITEE_BACKEND.GenerateToken
+namespace UNITEE_BACKEND.Models.Token
 {
-    public class JwtToken
+    public class Tokens
     {
         private readonly IConfiguration configuration;
-
-        public JwtToken(IConfiguration _configuration)
+        public Tokens(IConfiguration _configuration)
         {
             configuration = _configuration;
+        }
+
+        public static string CreateRandomToken()
+        {
+            return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+        }
+
+        public static string GenerateConfirmationCode()
+        {
+            int length = 5;
+
+            const string validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            StringBuilder sb = new();
+            Random random = new();
+
+            while (0 < length--)
+            {
+                sb.Append(validChars[random.Next(validChars.Length)]);
+            }
+
+            return sb.ToString();
         }
 
         public string GenerateJwtToken(User user)

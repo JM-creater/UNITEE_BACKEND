@@ -10,7 +10,7 @@ namespace UNITEE_BACKEND.Services
 
         public DepartmentService(AppDbContext dbcontext) 
         {
-            this.context = dbcontext;
+            context = dbcontext;
         }
 
         public async Task<IEnumerable<Department>> GetAll()
@@ -19,13 +19,8 @@ namespace UNITEE_BACKEND.Services
                             .ToListAsync();
 
         public async Task<Department> GetById(int id)
-        {
-            var e = await context.Departments.Where(a => a.DepartmentId == id).FirstOrDefaultAsync();
-
-            if (e == null)
-                throw new Exception("User Not Found");
-
-            return e;
-        }
+            => await context.Departments
+                            .Where(a => a.DepartmentId == id)
+                            .FirstOrDefaultAsync();
     }
 }

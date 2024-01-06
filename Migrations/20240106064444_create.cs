@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UNITEE_BACKEND.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class create : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -124,7 +124,8 @@ namespace UNITEE_BACKEND.Migrations
                     DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PaymentType = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CancellationReason = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -249,9 +250,14 @@ namespace UNITEE_BACKEND.Migrations
                     BIR = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CityPermit = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SchoolPermit = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BarangayClearance = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ValidIdFrontImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ValidIdBackImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
                     IsValidate = table.Column<bool>(type: "bit", nullable: false),
+                    EmailVerificationStatus = table.Column<int>(type: "int", nullable: false),
+                    EmailVerificationSentTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ConfirmationCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmailConfirmationToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsEmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
@@ -308,8 +314,8 @@ namespace UNITEE_BACKEND.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "Address", "BIR", "CityPermit", "ConfirmationCode", "DateCreated", "DateUpdated", "DepartmentId", "Email", "EmailConfirmationToken", "FirstName", "Gender", "Image", "IsActive", "IsEmailConfirmed", "IsValidate", "LastName", "Password", "PasswordResetToken", "PhoneNumber", "RatingId", "ResetTokenExpires", "Role", "SchoolPermit", "ShopName", "StudyLoad" },
-                values: new object[] { 20163482, "123 Main Street", null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "garadojosephmartin98@gmail.com", null, "Admin", null, "PathImages\\Images\\Admin Profile.png", true, false, true, "Admin", "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=", null, "09199431060", null, null, 3, null, null, null });
+                columns: new[] { "Id", "Address", "BIR", "BarangayClearance", "CityPermit", "ConfirmationCode", "DateCreated", "DateUpdated", "DepartmentId", "Email", "EmailConfirmationToken", "EmailVerificationSentTime", "EmailVerificationStatus", "FirstName", "Gender", "Image", "IsActive", "IsEmailConfirmed", "IsValidate", "LastName", "Password", "PasswordResetToken", "PhoneNumber", "RatingId", "ResetTokenExpires", "Role", "SchoolPermit", "ShopName", "StudyLoad", "ValidIdBackImage", "ValidIdFrontImage" },
+                values: new object[] { 20163482, "123 Main Street", null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "garadojosephmartin98@gmail.com", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, "Admin", null, "PathImages\\Images\\Admin Profile.png", true, false, true, "Admin", "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=", null, "09199431060", null, null, 3, null, null, null, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_CartId",

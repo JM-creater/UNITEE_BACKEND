@@ -15,10 +15,10 @@ namespace UNITEE_BACKEND.Services
             this.context = dbcontext;
         }
 
-        public IEnumerable<Cart> GetAll()
-            => context.Carts
-                      .Include(c => c.Items)
-                      .AsEnumerable();
+        public async Task<IEnumerable<Cart>> GetAll()
+            => await context.Carts
+                            .Include(c => c.Items)
+                            .ToListAsync();
 
         public async Task<Cart?> GetById(int id)
             => await context.Carts
@@ -28,31 +28,40 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<List<Cart>> GetByUserId(int id)
         {
-            var user = await context.Users.Where(u => u.Id == id).FirstOrDefaultAsync();
-
-            if (user == null)
-                throw new Exception($"User with Id {id} not found");
-
-            user.Carts = await context.Carts
-                                .Include(c => c.Supplier)
-                                .Include(c => c.Items)
-                                    .ThenInclude(i => i.Product)
-                                .Include(c => c.Items)
-                                    .ThenInclude(i => i.SizeQuantity)
-                                        .ThenInclude(i => i.Product)
-                                            .ThenInclude(i => i.Sizes)
-                                .Where(c => c.UserId == user.Id && c.Items.Any(i => !i.IsDeleted)) 
-                                .OrderByDescending(c => c.DateCreated)
-                                .ToListAsync();
-
-            foreach (var cart in user.Carts)
+            try
             {
-                cart.Items = cart.Items
-                                 .Where(i => !i.IsDeleted)
-                                 .ToList();
-            }
+                var user = await context.Users
+                                    .Where(u => u.Id == id)
+                                    .FirstOrDefaultAsync();
 
-            return user.Carts.ToList();
+                if (user == null)
+                    throw new Exception($"User with Id {id} not found");
+
+                user.Carts = await context.Carts
+                                    .Include(c => c.Supplier)
+                                    .Include(c => c.Items)
+                                        .ThenInclude(i => i.Product)
+                                    .Include(c => c.Items)
+                                        .ThenInclude(i => i.SizeQuantity)
+                                            .ThenInclude(i => i.Product)
+                                                .ThenInclude(i => i.Sizes)
+                                    .Where(c => c.UserId == user.Id && c.Items.Any(i => !i.IsDeleted))
+                                    .OrderByDescending(c => c.DateCreated)
+                                    .ToListAsync();
+
+                foreach (var cart in user.Carts)
+                {
+                    cart.Items = cart.Items
+                                     .Where(i => !i.IsDeleted)
+                                     .ToList();
+                }
+
+                return user.Carts.ToList();
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
 
         public async Task<List<Cart>> GetMyCart(int userId)

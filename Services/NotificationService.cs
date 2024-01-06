@@ -60,12 +60,10 @@ namespace UNITEE_BACKEND.Services
         }
         
         public async Task<IEnumerable<Notification>> GetUnreadNotifications(int userId)
-        {
-            return await context.Notifications
+            => await context.Notifications
                                 .Include(n => n.Order)
                                 .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Customer)
                                 .ToListAsync();
-        }
 
         public async Task MarkNotificationsAsRead(int userId)
         {
@@ -94,12 +92,10 @@ namespace UNITEE_BACKEND.Services
         }
 
         public async Task<IEnumerable<Notification>> GetSupplierUnreadNotifications(int userId)
-        {
-            return await context.Notifications
+            => await context.Notifications
                                 .Include(n => n.Order)
                                 .Where(n => n.UserId == userId && !n.IsRead && n.UserRole == UserRole.Supplier)
                                 .ToListAsync();
-        }
 
         public async Task MarkSupplierNotificationsAsRead(int userId)
         {

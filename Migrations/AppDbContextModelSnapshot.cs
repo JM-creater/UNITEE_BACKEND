@@ -508,8 +508,8 @@ namespace UNITEE_BACKEND.Migrations
                     b.Property<DateTime>("EmailVerificationSentTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("EmailVerificationStatus")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("EmailVerificationStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
@@ -584,6 +584,7 @@ namespace UNITEE_BACKEND.Migrations
                             DateUpdated = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "garadojosephmartin98@gmail.com",
                             EmailVerificationSentTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            EmailVerificationStatus = 0,
                             FirstName = "Admin",
                             Image = "PathImages\\Images\\Admin Profile.png",
                             IsActive = true,
