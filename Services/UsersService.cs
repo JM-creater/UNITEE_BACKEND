@@ -193,10 +193,14 @@ namespace UNITEE_BACKEND.Services
                     Image = imagePath,
                     StudyLoad = studyLoadPath,
                     Role = (int)UserRole.Customer,
-                    IsActive = false,
+                    IsActive = true,
                     DateCreated = DateTime.Now,
                     EmailConfirmationToken = confirmationToken,
-                    ConfirmationCode = confirmationCode
+                    ConfirmationCode = confirmationCode,
+                    IsValidate = true,
+                    EmailVerificationStatus = "Pending",
+                    EmailVerificationSentTime = DateTime.Now
+
                 };
 
                 context.Users.Add(newUser);
@@ -249,11 +253,24 @@ namespace UNITEE_BACKEND.Services
                 var user = await context.Users
                                         .Where(u => u.ConfirmationCode == confirmationCode)
                                         .FirstOrDefaultAsync();
+
                 if (user == null)
                     throw new ArgumentException("User not found.");
 
-                if (user.ConfirmationCode == confirmationCode)
+                if (user.EmailVerificationStatus == "Pending" && DateTime.Now > user.EmailVerificationSentTime.AddHours(24))
                 {
+                    user.EmailVerificationStatus = "Expired";
+                    await SendConfirmationEmail(user.Email, confirmationCode);
+
+                    context.Users.Update(user);
+                    await context.SaveChangesAsync();
+
+                    return user;
+                }
+                else if (user.EmailVerificationStatus == "Pending" && user.ConfirmationCode == confirmationCode)
+                {
+                    user.EmailVerificationStatus = "Verified"; 
+                    user.EmailConfirmationToken = null;
                     user.IsEmailConfirmed = true;
                     user.EmailConfirmationToken = null;
                 }
@@ -273,6 +290,29 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
+        public async Task<User> VerifyLater(int userId)
+        {
+            try
+            {
+                var user = await context.Users
+                                        .Where(u => u.Id == userId)
+                                        .FirstOrDefaultAsync();
+
+                if (user != null)
+                {
+                    user.EmailVerificationStatus = "Deferred"; 
+                }
+
+                context.Users.Update(user);
+                await context.SaveChangesAsync();
+
+                return user;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
 
         public async Task<User> RegisterSupplier(SupplierRequest request)
         {
@@ -341,10 +381,11 @@ namespace UNITEE_BACKEND.Services
                     ValidIdFrontImage = imageValidIdFrontImage,
                     ValidIdBackImage = imageValidIdBackImage,
                     Role = (int)UserRole.Supplier,
-                    IsActive = false,
+                    IsActive = true,
                     DateCreated = DateTime.Now,
                     EmailConfirmationToken = confirmationToken,
-                    ConfirmationCode = confirmationCode
+                    ConfirmationCode = confirmationCode,
+                    IsValidate = true
                 };
 
                 await context.Users.AddAsync(newSupplier);

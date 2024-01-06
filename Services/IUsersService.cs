@@ -11,6 +11,7 @@ namespace UNITEE_BACKEND.Services
         public Task<User> RegisterSupplier(SupplierRequest request);
         public Task<(User user, UserRole role)> Login(LoginRequest request);
         public Task<User> ConfirmEmail(string confirmationCode);
+        public Task<User> VerifyLater(int userId);
         public Task<User?> GetTopSellingSeller();
         public IEnumerable<User> GetAll();
         public Task<User> SupplierById(int id);
