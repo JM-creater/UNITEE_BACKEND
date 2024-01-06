@@ -18,6 +18,7 @@ namespace UNITEE_BACKEND.GenerateToken
         public string GenerateJwtToken(User user)
         {
             var secret = configuration["JWT:Secret"];
+
             if (string.IsNullOrEmpty(secret))
             {
                 throw new InvalidOperationException("JWT Secret is not configured properly.");
@@ -29,11 +30,11 @@ namespace UNITEE_BACKEND.GenerateToken
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                new Claim(ClaimTypes.Name, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Expiration, DateTime.Now.AddHours(24).ToString())
-            }),
+                    new Claim(ClaimTypes.Name, user.Id.ToString()),
+                    new Claim(ClaimTypes.Role, user.Role.ToString()),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Expiration, DateTime.Now.AddHours(24).ToString())
+                }),
                 Expires = DateTime.Now.AddHours(24),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
