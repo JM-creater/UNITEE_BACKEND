@@ -116,6 +116,20 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpPost("verify-later/{userId}")]
+        public async Task<IActionResult> VerifyLater(int userId)
+        {
+            try
+            {
+                var user = await service.VerifyLater(userId);
+
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(string email)

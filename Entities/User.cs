@@ -29,6 +29,8 @@ namespace UNITEE_BACKEND.Entities
         public bool IsActive { get; set; }
         public int Role { get; set; }
         public bool IsValidate { get; set; }
+        public string? EmailVerificationStatus { get; set; }
+        public DateTime EmailVerificationSentTime { get; set; }
         public string? ConfirmationCode { get; set; }
         public string? EmailConfirmationToken { get; set; }
         public bool IsEmailConfirmed { get; set; }
