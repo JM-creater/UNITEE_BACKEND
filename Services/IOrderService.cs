@@ -25,5 +25,6 @@ namespace UNITEE_BACKEND.Services
         public Task<Order> CanceledOrder(int orderId, CancellationDto dto);
         public Task<Order> ForPickUp(int orderId);
         public Task<Order> CompletedOrder(int orderId);
+        public Task<Order> OrderReceived(int orderId);
     }
 }

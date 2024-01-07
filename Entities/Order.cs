@@ -22,6 +22,7 @@ namespace UNITEE_BACKEND.Entities
         public Status Status { get; set; }
         public bool IsDeleted { get; set; } = false;
         public string? CancellationReason { get; set; }
+        public bool IsReceived { get; set; }
 
         public virtual ICollection<OrderItem>? OrderItems { get; set; }
         public virtual ICollection<Notification>? Notifications { get; set; }
