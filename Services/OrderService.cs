@@ -939,5 +939,26 @@ namespace UNITEE_BACKEND.Services
                 throw new ArgumentException(e.Message);
             }
         }
+
+        public async Task<Order> OrderReceived(int orderId)
+        {
+            try
+            {
+                var order = await context.Orders
+                                         .Where(o => o.Id == orderId)
+                                         .FirstOrDefaultAsync();
+
+                order.IsReceived = true;
+
+                context.Orders.Update(order);
+                await context.SaveChangesAsync();
+
+                return order;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
     }
 }

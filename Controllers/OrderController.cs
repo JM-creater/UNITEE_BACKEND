@@ -271,5 +271,20 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(new { message = e.Message });
             }
         }
+
+        [HttpPut("orderReceived/{orderId}")]
+        public async Task<IActionResult> OrderReceived(int orderId)
+        {
+            try
+            {
+                var order = await orderService.OrderReceived(orderId);
+
+                return Ok(order);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
     }
 }
