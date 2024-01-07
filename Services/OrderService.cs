@@ -899,6 +899,11 @@ namespace UNITEE_BACKEND.Services
                     throw new InvalidOperationException("Only orders with 'ForPickUp' status can be marked as completed");
                 }
 
+                if (order.User.IsEmailConfirmed == true)
+                {
+                    await SendOrderCompletedEmailAsync(order.User.Email, orderId);
+                }
+
                 order.Status = Status.Completed;
                 order.DateUpdated = DateTime.Now;
 
@@ -926,8 +931,6 @@ namespace UNITEE_BACKEND.Services
 
                 context.Orders.Update(order);
                 await context.SaveChangesAsync();
-
-                await SendOrderCompletedEmailAsync(order.User.Email, orderId);
 
                 return order;
             }
