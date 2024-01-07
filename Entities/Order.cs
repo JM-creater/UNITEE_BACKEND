@@ -14,6 +14,7 @@ namespace UNITEE_BACKEND.Entities
         public string OrderNumber { get; set; }
         public string? ReferenceId { get; set; }
         public string? ProofOfPayment { get; set; }
+        public DateTime? EstimatedDate { get; set; }
         public float Total { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }

@@ -2,9 +2,10 @@
 {
     public class UpdateSupplierRequest
     {
-        public string shopName { get; set; }
-        public string address { get; set; }
-        public string email { get; set; }
-        public string phoneNumber { get; set; }
+        public string? shopName { get; set; }
+        public string? address { get; set; }
+        public string? email { get; set; }
+        public string? phoneNumber { get; set; }
+        public IFormFile? Image { get; set; }
     }
 }

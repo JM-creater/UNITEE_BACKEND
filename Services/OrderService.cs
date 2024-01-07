@@ -411,6 +411,7 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var order = await context.Orders
+                                         .Include(o => o.OrderItems)
                                          .Where(o => o.Id == orderId)
                                          .FirstOrDefaultAsync();
 
@@ -426,6 +427,11 @@ namespace UNITEE_BACKEND.Services
 
                 order.Status = Status.Approved;
                 order.DateUpdated = DateTime.Now;
+
+                int totalQuantity = order.OrderItems.Sum(oi => oi.Quantity);
+                int weekToAdd = (totalQuantity + 4) / 5;
+
+                order.EstimatedDate = DateTime.Now.AddDays(7 * weekToAdd);
 
                 var existingNotification = await context.Notifications
                                                         .Where(n => n.OrderId == order.Id)

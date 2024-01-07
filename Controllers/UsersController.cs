@@ -332,7 +332,7 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("updateProfileCustomer/{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCustomerRequest request)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromForm] UpdateCustomerRequest request)
         {
             try
             {
@@ -347,7 +347,7 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("updateProfileAdmin/{id}")]
-        public async Task<IActionResult> UpdateAdmin([FromRoute] int id, [FromBody] UpdateAdminRequest request)
+        public async Task<IActionResult> UpdateAdmin([FromRoute] int id, [FromForm] UpdateAdminRequest request)
         {
             try
             {
@@ -362,7 +362,7 @@ namespace UNITEE_BACKEND.Controllers
         }
 
         [HttpPut("updateProfileSupplier/{id}")]
-        public async Task<IActionResult> UpdateSupplier([FromRoute] int id, [FromBody] UpdateSupplierRequest request)
+        public async Task<IActionResult> UpdateSupplier([FromRoute] int id, [FromForm] UpdateSupplierRequest request)
         {
             try
             {
@@ -427,6 +427,21 @@ namespace UNITEE_BACKEND.Controllers
             try
             {
                 var supplier = await service.UpdateSupplierPassword(id, request);
+
+                return Ok(supplier);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpPut("updateAdminPassword/{id}")]
+        public async Task<IActionResult> UpdateAdminPassword(int id, [FromBody] UpdatePasswordRequest request)
+        {
+            try
+            {
+                var supplier = await service.UpdateAdminPassword(id, request);
 
                 return Ok(supplier);
             }

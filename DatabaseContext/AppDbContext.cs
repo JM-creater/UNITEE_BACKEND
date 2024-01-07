@@ -92,6 +92,11 @@ namespace UNITEE_BACKEND.DatabaseContext
                 {
                     DepartmentId = 12,
                     Department_Name = "Hotel and Tourism"
+                },
+                new Department
+                {
+                    DepartmentId = 13,
+                    Department_Name = "Seacast"
                 }
                 );
 
