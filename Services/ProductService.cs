@@ -76,9 +76,13 @@ namespace UNITEE_BACKEND.Services
             }
         }
 
-        public async Task<IEnumerable<Product>> RecommendProducts(string search)
+        public async Task<IEnumerable<Product>> RecommendProducts(string search, int userId)
         {
             var searchToLower = search.ToLower();
+            var user = await context.Users
+                                    .Include(u => u.Department)
+                                    .Where(u => u.Id == userId)
+                                    .FirstOrDefaultAsync();
 
             return await context.Products
                                 .Include(p => p.Sizes)
@@ -90,6 +94,7 @@ namespace UNITEE_BACKEND.Services
                                             p.Sizes.Any(s => s.Size.ToLower().Contains(searchToLower)) ||
                                             p.ProductDepartments.Any(pd => pd.Department.Department_Name.ToLower().Contains(searchToLower)) ||
                                             p.ProductType.Product_Type.ToLower().Contains(searchToLower))
+                                .Where(p => p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
                                 .OrderByDescending(p => p.Rating.Value)
                                 .Take(5)
                                 .ToListAsync();

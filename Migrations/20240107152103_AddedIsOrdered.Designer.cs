@@ -12,8 +12,8 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240106064444_create")]
-    partial class create
+    [Migration("20240107152103_AddedIsOrdered")]
+    partial class AddedIsOrdered
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -165,6 +165,11 @@ namespace UNITEE_BACKEND.Migrations
                         {
                             DepartmentId = 12,
                             Department_Name = "Hotel and Tourism"
+                        },
+                        new
+                        {
+                            DepartmentId = 13,
+                            Department_Name = "Seacast"
                         });
                 });
 
@@ -223,6 +228,9 @@ namespace UNITEE_BACKEND.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EstimatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
