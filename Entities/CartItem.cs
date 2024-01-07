@@ -14,6 +14,6 @@ namespace UNITEE_BACKEND.Entities
         public int CartId { get; set; }
         public virtual Cart Cart { get; set; }  
         public bool IsDeleted { get; set; }
-        public bool IsOrdered { get; set; } = false;
+        public bool IsOrdered { get; set; }
     }
 }

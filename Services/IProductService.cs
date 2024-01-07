@@ -7,7 +7,7 @@ namespace UNITEE_BACKEND.Services
     public interface IProductService
     {
         public Task<int> AddProduct(ProductRequest request);
-        public Task<IEnumerable<Product>> RecommendProducts(string search);
+        public Task<IEnumerable<Product>> RecommendProducts(string search, int userId);
         public Task<IEnumerable<Product>> RecommendProductsPurchase(int id);
         public Task<IEnumerable<Product>> GetSearchProductByUserDepartment(int userId);
         public Task<int> GetQuantityBySize(int productId, int sizeQuantityId);

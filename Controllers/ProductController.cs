@@ -58,11 +58,11 @@ namespace UNITEE_BACKEND.Controllers
 
 
         [HttpGet("recommender")]
-        public async Task<IActionResult> GetRecommendProducts(string search)
+        public async Task<IActionResult> GetRecommendProducts(string search, int userId)
         {
             try
             {
-                var products = await productService.RecommendProducts(search);
+                var products = await productService.RecommendProducts(search, userId);
 
                 return Ok(products);
             }

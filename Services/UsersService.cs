@@ -298,8 +298,14 @@ namespace UNITEE_BACKEND.Services
                                         .Where(u => u.Id == userId)
                                         .FirstOrDefaultAsync();
 
-                var emailConfig = new EmailConfig(configuration);
-                await emailConfig.SendConfirmationEmail(user.Email, user.ConfirmationCode);
+                var confirmationCode = Tokens.GenerateConfirmationCode();
+
+                if (user.EmailVerificationStatus == EmailStatus.Deferred)
+                {
+                    user.ConfirmationCode = confirmationCode;
+                    var emailConfig = new EmailConfig(configuration);
+                    await emailConfig.SendConfirmationEmail(user.Email, user.ConfirmationCode);
+                }
 
                 await context.SaveChangesAsync();
 
@@ -513,6 +519,8 @@ namespace UNITEE_BACKEND.Services
                 if (user == null)
                     throw new InvalidOperationException("No User Found");
 
+                var confirmationCode = Tokens.GenerateConfirmationCode();
+
                 if (request.Image != null)
                 {
                     var imageUser = await new ImagePathConfig().SaveImage(request.Image);
@@ -532,6 +540,7 @@ namespace UNITEE_BACKEND.Services
                 if (!string.IsNullOrEmpty(request.email))
                 {
                     user.Email = request.email;
+                    user.EmailVerificationStatus = EmailStatus.Deferred;
                 }
 
                 if (!string.IsNullOrEmpty(request.phoneNumber))
@@ -635,6 +644,7 @@ namespace UNITEE_BACKEND.Services
                 if (!string.IsNullOrEmpty(supplier.Email))
                 {
                     supplier.Email = request.email;
+                    supplier.EmailVerificationStatus = EmailStatus.Deferred;
                 }
 
                 if (!string.IsNullOrEmpty(supplier.PhoneNumber))

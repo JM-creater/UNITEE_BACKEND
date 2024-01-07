@@ -12,8 +12,8 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240106125827_addedestimatedDate")]
-    partial class addedestimatedDate
+    [Migration("20240107143122_Create")]
+    partial class Create
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,9 +64,6 @@ namespace UNITEE_BACKEND.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsOrdered")
                         .HasColumnType("bit");
 
                     b.Property<int>("ProductId")

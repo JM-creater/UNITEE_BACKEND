@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UNITEE_BACKEND.Migrations
 {
     /// <inheritdoc />
-    public partial class create : Migration
+    public partial class Create : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -49,8 +49,7 @@ namespace UNITEE_BACKEND.Migrations
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     SizeQuantityId = table.Column<int>(type: "int", nullable: false),
                     CartId = table.Column<int>(type: "int", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    IsOrdered = table.Column<bool>(type: "bit", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -119,6 +118,7 @@ namespace UNITEE_BACKEND.Migrations
                     OrderNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReferenceId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProofOfPayment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EstimatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Total = table.Column<float>(type: "real", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -297,7 +297,8 @@ namespace UNITEE_BACKEND.Migrations
                     { 9, "Business and Accountancy" },
                     { 10, "Teacher Education" },
                     { 11, "Marine Engineering" },
-                    { 12, "Hotel and Tourism" }
+                    { 12, "Hotel and Tourism" },
+                    { 13, "Seacast" }
                 });
 
             migrationBuilder.InsertData(

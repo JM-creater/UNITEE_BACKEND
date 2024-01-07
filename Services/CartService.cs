@@ -79,17 +79,464 @@ namespace UNITEE_BACKEND.Services
         public async Task <IEnumerable<Cart>> GetCartByCustomer(int customerId)
             => await GetByUserId(customerId);
 
+        //public async Task AddToCart(UserRole userRole, CartAddRequest request)
+        //{
+        //    int supplierId = context.Products.First(p => p.ProductId == request.ProductId).SupplierId;
+
+        //    var cart = await context.Carts
+        //                            .Include(c => c.Items)
+        //                            .ThenInclude(ci => ci.SizeQuantity)
+        //                            .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
+        //                                                        c.SupplierId == supplierId &&
+        //                                                        !c.IsDeleted &&
+        //                                                        !context.Orders.Any(o => o.CartId == c.Id));
+
+        //    if (cart == null)
+        //    {
+        //        cart = new Cart
+        //        {
+        //            UserId = request.UserId,
+        //            SupplierId = supplierId,
+        //            Items = new List<CartItem>(),
+        //            DateCreated = DateTime.Now
+        //        };
+
+        //        context.Carts.Add(cart);
+        //    }
+
+        //    var cartItem = cart.Items
+        //                        .FirstOrDefault(i => i.ProductId == request.ProductId &&
+        //                                                i.SizeQuantity.Size == request.Size);
+
+        //    if (cartItem != null)
+        //    {
+        //        if (cartItem.Quantity + request.Quantity > cartItem.SizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        cartItem.Quantity += request.Quantity;
+        //    }
+        //    else
+        //    {
+        //        var sizeQuantity = await context.SizeQuantities
+        //                                        .Where(sq => sq.ProductId == request.ProductId &&
+        //                                                        sq.Size == request.Size)
+        //                                        .FirstOrDefaultAsync();
+
+        //        if (sizeQuantity == null)
+        //        {
+        //            throw new InvalidOperationException("Product size not found.");
+        //        }
+
+        //        if (request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        cartItem = new CartItem
+        //        {
+        //            ProductId = request.ProductId,
+        //            SizeQuantityId = sizeQuantity.Id,
+        //            Quantity = request.Quantity
+        //        };
+
+        //        cart.Items.Add(cartItem);
+        //    }
+
+        //    await context.SaveChangesAsync();
+        //}
+
+        //public async Task AddToCart(UserRole userRole, CartAddRequest request)
+        //{
+        //    int supplierId = context.Products.First(p => p.ProductId == request.ProductId).SupplierId;
+
+        //    var cart = await context.Carts
+        //                            .Include(c => c.Items)
+        //                            .ThenInclude(ci => ci.SizeQuantity)
+        //                            .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
+        //                                                        c.SupplierId == supplierId &&
+        //                                                        !c.IsDeleted);
+
+        //    if (cart == null)
+        //    {
+        //        cart = new Cart
+        //        {
+        //            UserId = request.UserId,
+        //            SupplierId = supplierId,
+        //            Items = new List<CartItem>(),
+        //            DateCreated = DateTime.Now
+        //        };
+
+        //        context.Carts.Add(cart);
+        //    }
+
+        //    var cartItem = cart.Items
+        //                        .FirstOrDefault(i => i.ProductId == request.ProductId &&
+        //                                                i.SizeQuantity.Size == request.Size);
+
+        //    if (cartItem != null)
+        //    {
+        //        if (cartItem.Quantity + request.Quantity > cartItem.SizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        cartItem.Quantity += request.Quantity;
+        //    }
+        //    else
+        //    {
+        //        var sizeQuantity = await context.SizeQuantities
+        //                                        .Where(sq => sq.ProductId == request.ProductId &&
+        //                                                        sq.Size == request.Size)
+        //                                        .FirstOrDefaultAsync();
+
+        //        if (sizeQuantity == null)
+        //        {
+        //            throw new InvalidOperationException("Product size not found.");
+        //        }
+
+        //        if (request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        cartItem = new CartItem
+        //        {
+        //            ProductId = request.ProductId,
+        //            SizeQuantityId = sizeQuantity.Id,
+        //            Quantity = request.Quantity
+        //        };
+
+        //        cart.Items.Add(cartItem);
+        //    }
+
+        //    await context.SaveChangesAsync();
+        //}
+
+        //public async Task AddToCart(UserRole userRole, CartAddRequest request)
+        //{
+        //    int supplierId = context.Products.First(p => p.ProductId == request.ProductId).SupplierId;
+
+        //    var cart = await context.Carts
+        //        .Include(c => c.Items)
+        //        .ThenInclude(ci => ci.SizeQuantity)
+        //        .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
+        //                                    c.SupplierId == supplierId &&
+        //                                    !context.Orders.Any(o => o.CartId == c.Id));
+
+        //    if (cart == null)
+        //    {
+        //        cart = new Cart
+        //        {
+        //            UserId = request.UserId,
+        //            SupplierId = supplierId,
+        //            Items = new List<CartItem>(),
+        //            DateCreated = DateTime.Now
+        //        };
+
+        //        context.Carts.Add(cart);
+        //    }
+
+        //    var sizeQuantity = await context.SizeQuantities
+        //        .Where(sq => sq.ProductId == request.ProductId &&
+        //                      sq.Size == request.Size)
+        //        .FirstOrDefaultAsync();
+
+        //    if (sizeQuantity == null)
+        //    {
+        //        throw new InvalidOperationException("Product size not found.");
+        //    }
+
+        //    var existingCartItem = cart.Items
+        //        .FirstOrDefault(i => i.ProductId == request.ProductId &&
+        //                               i.SizeQuantityId == sizeQuantity.Id);
+
+        //    if (existingCartItem != null)
+        //    {
+        //        if (existingCartItem.Quantity + request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        // Update the existing cart item's IsDeleted flag based on your condition.
+        //        if (existingCartItem.IsDeleted)
+        //        {
+        //            existingCartItem.IsDeleted = false;
+        //        }
+
+        //        existingCartItem.Quantity += request.Quantity;
+        //    }
+        //    else
+        //    {
+        //        if (request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        var cartItem = new CartItem
+        //        {
+        //            ProductId = request.ProductId,
+        //            SizeQuantityId = sizeQuantity.Id,
+        //            Quantity = request.Quantity,
+        //            IsDeleted = false // Ensure IsDeleted is set to false for new items.
+        //        };
+
+        //        cart.Items.Add(cartItem);
+        //    }
+
+        //    await context.SaveChangesAsync();
+        //}
+
+        //public async Task AddToCart(UserRole userRole, CartAddRequest request)
+        //{
+        //    int supplierId = context.Products.First(p => p.ProductId == request.ProductId).SupplierId;
+
+        //    var cart = await context.Carts
+        //        .Include(c => c.Items)
+        //        .ThenInclude(ci => ci.SizeQuantity)
+        //        .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
+        //                                    c.SupplierId == supplierId &&
+        //                                    !context.Orders.Any(o => o.CartId == c.Id));
+
+        //    if (cart == null)
+        //    {
+        //        cart = new Cart
+        //        {
+        //            UserId = request.UserId,
+        //            SupplierId = supplierId,
+        //            Items = new List<CartItem>(),
+        //            DateCreated = DateTime.Now
+        //        };
+
+        //        context.Carts.Add(cart);
+        //    }
+
+        //    var sizeQuantity = await context.SizeQuantities
+        //        .Where(sq => sq.ProductId == request.ProductId &&
+        //                      sq.Size == request.Size)
+        //        .FirstOrDefaultAsync();
+
+        //    if (sizeQuantity == null)
+        //    {
+        //        throw new InvalidOperationException("Product size not found.");
+        //    }
+
+        //    var existingCartItem = cart.Items
+        //        .FirstOrDefault(i => i.ProductId == request.ProductId &&
+        //                               i.SizeQuantityId == sizeQuantity.Id);
+
+        //    if (existingCartItem != null)
+        //    {
+        //        if (existingCartItem.IsDeleted)
+        //        {
+        //            existingCartItem.IsDeleted = false;
+        //        }
+
+        //        if (existingCartItem.IsOrdered)
+        //        {
+        //            await context.SaveChangesAsync();
+        //            return;
+        //        }
+
+        //        if (existingCartItem.Quantity + request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        existingCartItem.Quantity += request.Quantity;
+        //    }
+        //    else
+        //    {
+        //        if (request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        var cartItem = new CartItem
+        //        {
+        //            ProductId = request.ProductId,
+        //            SizeQuantityId = sizeQuantity.Id,
+        //            Quantity = request.Quantity,
+        //            IsDeleted = false, 
+        //            IsOrdered = false
+        //        };
+
+        //        cart.Items.Add(cartItem);
+        //    }
+
+        //    await context.SaveChangesAsync();
+        //}
+
+        //public async Task AddToCart(UserRole userRole, CartAddRequest request)
+        //{
+        //    int supplierId = await context.Products.Where(p => p.ProductId == request.ProductId).Select(p => p.SupplierId).FirstOrDefaultAsync();
+
+        //    var cart = await context.Carts
+        //        .Include(c => c.Items)
+        //        .ThenInclude(ci => ci.SizeQuantity)
+        //        .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
+        //                                    c.SupplierId == supplierId);
+
+        //    if (cart == null)
+        //    {
+        //        cart = new Cart
+        //        {
+        //            UserId = request.UserId,
+        //            SupplierId = supplierId,
+        //            Items = new List<CartItem>(),
+        //            DateCreated = DateTime.Now
+        //        };
+
+        //        context.Carts.Add(cart);
+        //    }
+
+        //    var sizeQuantity = await context.SizeQuantities
+        //        .Where(sq => sq.ProductId == request.ProductId &&
+        //                      sq.Size == request.Size)
+        //        .FirstOrDefaultAsync();
+
+        //    if (sizeQuantity == null)
+        //    {
+        //        throw new InvalidOperationException("Product size not found.");
+        //    }
+
+        //    var existingCartItem = cart.Items
+        //        .FirstOrDefault(i => i.ProductId == request.ProductId &&
+        //                               i.SizeQuantityId == sizeQuantity.Id);
+
+        //    if (existingCartItem != null)
+        //    {
+        //        if (existingCartItem.IsDeleted)
+        //        {
+        //            existingCartItem.IsDeleted = false;
+        //        }
+
+        //        if (existingCartItem.IsOrdered)
+        //        {
+        //            await context.SaveChangesAsync();
+        //            return;
+        //        }
+
+        //        if (existingCartItem.Quantity + request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        existingCartItem.Quantity += request.Quantity;
+        //    }
+        //    else
+        //    {
+        //        if (request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        var cartItem = new CartItem
+        //        {
+        //            ProductId = request.ProductId,
+        //            SizeQuantityId = sizeQuantity.Id,
+        //            Quantity = request.Quantity,
+        //            IsDeleted = false,
+        //            IsOrdered = false
+        //        };
+
+        //        cart.Items.Add(cartItem);
+        //    }
+
+        //    await context.SaveChangesAsync();
+        //}
+
+
+        //public async Task AddToCart(UserRole userRole, CartAddRequest request)
+        //{
+        //    int supplierId = await context.Products.Where(p => p.ProductId == request.ProductId).Select(p => p.SupplierId).FirstOrDefaultAsync();
+
+        //    var cart = await context.Carts
+        //        .Include(c => c.Items)
+        //        .ThenInclude(ci => ci.SizeQuantity)
+        //        .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
+        //                                    c.SupplierId == supplierId);
+
+        //    if (cart == null)
+        //    {
+        //        cart = new Cart
+        //        {
+        //            UserId = request.UserId,
+        //            SupplierId = supplierId,
+        //            Items = new List<CartItem>(),
+        //            DateCreated = DateTime.Now
+        //        };
+
+        //        context.Carts.Add(cart);
+        //    }
+
+        //    var sizeQuantity = await context.SizeQuantities
+        //        .Where(sq => sq.ProductId == request.ProductId &&
+        //                      sq.Size == request.Size)
+        //        .FirstOrDefaultAsync();
+
+        //    if (sizeQuantity == null)
+        //    {
+        //        throw new InvalidOperationException("Product size not found.");
+        //    }
+
+        //    var existingCartItem = cart.Items
+        //        .FirstOrDefault(i => i.ProductId == request.ProductId &&
+        //                               i.SizeQuantityId == sizeQuantity.Id);
+
+        //    // Check if existing cart item is part of an order
+        //    if (existingCartItem != null)
+        //    {
+        //        if (existingCartItem.IsOrdered)
+        //        {
+        //            // If the item is part of an order, do not modify it
+        //            return;
+        //        }
+
+        //        if (existingCartItem.IsDeleted)
+        //        {
+        //            existingCartItem.IsDeleted = false;
+        //        }
+
+        //        if (existingCartItem.Quantity + request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        existingCartItem.Quantity += request.Quantity;
+        //    }
+        //    else
+        //    {
+        //        if (request.Quantity > sizeQuantity.Quantity)
+        //        {
+        //            throw new InvalidOperationException("Requested quantity exceeds available quantity.");
+        //        }
+
+        //        var cartItem = new CartItem
+        //        {
+        //            ProductId = request.ProductId,
+        //            SizeQuantityId = sizeQuantity.Id,
+        //            Quantity = request.Quantity,
+        //            IsDeleted = false,
+        //            IsOrdered = false
+        //        };
+
+        //        cart.Items.Add(cartItem);
+        //    }
+
+        //    await context.SaveChangesAsync();
+        //}
+
         public async Task AddToCart(UserRole userRole, CartAddRequest request)
         {
-            int supplierId = context.Products.First(p => p.ProductId == request.ProductId).SupplierId;
+            int supplierId = await context.Products.Where(p => p.ProductId == request.ProductId).Select(p => p.SupplierId).FirstOrDefaultAsync();
 
             var cart = await context.Carts
-                                    .Include(c => c.Items)
-                                    .ThenInclude(ci => ci.SizeQuantity)
-                                    .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
-                                                                c.SupplierId == supplierId &&
-                                                                !c.IsDeleted &&
-                                                                !context.Orders.Any(o => o.CartId == c.Id));
+                .Include(c => c.Items)
+                .ThenInclude(ci => ci.SizeQuantity)
+                .FirstOrDefaultAsync(c => c.UserId == request.UserId &&
+                                            c.SupplierId == supplierId);
 
             if (cart == null)
             {
@@ -104,41 +551,49 @@ namespace UNITEE_BACKEND.Services
                 context.Carts.Add(cart);
             }
 
-            var cartItem = cart.Items
-                                .FirstOrDefault(i => i.ProductId == request.ProductId &&
-                                                        i.SizeQuantity.Size == request.Size);
+            var sizeQuantity = await context.SizeQuantities
+                .Where(sq => sq.ProductId == request.ProductId &&
+                              sq.Size == request.Size)
+                .FirstOrDefaultAsync();
 
-            if (cartItem != null)
+            if (sizeQuantity == null)
             {
-                if (cartItem.Quantity + request.Quantity > cartItem.SizeQuantity.Quantity)
+                throw new InvalidOperationException("Product size not found.");
+            }
+
+            var existingCartItem = cart.Items
+                .FirstOrDefault(i => i.ProductId == request.ProductId &&
+                                       i.SizeQuantityId == sizeQuantity.Id);
+
+            if (existingCartItem != null)
+            {
+                if (existingCartItem.IsDeleted)
+                {
+                    existingCartItem.IsDeleted = false;
+                    existingCartItem.Quantity = request.Quantity; // Update quantity as per new request
+                }
+                else if (existingCartItem.Quantity + request.Quantity > sizeQuantity.Quantity)
                 {
                     throw new InvalidOperationException("Requested quantity exceeds available quantity.");
                 }
-
-                cartItem.Quantity += request.Quantity;
+                else
+                {
+                    existingCartItem.Quantity += request.Quantity;
+                }
             }
             else
             {
-                var sizeQuantity = await context.SizeQuantities
-                                                .Where(sq => sq.ProductId == request.ProductId &&
-                                                                sq.Size == request.Size)
-                                                .FirstOrDefaultAsync();
-
-                if (sizeQuantity == null)
-                {
-                    throw new InvalidOperationException("Product size not found.");
-                }
-
                 if (request.Quantity > sizeQuantity.Quantity)
                 {
                     throw new InvalidOperationException("Requested quantity exceeds available quantity.");
                 }
 
-                cartItem = new CartItem
+                var cartItem = new CartItem
                 {
                     ProductId = request.ProductId,
                     SizeQuantityId = sizeQuantity.Id,
-                    Quantity = request.Quantity
+                    Quantity = request.Quantity,
+                    IsDeleted = false
                 };
 
                 cart.Items.Add(cartItem);
@@ -147,9 +602,12 @@ namespace UNITEE_BACKEND.Services
             await context.SaveChangesAsync();
         }
 
+
+
+
         public async Task DeleteCart(int id)
         {
-            var cart = context.Carts.Find(id);
+            var cart = await context.Carts.FindAsync(id);
                 
             if (cart != null)
             {
