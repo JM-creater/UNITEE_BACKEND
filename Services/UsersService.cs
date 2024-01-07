@@ -435,7 +435,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (!PasswordEncryptionService.VerifyPassword(request.Password, user.Password))
                 {
-                    throw new AuthenticationException("Invalid Password");
+                    throw new AuthenticationException("Incorrect Password");
                 }
 
                 return (user, (UserRole)user.Role);
@@ -455,10 +455,10 @@ namespace UNITEE_BACKEND.Services
                                              .FirstOrDefaultAsync();
 
                 if (userExist == null)
-                    throw new Exception("User not Found");
+                    throw new InvalidOperationException("User not Found");
 
                 if (userExist.Role != (int)UserRole.Customer)
-                    throw new Exception("The provided ID does not correspond to a customer");
+                    throw new InvalidOperationException("The provided ID does not correspond to a customer");
 
                 userExist.IsValidate = request.IsValidate;
                 userExist.IsActive = request.IsActive;
@@ -483,10 +483,10 @@ namespace UNITEE_BACKEND.Services
                                              .FirstOrDefaultAsync();
 
                 if (userExist == null)
-                    throw new Exception("User not Found");
+                    throw new InvalidOperationException("User not Found");
 
                 if (userExist.Role != (int)UserRole.Supplier)
-                    throw new Exception("The provided ID does not correspond to a supplier");
+                    throw new InvalidOperationException("The provided ID does not correspond to a supplier");
 
                 userExist.IsValidate = request.IsValidate;
                 userExist.IsActive = request.IsActive;
@@ -513,12 +513,36 @@ namespace UNITEE_BACKEND.Services
                 if (user == null)
                     throw new InvalidOperationException("No User Found");
 
-                user.FirstName = request.firstName;
-                user.LastName = request.lastName;
-                user.Email = request.email;
-                user.DepartmentId = request.departmentId;
-                user.PhoneNumber = request.phoneNumber;
-                user.Gender = request.gender;
+                if (request.Image != null)
+                {
+                    var imageUser = await new ImagePathConfig().SaveImage(request.Image);
+                    user.Image = imageUser;
+                }
+
+                if (!string.IsNullOrEmpty(request.firstName))
+                {
+                    user.FirstName = request.firstName;
+                }
+
+                if (!string.IsNullOrEmpty(request.lastName))
+                {
+                    user.LastName = request.lastName;
+                }
+
+                if (!string.IsNullOrEmpty(request.email))
+                {
+                    user.Email = request.email;
+                }
+
+                if (!string.IsNullOrEmpty(request.phoneNumber))
+                {
+                    user.PhoneNumber = request.phoneNumber;
+                }
+
+                if (!string.IsNullOrEmpty(request.gender))
+                {
+                    user.Gender = request.gender;
+                }
 
                 context.Users.Update(user);
                 await context.SaveChangesAsync();
@@ -542,11 +566,31 @@ namespace UNITEE_BACKEND.Services
                 if (user == null)
                     throw new InvalidOperationException("No User Found");
 
-                user.FirstName = request.firstName;
-                user.LastName = request.lastName;
-                user.Email = request.email;
-                user.PhoneNumber = request.phoneNumber;
-                user.Gender = request.gender;
+                if (request.Image != null)
+                {
+                    var imageAdmin = await new ImagePathConfig().SaveImage(request.Image);
+                    user.Image = imageAdmin;
+                }
+
+                if (!string.IsNullOrEmpty(request.firstName))
+                {
+                    user.FirstName = request.firstName;
+                }
+
+                if (!string.IsNullOrEmpty(request.lastName))
+                {
+                    user.LastName = request.lastName;
+                }
+
+                if (!string.IsNullOrEmpty(request.email))
+                {
+                    user.Email = request.email;
+                }
+
+                if (!string.IsNullOrEmpty(request.phoneNumber))
+                {
+                    user.PhoneNumber = request.phoneNumber;
+                }
 
                 context.Users.Update(user);
                 await context.SaveChangesAsync();
@@ -569,13 +613,34 @@ namespace UNITEE_BACKEND.Services
 
                 if (supplier == null)
                 {
-                    throw new Exception("No User Found");
+                    throw new InvalidOperationException("No User Found");
                 }
 
-                supplier.ShopName = request.shopName;
-                supplier.Address = request.address;
-                supplier.Email = request.email;
-                supplier.PhoneNumber = request.phoneNumber;
+                if (request.Image != null)
+                {
+                    var imageSupplier = await new ImagePathConfig().SaveSupplierImage(request.Image);
+                    supplier.Image = imageSupplier;
+                }
+
+                if (!string.IsNullOrEmpty(supplier.ShopName))
+                {
+                    supplier.ShopName = request.shopName;
+                }
+
+                if (!string.IsNullOrEmpty(supplier.Address))
+                {
+                    supplier.Address = request.address;
+                }
+
+                if (!string.IsNullOrEmpty(supplier.Email))
+                {
+                    supplier.Email = request.email;
+                }
+
+                if (!string.IsNullOrEmpty(supplier.PhoneNumber))
+                {
+                    supplier.PhoneNumber = request.phoneNumber;
+                }
 
                 context.Users.Update(supplier);
                 await context.SaveChangesAsync();
@@ -624,6 +689,32 @@ namespace UNITEE_BACKEND.Services
 
                 if (supplier == null)
                     throw new InvalidOperationException("Supplier not found");
+
+                var updatedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
+
+                supplier.Password = updatedPassword;
+
+                context.Users.Update(supplier);
+                await context.SaveChangesAsync();
+
+                return supplier;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        }
+
+        public async Task<User> UpdateAdminPassword(int id, UpdatePasswordRequest request)
+        {
+            try
+            {
+                var supplier = await context.Users
+                                            .Where(u => u.Id == id)
+                                            .FirstOrDefaultAsync();
+
+                if (supplier == null)
+                    throw new InvalidOperationException("Admin not found");
 
                 var updatedPassword = PasswordEncryptionService.EncryptPassword(request.Password);
 

@@ -29,6 +29,7 @@ namespace UNITEE_BACKEND.Services
         public Task<User> UpdateProfileSupplier(int id, UpdateSupplierRequest request);
         public Task<User> UpdateCustomerPassword(int id, UpdatePasswordRequest request);
         public Task<User> UpdateSupplierPassword(int id, UpdatePasswordRequest request);
+        public Task<User> UpdateAdminPassword(int id, UpdatePasswordRequest request);
         public Task<User> ForgotPassword(string email);
         public Task<User> ResetPassword(ResetPasswordDto dto);
         public Task<bool> IsResetTokenValid(string token);
