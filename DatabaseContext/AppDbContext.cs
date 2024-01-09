@@ -96,6 +96,11 @@ namespace UNITEE_BACKEND.DatabaseContext
                 new Department
                 {
                     DepartmentId = 13,
+                    Department_Name = "Basic Education"
+                },
+                new Department
+                {
+                    DepartmentId = 14,
                     Department_Name = "Seacast"
                 }
                 );

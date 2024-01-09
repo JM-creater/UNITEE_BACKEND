@@ -50,7 +50,7 @@ namespace UNITEE_BACKEND.Services
                     SideViewImage = sideImagePath,
                     BackViewImage = backImagePath,
                     SizeGuide = sizeGuidePath,
-                    IsActive = true
+                    IsActive = true,
                 };
 
                 foreach (var departmentId in request.DepartmentIds)
