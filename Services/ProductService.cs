@@ -101,45 +101,6 @@ namespace UNITEE_BACKEND.Services
                                 .ToListAsync();
         }
 
-        //public async Task<IEnumerable<Product>> RecommendProductsPurchase(int userId)
-        //{
-        //    var userDepartmentId = await context.Users
-        //                                        .Where(u => u.Id == userId)
-        //                                        .Select(u => u.DepartmentId)
-        //                                        .FirstOrDefaultAsync();
-
-        //    if (!userDepartmentId.HasValue)
-        //    {
-        //        return Enumerable.Empty<Product>();
-        //    }
-
-        //    var purchasedProductIds = await context.OrderItems
-        //                                            .Where(oi => oi.Order.UserId == userId && !oi.Order.IsDeleted)
-        //                                            .Select(oi => oi.ProductId)
-        //                                            .Distinct()
-        //                                            .ToListAsync();
-
-        //    var purchasedProductsInfo = await context.Products
-        //                                              .Where(p => purchasedProductIds.Contains(p.ProductId))
-        //                                              .Select(p => new { p.Category, p.ProductTypeId, p.SupplierId })
-        //                                              .Distinct()
-        //                                              .ToListAsync();
-
-        //    var categories = purchasedProductsInfo.Select(p => p.Category).Distinct();
-        //    var productTypes = purchasedProductsInfo.Select(p => p.ProductTypeId).Distinct();
-        //    var suppliers = purchasedProductsInfo.Select(p => p.SupplierId).Distinct();
-
-        //    var recommendedProducts = await context.Products
-        //                                            .Where(p => !purchasedProductIds.Contains(p.ProductId) &&
-        //                                                        productTypes.Contains(p.ProductTypeId) &&
-        //                                                        categories.Contains(p.Category) &&
-        //                                                        suppliers.Contains(p.SupplierId) &&
-        //                                                        p.ProductDepartments.Any(pd => pd.DepartmentId == userDepartmentId.Value))
-        //                                            .ToListAsync();
-
-        //    return recommendedProducts.Distinct().ToList();
-        //}
-
         public async Task<IEnumerable<Product>> RecommendProductsPurchase(int userId)
         {
             var lastPurchasedProducts = await context.Orders
@@ -162,6 +123,87 @@ namespace UNITEE_BACKEND.Services
 
             return recommendedProducts;
         }
+
+        public async Task<IEnumerable<Product>> GetRecommendedForYouProducts(int userId, int supplierId)
+        {
+            var user = await context.Users
+                                     .Include(u => u.Department)
+                                     .Where(u => u.Id == userId)
+                                     .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return Enumerable.Empty<Product>();
+            }
+
+            var completedOrders = context.Orders
+                                         .Where(o => o.Status == Status.Completed &&
+                                                o.UserId == userId)
+                                         .SelectMany(o => o.OrderItems)
+                                         .Where(oi => oi.Product.SupplierId == supplierId)
+                                         .Select(oi => oi.ProductId);
+
+            var mostSold = completedOrders.GroupBy(productId => productId)
+                                          .OrderByDescending(g => g.Count())
+                                          .Select(g => g.Key)
+                                          .Take(10);
+
+            var highestRated = context.Products.Where(p => mostSold.Contains(p.ProductId))
+                                               .OrderByDescending(p => p.Ratings.Average(r => r.Value))
+                                               .Select(p => p.ProductId)
+                                               .Take(10);
+
+            var recommendedProducts = await context.Products
+                                                   .Where(p => highestRated.Contains(p.ProductId) &&
+                                                          p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
+                                                   .ToListAsync();
+
+            return recommendedProducts;
+        }
+
+        public async Task<IEnumerable<Product>> GetRecommendedForYouProductsOverAll(int userId)
+        {
+            var user = await context.Users
+                                    .Include(u => u.Department)
+                                    .Where(u => u.Id == userId)
+                                    .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return Enumerable.Empty<Product>();
+            }
+
+            var completedOrders = context.OrderItems
+                                         .Include(oi => oi.Order)
+                                         .Include(oi => oi.Product)
+                                             .ThenInclude(p => p.Ratings)
+                                         .Where(oi => oi.Order.Status == Status.Completed && 
+                                                oi.Order.UserId == userId);
+
+            if (!completedOrders.Any())
+            {
+                return Enumerable.Empty<Product>();
+            }
+
+            var mostSold = completedOrders.GroupBy(oi => oi.ProductId)
+                                          .OrderByDescending(g => g.Count())
+                                          .Select(g => g.Key)
+                                          .Take(10);
+
+            var highestRated = completedOrders.Where(oi => mostSold.Contains(oi.ProductId))
+                                              .OrderByDescending(oi => oi.Product.Ratings.Average(r => r.Value))
+                                              .Select(oi => oi.ProductId)
+                                              .Distinct()
+                                              .Take(10);
+
+            var recommendedProducts = await context.Products
+                                                   .Where(p => highestRated.Contains(p.ProductId) &&
+                                                          p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
+                                                   .ToListAsync();
+
+            return recommendedProducts;
+        }
+
 
         public async Task<IEnumerable<Product>> GetSearchProductByUserDepartment(int userId)
         {

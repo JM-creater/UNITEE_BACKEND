@@ -35,6 +35,7 @@ namespace UNITEE_BACKEND.Services
                         .ThenInclude(p => p.Product)
                         .ThenInclude(s => s.Sizes)
                        .Include(o => o.OrderItems)
+                      .OrderByDescending(o => o.DateCreated)
                       .ToListAsync();
 
         public async Task<Order?> GetById(int id)
