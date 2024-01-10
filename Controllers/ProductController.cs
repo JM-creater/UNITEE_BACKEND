@@ -72,6 +72,36 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        [HttpGet("recommendedForYou")]
+        public async Task<IActionResult> GetRecommendProducts(int userId, int supplierId)
+        {
+            try
+            {
+                var products = await productService.GetRecommendedForYouProducts(userId, supplierId);
+
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("recommendedOverAll")]
+        public async Task<IActionResult> GetRecommendProductsOverAll(int userId)
+        {
+            try
+            {
+                var products = await productService.GetRecommendedForYouProductsOverAll(userId);
+
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
         [HttpGet("recommendations/{id}")]
         public async Task<IActionResult> GetRecommendations(int id)
         {

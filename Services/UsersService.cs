@@ -300,7 +300,7 @@ namespace UNITEE_BACKEND.Services
 
                 var confirmationCode = Tokens.GenerateConfirmationCode();
 
-                if (user.EmailVerificationStatus == EmailStatus.Deferred)
+                if (user.EmailVerificationStatus == EmailStatus.Deferred || user.EmailVerificationStatus == EmailStatus.Pending)
                 {
                     user.ConfirmationCode = confirmationCode;
                     var emailConfig = new EmailConfig(configuration);
