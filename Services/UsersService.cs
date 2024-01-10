@@ -539,8 +539,20 @@ namespace UNITEE_BACKEND.Services
 
                 if (!string.IsNullOrEmpty(request.email))
                 {
-                    user.Email = request.email;
-                    user.EmailVerificationStatus = EmailStatus.Deferred;
+                    var emailExists = await context.Users
+                                                   .AnyAsync(u => u.Id != id &&
+                                                             u.Email == request.email);
+
+                    if (emailExists)
+                    {
+                        throw new InvalidOperationException("Email already in use by another user.");
+                    }
+
+                    if (user.Email != request.email)
+                    {
+                        user.Email = request.email;
+                        user.EmailVerificationStatus = EmailStatus.Pending;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(request.phoneNumber))
@@ -593,7 +605,20 @@ namespace UNITEE_BACKEND.Services
 
                 if (!string.IsNullOrEmpty(request.email))
                 {
-                    user.Email = request.email;
+                    var emailExists = await context.Users
+                                                   .AnyAsync(u => u.Id != id &&
+                                                             u.Email == request.email);
+
+                    if (emailExists)
+                    {
+                        throw new InvalidOperationException("Email already in use by another user.");
+                    }
+
+                    if (user.Email != request.email)
+                    {
+                        user.Email = request.email;
+                        user.EmailVerificationStatus = EmailStatus.Pending;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(request.phoneNumber))
@@ -631,25 +656,37 @@ namespace UNITEE_BACKEND.Services
                     supplier.Image = imageSupplier;
                 }
 
-                if (!string.IsNullOrEmpty(supplier.ShopName))
+                if (!string.IsNullOrEmpty(request.shopName))
                 {
                     supplier.ShopName = request.shopName;
                 }
 
-                if (!string.IsNullOrEmpty(supplier.Address))
+                if (!string.IsNullOrEmpty(request.address))
                 {
                     supplier.Address = request.address;
                 }
 
-                if (!string.IsNullOrEmpty(supplier.Email))
-                {
-                    supplier.Email = request.email;
-                    supplier.EmailVerificationStatus = EmailStatus.Deferred;
-                }
-
-                if (!string.IsNullOrEmpty(supplier.PhoneNumber))
+                if (!string.IsNullOrEmpty(request.phoneNumber))
                 {
                     supplier.PhoneNumber = request.phoneNumber;
+                }
+
+                if (!string.IsNullOrEmpty(request.email))
+                {
+                    var emailExists = await context.Users
+                                                   .AnyAsync(u => u.Id != id && 
+                                                             u.Email == request.email);
+
+                    if (emailExists)
+                    {
+                        throw new InvalidOperationException("Email already in use by another user.");
+                    }
+
+                    if (supplier.Email != request.email)
+                    {
+                        supplier.Email = request.email;
+                        supplier.EmailVerificationStatus = EmailStatus.Pending;
+                    }
                 }
 
                 context.Users.Update(supplier);
