@@ -35,7 +35,6 @@
     <Folder Include="PathImages\CityPermit\" />
     <Folder Include="PathImages\FrontViewImage\" />
     <Folder Include="PathImages\BackViewImage\" />
-    <Folder Include="PathImages\Images\" />
     <Folder Include="PathImages\BarangayClearance\" />
     <Folder Include="PathImages\ValidIdBackImage\" />
     <Folder Include="PathImages\ValidIdFrontImage\" />
