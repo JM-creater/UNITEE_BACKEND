@@ -119,7 +119,7 @@ namespace UNITEE_BACKEND.DatabaseContext
                 new ProductType
                 {
                     ProductTypeId = 3,
-                    Product_Type = "Department Shirt"
+                    Product_Type = "Department T-Shirt"
                 },
                 new ProductType
                 {
@@ -130,6 +130,11 @@ namespace UNITEE_BACKEND.DatabaseContext
                 {
                     ProductTypeId = 5,
                     Product_Type = "ID Sling"
+                },
+                new ProductType
+                {
+                    ProductTypeId = 6,
+                    Product_Type = "Accessories"
                 }
                 );
 
@@ -137,8 +142,8 @@ namespace UNITEE_BACKEND.DatabaseContext
                 new User
                 {
                     Id = 20163482,
-                    FirstName = "Admin",
-                    LastName = "Admin",
+                    FirstName = "Joseph Martin",
+                    LastName = "Garado",
                     Password = PasswordEncryptionService.EncryptPassword("123456"),
                     Email = "garadojosephmartin98@gmail.com",
                     PhoneNumber = "09199431060",

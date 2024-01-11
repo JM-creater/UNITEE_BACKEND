@@ -225,7 +225,21 @@ namespace UNITEE_BACKEND.Services
                 if (user == null)
                     throw new ArgumentException("User not found.");
 
-                if (user.EmailVerificationStatus == EmailStatus.Pending && DateTime.Now > user.EmailVerificationSentTime.AddHours(24))
+
+                if (user.EmailVerificationStatus == EmailStatus.Pending)
+                {
+                    user.EmailVerificationStatus = EmailStatus.Verified;
+                    user.EmailConfirmationToken = null;
+                    user.IsEmailConfirmed = true;
+                    user.ConfirmationCode = null;
+                    user.EmailVerificationSentTime = DateTime.Now;
+
+                    context.Users.Update(user);
+                    await context.SaveChangesAsync();
+
+                    return user;
+                }
+                else if (user.EmailVerificationStatus == EmailStatus.Pending && DateTime.Now > user.EmailVerificationSentTime.AddHours(24))
                 {
                     user.EmailVerificationStatus = EmailStatus.Expired;
                     var emailConfig = new EmailConfig(configuration);
@@ -236,29 +250,36 @@ namespace UNITEE_BACKEND.Services
 
                     return user;
                 }
-                else if (user.EmailVerificationStatus == EmailStatus.Pending)
-                {
-                    user.EmailVerificationStatus = EmailStatus.Verified;
-                    user.EmailConfirmationToken = null;
-                    user.IsEmailConfirmed = true;
-                    user.ConfirmationCode = null; 
-                }
                 else if (user.EmailVerificationStatus == EmailStatus.Deferred)
                 {
                     user.EmailVerificationStatus = EmailStatus.Verified;
                     user.EmailConfirmationToken = null;
                     user.IsEmailConfirmed = true;
                     user.ConfirmationCode = null;
+                    user.EmailVerificationSentTime = DateTime.Now;
+
+                    context.Users.Update(user);
+                    await context.SaveChangesAsync();
+
+                    return user;
+                }
+                else if (user.EmailVerificationStatus == EmailStatus.Expired)
+                {
+                    user.EmailVerificationStatus = EmailStatus.Verified;
+                    user.EmailConfirmationToken = null;
+                    user.IsEmailConfirmed = true;
+                    user.ConfirmationCode = null;
+                    user.EmailVerificationSentTime = DateTime.Now;
+
+                    context.Users.Update(user);
+                    await context.SaveChangesAsync();
+
+                    return user;
                 }
                 else
                 {
-                    throw new InvalidOperationException("Invalid confirmation code or status.");
+                    throw new InvalidOperationException("Invalid email verification status.");
                 }
-
-                context.Users.Update(user);
-                await context.SaveChangesAsync();
-
-                return user;
             }
             catch (Exception e)
             {
@@ -300,7 +321,9 @@ namespace UNITEE_BACKEND.Services
 
                 var confirmationCode = Tokens.GenerateConfirmationCode();
 
-                if (user.EmailVerificationStatus == EmailStatus.Deferred || user.EmailVerificationStatus == EmailStatus.Pending)
+                if (user.EmailVerificationStatus == EmailStatus.Deferred || 
+                    user.EmailVerificationStatus == EmailStatus.Expired || 
+                    user.EmailVerificationStatus == EmailStatus.Pending)
                 {
                     user.ConfirmationCode = confirmationCode;
                     var emailConfig = new EmailConfig(configuration);
@@ -550,8 +573,12 @@ namespace UNITEE_BACKEND.Services
 
                     if (user.Email != request.email)
                     {
+                        var confirmationToken = Tokens.CreateRandomToken();
                         user.Email = request.email;
                         user.EmailVerificationStatus = EmailStatus.Pending;
+                        user.IsEmailConfirmed = false;
+                        user.EmailConfirmationToken = confirmationToken;
+                        user.EmailVerificationSentTime = DateTime.Now;
                     }
                 }
 
@@ -616,8 +643,12 @@ namespace UNITEE_BACKEND.Services
 
                     if (user.Email != request.email)
                     {
+                        var confirmationToken = Tokens.CreateRandomToken();
                         user.Email = request.email;
                         user.EmailVerificationStatus = EmailStatus.Pending;
+                        user.IsEmailConfirmed = false;
+                        user.EmailConfirmationToken = confirmationToken;
+                        user.EmailVerificationSentTime = DateTime.Now;
                     }
                 }
 
@@ -684,8 +715,12 @@ namespace UNITEE_BACKEND.Services
 
                     if (supplier.Email != request.email)
                     {
+                        var confirmationToken = Tokens.CreateRandomToken();
                         supplier.Email = request.email;
                         supplier.EmailVerificationStatus = EmailStatus.Pending;
+                        supplier.IsEmailConfirmed = false;
+                        supplier.EmailConfirmationToken = confirmationToken;
+                        supplier.EmailVerificationSentTime = DateTime.Now;
                     }
                 }
 
