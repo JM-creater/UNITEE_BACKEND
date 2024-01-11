@@ -5,7 +5,7 @@ namespace UNITEE_BACKEND.Entities
 {
     public class Notification
     {
-        [Key]
+        [Key] 
         public int Id { get; set; }
         public int UserId { get; set; }
         public int OrderId { get; set; }

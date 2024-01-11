@@ -8,6 +8,7 @@ namespace UNITEE_BACKEND.Entities
     {
         [Key]
         public int DepartmentId { get; set; }
+        [Column(TypeName = "nvarchar(50)")]
         public string Department_Name { get; set; }
         public ICollection<ProductDepartment> ProductDepartments { get; set; } = new List<ProductDepartment>();
     }

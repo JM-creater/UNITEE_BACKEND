@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using UNITEE_BACKEND.Enum;
 
 namespace UNITEE_BACKEND.Entities
@@ -11,7 +12,9 @@ namespace UNITEE_BACKEND.Entities
         public virtual User User { get; set; }
         public int CartId { get; set; }
         public virtual Cart Cart { get; set; }
+        [Column(TypeName = "nvarchar(50)")]
         public string OrderNumber { get; set; }
+        [Column(TypeName = "nvarchar(13)")]
         public string? ReferenceId { get; set; }
         public string? ProofOfPayment { get; set; }
         public DateTime? EstimatedDate { get; set; }

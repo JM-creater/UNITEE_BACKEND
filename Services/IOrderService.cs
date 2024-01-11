@@ -9,11 +9,11 @@ namespace UNITEE_BACKEND.Services
     public interface IOrderService
     {
         public Task<Order> AddOrder(OrderRequest request);
-        public int CountPendingOrders();
-        public int CountApprovedOrders();
-        public int CountForPickUpOrders();
-        public int CountCompletedOrderd();
-        public int CountCanceledOrderd();
+        public int CountPendingOrders(int id);
+        public int CountApprovedOrders(int id);
+        public int CountForPickUpOrders(int id);
+        public int CountCompletedOrderd(int id);
+        public int CountCanceledOrderd(int id);
         public Task<IEnumerable<Order>> GetAll();
         public Task<Order?> GetById(int id);
         public Task<List<Order>> GetAllByUserId(int id);
