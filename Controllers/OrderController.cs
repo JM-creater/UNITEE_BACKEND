@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Enum;
@@ -33,12 +34,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("countPending")]
-        public IActionResult CountPendingOrders()
+        [HttpGet("countPending/{id}")]
+        public IActionResult CountPendingOrders(int id)
         {
             try
             {
-                int count = orderService.CountPendingOrders();
+                int count = orderService.CountPendingOrders(id);
 
                 return Ok(count);
             }
@@ -48,12 +49,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("countApproved")]
-        public IActionResult CountApprovedOrders()
+        [HttpGet("countApproved/{id}")]
+        public IActionResult CountApprovedOrders(int id)
         {
             try
             {
-                int count = orderService.CountApprovedOrders();
+                int count = orderService.CountApprovedOrders(id);
 
                 return Ok(count);
             }
@@ -63,12 +64,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("countForPickUp")]
-        public IActionResult CountForPickUpOrders()
+        [HttpGet("countForPickUp/{id}")]
+        public IActionResult CountForPickUpOrders(int id)
         {
             try
             {
-                int count = orderService.CountForPickUpOrders();
+                int count = orderService.CountForPickUpOrders(id);
 
                 return Ok(count);
             }
@@ -78,12 +79,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("countCompleted")]
-        public IActionResult CountCompletedOrders()
+        [HttpGet("countCompleted/{id}")]
+        public IActionResult CountCompletedOrders(int id)
         {
             try
             {
-                int count = orderService.CountCompletedOrderd();
+                int count = orderService.CountCompletedOrderd(id);
 
                 return Ok(count);
             }
@@ -93,12 +94,12 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
-        [HttpGet("countCanceled")]
-        public IActionResult CountCanceledOrders()
+        [HttpGet("countCanceled/{id}")]
+        public IActionResult CountCanceledOrders(int id)
         {
             try
             {
-                int count = orderService.CountCanceledOrderd();
+                int count = orderService.CountCanceledOrderd(id);
 
                 return Ok(count);
             }

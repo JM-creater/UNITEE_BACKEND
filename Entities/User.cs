@@ -11,13 +11,21 @@ namespace UNITEE_BACKEND.Entities
         public virtual Department? Department { get; set; }
         public int? RatingId { get; set; }
         public virtual Rating Rating { get; set; }
+        [Column(TypeName = "nvarchar(50)")]
         public string? FirstName { get; set; }
+        [Column(TypeName = "nvarchar(50)")]
         public string? LastName { get; set; }
+        [Column(TypeName = "nvarchar(100)")]
         public string Password { get; set; }
+        [Column(TypeName = "nvarchar(50)")]
         public string Email { get; set; }
+        [Column(TypeName = "nvarchar(15)")]
         public string PhoneNumber { get; set; }
+        [Column(TypeName = "nvarchar(10)")]
         public string? Gender { get; set; }
+        [Column(TypeName = "nvarchar(50)")]
         public string? ShopName { get; set; }
+        [Column(TypeName = "nvarchar(50)")]
         public string? Address { get; set; }
         public string? Image { get; set; }
         public string? StudyLoad { get; set; }
@@ -32,6 +40,7 @@ namespace UNITEE_BACKEND.Entities
         public bool IsValidate { get; set; }
         public EmailStatus EmailVerificationStatus { get; set; }
         public DateTime EmailVerificationSentTime { get; set; }
+        [Column(TypeName = "nvarchar(6)")]
         public string? ConfirmationCode { get; set; }
         public string? EmailConfirmationToken { get; set; }
         public bool IsEmailConfirmed { get; set; }

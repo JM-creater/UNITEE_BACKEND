@@ -25,20 +25,20 @@ namespace UNITEE_BACKEND.Services
             configuration = _configuration;
         }
 
-        public int CountPendingOrders()
-            => context.Orders.Count(o => o.Status == Status.Pending);
+        public int CountPendingOrders(int id)
+             => context.Orders.Count(o => o.Cart.SupplierId == id && o.Status == Status.Pending);
 
-        public int CountApprovedOrders()
-            => context.Orders.Count(o => o.Status == Status.Approved);
+        public int CountApprovedOrders(int id)
+            => context.Orders.Count(o => o.Cart.SupplierId == id && o.Status == Status.Approved);
 
-        public int CountForPickUpOrders()
-            => context.Orders.Count(o => o.Status == Status.ForPickUp);
+        public int CountForPickUpOrders(int id)
+           => context.Orders.Count(o => o.Cart.SupplierId == id && o.Status == Status.ForPickUp);
 
-        public int CountCompletedOrderd()
-             => context.Orders.Count(o => o.Status == Status.Completed && (!o.IsReceived || o.Status != Status.Completed));
+        public int CountCompletedOrderd(int id)
+           => context.Orders.Count(o => o.Cart.SupplierId == id && o.Status == Status.Completed && (!o.IsReceived || o.Status != Status.Completed));
 
-        public int CountCanceledOrderd()
-             => context.Orders.Count(o => o.Status == Status.Canceled);
+        public int CountCanceledOrderd(int id)
+           => context.Orders.Count(o => o.Cart.SupplierId == id && o.Status == Status.Canceled);
 
 
         public async Task<IEnumerable<Order>> GetAll()
@@ -835,64 +835,6 @@ namespace UNITEE_BACKEND.Services
             await emailConfig.SendEmailAsync(email, subject, message);
         }
 
-        //public async Task<Order> CompletedOrder(int orderId)
-        //{
-        //    try
-        //    {
-        //        var order = await context.Orders
-        //                                  .Include(o => o.User)
-        //                                  .Include(o => o.OrderItems)
-        //                                     .ThenInclude(oi => oi.Product)
-        //                                  .FirstOrDefaultAsync(o => o.Id == orderId);
-
-        //        if (order == null)
-        //        {
-        //            throw new InvalidOperationException("Order not found");
-        //        }
-
-        //        if (order.Status != Status.ForPickUp)
-        //        {
-        //            throw new InvalidOperationException("Only orders with 'ForPickUp' status can be marked as completed");
-        //        }
-
-        //        order.Status = Status.Completed;
-        //        order.DateUpdated = DateTime.Now;
-
-        //        var existingNotification = await context.Notifications
-        //                                                .Where(o => o.OrderId == order.Id)
-        //                                                .FirstOrDefaultAsync();
-
-        //        if (existingNotification != null)
-        //        {
-        //            existingNotification.Message = $"Your order {order.OrderNumber} has been completed. Thank you for shopping with us!";
-        //            existingNotification.IsRead = false;
-        //        }
-        //        else
-        //        {
-        //            var notification = new Notification
-        //            {
-        //                UserId = order.UserId,
-        //                OrderId = order.Id,
-        //                Message = $"Your order {order.OrderNumber} has been completed. Thank you for shopping with us!",
-        //                DateUpdated = DateTime.Now,
-        //                IsRead = false
-        //            };
-        //            await service.AddNotification(notification);
-        //        }
-
-        //        context.Orders.Update(order);
-        //        await context.SaveChangesAsync();
-
-        //        await SendOrderCompletedEmailAsync(order.User.Email, orderId);
-
-        //        return order;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new ArgumentException(e.Message);
-        //    }
-        //}
-
         public async Task<Order> CompletedOrder(int orderId)
         {
             try
@@ -911,11 +853,6 @@ namespace UNITEE_BACKEND.Services
                 if (order.Status != Status.ForPickUp)
                 {
                     throw new InvalidOperationException("Only orders with 'ForPickUp' status can be marked as completed");
-                }
-
-                if (order.User.IsEmailConfirmed == true)
-                {
-                    await SendOrderCompletedEmailAsync(order.User.Email, orderId);
                 }
 
                 order.Status = Status.Completed;
@@ -940,11 +877,24 @@ namespace UNITEE_BACKEND.Services
                         DateUpdated = DateTime.Now,
                         IsRead = false
                     };
+
                     await service.AddNotification(notification);
                 }
 
                 context.Orders.Update(order);
                 await context.SaveChangesAsync();
+
+                if (order.User.EmailVerificationStatus == EmailStatus.Deferred || order.User.EmailVerificationStatus == EmailStatus.Pending || order.User.IsEmailConfirmed == true)
+                {
+                    try
+                    {
+                        await SendOrderCompletedEmailAsync(order.User.Email, orderId);
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
 
                 return order;
             }
