@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
+using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Services;
 
@@ -25,6 +26,81 @@ namespace UNITEE_BACKEND.Controllers
                 var order = await orderService.AddOrder(request);
 
                 return Ok(order);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("countPending")]
+        public IActionResult CountPendingOrders()
+        {
+            try
+            {
+                int count = orderService.CountPendingOrders();
+
+                return Ok(count);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("countApproved")]
+        public IActionResult CountApprovedOrders()
+        {
+            try
+            {
+                int count = orderService.CountApprovedOrders();
+
+                return Ok(count);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("countForPickUp")]
+        public IActionResult CountForPickUpOrders()
+        {
+            try
+            {
+                int count = orderService.CountForPickUpOrders();
+
+                return Ok(count);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("countCompleted")]
+        public IActionResult CountCompletedOrders()
+        {
+            try
+            {
+                int count = orderService.CountCompletedOrderd();
+
+                return Ok(count);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("countCanceled")]
+        public IActionResult CountCanceledOrders()
+        {
+            try
+            {
+                int count = orderService.CountCanceledOrderd();
+
+                return Ok(count);
             }
             catch (Exception e)
             {

@@ -13,6 +13,9 @@ namespace UNITEE_BACKEND.Services
         public Task<User> ConfirmEmail(string confirmationCode);
         public Task<User> VerifyLater(int userId);
         public Task<User> VerifyEmail(int userId);
+        public int OverAllCountUsers();
+        public int CountCustomers();
+        public int CountSuppliers();
         public Task<User?> GetTopSellingSeller();
         public Task<IEnumerable<User>> GetAll();
         public Task<User> SupplierById(int id);
