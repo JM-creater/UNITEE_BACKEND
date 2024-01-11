@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UNITEE_BACKEND.Migrations
 {
     /// <inheritdoc />
-    public partial class Create : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -300,7 +300,8 @@ namespace UNITEE_BACKEND.Migrations
                     { 10, "Teacher Education" },
                     { 11, "Marine Engineering" },
                     { 12, "Hotel and Tourism" },
-                    { 13, "Seacast" }
+                    { 13, "Basic Education" },
+                    { 14, "Seacast" }
                 });
 
             migrationBuilder.InsertData(
@@ -310,15 +311,16 @@ namespace UNITEE_BACKEND.Migrations
                 {
                     { 1, "School Uniform" },
                     { 2, "Event T-shirt" },
-                    { 3, "Department Shirt" },
+                    { 3, "Department T-Shirt" },
                     { 4, "PE Uniform" },
-                    { 5, "ID Sling" }
+                    { 5, "ID Sling" },
+                    { 6, "Accessories" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Address", "BIR", "BarangayClearance", "CityPermit", "ConfirmationCode", "DateCreated", "DateUpdated", "DepartmentId", "Email", "EmailConfirmationToken", "EmailVerificationSentTime", "EmailVerificationStatus", "FirstName", "Gender", "Image", "IsActive", "IsEmailConfirmed", "IsValidate", "LastName", "Password", "PasswordResetToken", "PhoneNumber", "RatingId", "ResetTokenExpires", "Role", "SchoolPermit", "ShopName", "StudyLoad", "ValidIdBackImage", "ValidIdFrontImage" },
-                values: new object[] { 20163482, "123 Main Street", null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "garadojosephmartin98@gmail.com", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, "Admin", null, "PathImages\\Images\\Admin Profile.png", true, false, true, "Admin", "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=", null, "09199431060", null, null, 3, null, null, null, null, null });
+                values: new object[] { 20163482, "123 Main Street", null, null, null, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, "garadojosephmartin98@gmail.com", null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, "Joseph Martin", null, "PathImages\\Images\\Admin Profile.png", true, false, true, "Garado", "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=", null, "09199431060", null, null, 3, null, null, null, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_CartId",

@@ -678,9 +678,6 @@ namespace UNITEE_BACKEND.Services
                     throw new InvalidOperationException("Only orders with 'Approved' status can be approved");
                 }
 
-                //DateTime pickUpDate = DateTime.Now.AddDays(5);
-                //string formattedDate = pickUpDate.ToString("MM/dd/yyyy");
-
                 order.Status = Status.ForPickUp;
                 order.DateUpdated = DateTime.Now;
 
@@ -690,7 +687,7 @@ namespace UNITEE_BACKEND.Services
 
                 if (existingNotification != null)
                 {
-                    existingNotification.Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {order.EstimatedDate?.ToString("MM-dd-yyyy")}.";
+                    existingNotification.Message = $"Your order {order.OrderNumber} is ready for pick-up at the front of the UC Chapel on {order.EstimatedDate?.ToString("MM-dd-yyyy")}.";
                     existingNotification.IsRead = false;
                 }
                 else
@@ -699,7 +696,7 @@ namespace UNITEE_BACKEND.Services
                     {
                         UserId = order.UserId,
                         OrderId = order.Id,
-                        Message = $"Your order {order.OrderNumber} is ready for pick-up. The pick-up date is on {order.EstimatedDate?.ToString("MM-dd-yyyy")}.",
+                        Message = $"Your order {order.OrderNumber} is ready for pick-up at the front of the UC Chapel on {order.EstimatedDate?.ToString("MM-dd-yyyy")}.",
                         DateUpdated = DateTime.Now,
                         IsRead = false
                     };

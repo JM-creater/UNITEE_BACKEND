@@ -12,15 +12,15 @@ using UNITEE_BACKEND.DatabaseContext;
 namespace UNITEE_BACKEND.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240107231336_Create")]
-    partial class Create
+    [Migration("20240110150648_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -169,6 +169,11 @@ namespace UNITEE_BACKEND.Migrations
                         new
                         {
                             DepartmentId = 13,
+                            Department_Name = "Basic Education"
+                        },
+                        new
+                        {
+                            DepartmentId = 14,
                             Department_Name = "Seacast"
                         });
                 });
@@ -407,7 +412,7 @@ namespace UNITEE_BACKEND.Migrations
                         new
                         {
                             ProductTypeId = 3,
-                            Product_Type = "Department Shirt"
+                            Product_Type = "Department T-Shirt"
                         },
                         new
                         {
@@ -418,6 +423,11 @@ namespace UNITEE_BACKEND.Migrations
                         {
                             ProductTypeId = 5,
                             Product_Type = "ID Sling"
+                        },
+                        new
+                        {
+                            ProductTypeId = 6,
+                            Product_Type = "Accessories"
                         });
                 });
 
@@ -599,12 +609,12 @@ namespace UNITEE_BACKEND.Migrations
                             Email = "garadojosephmartin98@gmail.com",
                             EmailVerificationSentTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EmailVerificationStatus = 0,
-                            FirstName = "Admin",
+                            FirstName = "Joseph Martin",
                             Image = "PathImages\\Images\\Admin Profile.png",
                             IsActive = true,
                             IsEmailConfirmed = false,
                             IsValidate = true,
-                            LastName = "Admin",
+                            LastName = "Garado",
                             Password = "jZae727K08KaOmKSgOaGzww/XVqGr/PKEgIMkjrcbJI=",
                             PhoneNumber = "09199431060",
                             Role = 3
