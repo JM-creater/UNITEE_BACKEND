@@ -1,5 +1,6 @@
 ﻿using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
+using UNITEE_BACKEND.Enum;
 using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 
@@ -8,6 +9,11 @@ namespace UNITEE_BACKEND.Services
     public interface IOrderService
     {
         public Task<Order> AddOrder(OrderRequest request);
+        public int CountPendingOrders();
+        public int CountApprovedOrders();
+        public int CountForPickUpOrders();
+        public int CountCompletedOrderd();
+        public int CountCanceledOrderd();
         public Task<IEnumerable<Order>> GetAll();
         public Task<Order?> GetById(int id);
         public Task<List<Order>> GetAllByUserId(int id);

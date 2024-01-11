@@ -172,7 +172,52 @@ namespace UNITEE_BACKEND.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("overAllCountUsers")]
+        public IActionResult OverAllCount()
+        {
+            try
+            {
+                var user = service.OverAllCountUsers();
+
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("countCustomers")]
+        public IActionResult CountCustomers()
+        {
+            try
+            {
+                var user = service.CountCustomers();
+
+                return Ok(user);
+            }
+            catch (Exception e) 
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpGet("countSuppliers")]
+        public IActionResult CountSuppliers()
+        {
+            try
+            {
+                var user = service.CountSuppliers();
+
+                return Ok(user);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
             }
         }
 

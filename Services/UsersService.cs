@@ -23,6 +23,15 @@ namespace UNITEE_BACKEND.Services
             configuration = _configuration; 
         }
 
+        public int OverAllCountUsers()
+            => context.Users.Count(u => !u.IsValidate);
+
+        public int CountCustomers()
+            => context.Users.Count(u => u.Role == (int)UserRole.Customer && (!u.IsValidate || u.Role != (int)UserRole.Customer));
+
+        public int CountSuppliers()
+          => context.Users.Count(u => u.Role == (int)UserRole.Supplier && (!u.IsValidate || u.Role != (int)UserRole.Supplier));
+
         public async Task<User?> GetTopSellingSeller()
         {
             var topSellerData = await context.OrderItems

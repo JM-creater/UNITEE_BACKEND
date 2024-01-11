@@ -25,6 +25,22 @@ namespace UNITEE_BACKEND.Services
             configuration = _configuration;
         }
 
+        public int CountPendingOrders()
+            => context.Orders.Count(o => o.Status == Status.Pending);
+
+        public int CountApprovedOrders()
+            => context.Orders.Count(o => o.Status == Status.Approved);
+
+        public int CountForPickUpOrders()
+            => context.Orders.Count(o => o.Status == Status.ForPickUp);
+
+        public int CountCompletedOrderd()
+             => context.Orders.Count(o => o.Status == Status.Completed && (!o.IsReceived || o.Status != Status.Completed));
+
+        public int CountCanceledOrderd()
+             => context.Orders.Count(o => o.Status == Status.Canceled);
+
+
         public async Task<IEnumerable<Order>> GetAll()
             => await context.Orders
                       .Include(u => u.User)
