@@ -83,13 +83,30 @@ namespace UNITEE_BACKEND.Services
 
         public async Task<IEnumerable<User>> GetAllSuppliers()
         {
-            return await context.Users
-                          .Include(u => u.Products)
-                            .ThenInclude(u => u.Sizes)
-                          .Include(u => u.Ratings)
-                          .Where(u => u.Role == (int)UserRole.Supplier)
-                          .OrderByDescending(u => u.DateCreated)
-                          .ToListAsync();
+            var suppliers = await context.Users
+                                       .Include(u => u.Products)
+                                         .ThenInclude(u => u.Sizes)
+                                       .Include(u => u.Ratings)
+                                       .Where(u => u.Role == (int)UserRole.Supplier)
+                                       .OrderByDescending(u => u.DateCreated)
+                                       .ToListAsync();
+
+            foreach (var supplier in suppliers)
+            {
+                double totalValueOfRating = supplier.Products
+                                                    .SelectMany(p => p.Ratings)
+                                                    .Where(r => r.Role == RatingRole.Supplier)
+                                                    .Sum(r => r.Value);
+
+                double totalNumberOfRated = supplier.Products
+                                                    .SelectMany(p => p.Ratings)
+                                                    .Count(r => r.Role == RatingRole.Supplier);
+
+                double averageRating = totalNumberOfRated > 0 ? totalValueOfRating / totalNumberOfRated : 0;
+                supplier.AverageRating = double.IsNaN(averageRating) ? 0 : averageRating;
+            }
+
+            return suppliers;
         }
 
 
@@ -101,16 +118,33 @@ namespace UNITEE_BACKEND.Services
                                                             .Distinct()
                                                             .ToListAsync();
 
-            return await context.Users
-                          .Where(u => u.Role == (int)UserRole.Supplier && supplierIdsProductDepartment.Contains(u.Id))
-                          .Include(u => u.Products)
-                             .ThenInclude(u => u.Sizes)
-                          .Include(u => u.Products)
-                             .ThenInclude(u => u.Ratings)
-                          .Include(u => u.Products)
-                             .ThenInclude(u => u.ProductDepartments)
-                                .ThenInclude(u => u.Department)
-                         .ToListAsync();
+            var suppliersByDepartment = await context.Users
+                                                     .Where(u => u.Role == (int)UserRole.Supplier && supplierIdsProductDepartment.Contains(u.Id))
+                                                     .Include(u => u.Products)
+                                                        .ThenInclude(p => p.Sizes)
+                                                     .Include(u => u.Products)
+                                                        .ThenInclude(p => p.Ratings)
+                                                     .Include(u => u.Products)
+                                                        .ThenInclude(p => p.ProductDepartments)
+                                                           .ThenInclude(pd => pd.Department)
+                                                     .ToListAsync();
+
+            foreach (var supplier in suppliersByDepartment)
+            {
+                double totalValueOfRating = supplier.Products
+                                                    .SelectMany(p => p.Ratings)
+                                                    .Where(r => r.Role == RatingRole.Supplier)
+                                                    .Sum(r => r.Value);
+
+                double totalNumberOfRated = supplier.Products
+                                                    .SelectMany(p => p.Ratings)
+                                                    .Count(r => r.Role == RatingRole.Supplier);
+
+                double averageRating = totalNumberOfRated > 0 ? totalValueOfRating / totalNumberOfRated : 0;
+                supplier.AverageRating = double.IsNaN(averageRating) ? 0 : averageRating;
+            }
+
+            return suppliersByDepartment;
         }
 
         public async Task<List<User>> GetSupplierById(int id)

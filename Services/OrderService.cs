@@ -1,7 +1,5 @@
 ﻿using Hangfire;
-using MailKit.Net.Smtp;
 using Microsoft.EntityFrameworkCore;
-using MimeKit;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;

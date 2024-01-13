@@ -1,7 +1,5 @@
 ﻿using UNITEE_BACKEND.Dto;
 using UNITEE_BACKEND.Entities;
-using UNITEE_BACKEND.Enum;
-using UNITEE_BACKEND.Models.ImageDirectory;
 using UNITEE_BACKEND.Models.Request;
 
 namespace UNITEE_BACKEND.Services

@@ -51,6 +51,7 @@ namespace UNITEE_BACKEND.Services
                     BackViewImage = backImagePath,
                     SizeGuide = sizeGuidePath,
                     IsActive = true,
+                    DateCreated = DateTime.Now
                 };
 
                 foreach (var departmentId in request.DepartmentIds)
@@ -127,36 +128,64 @@ namespace UNITEE_BACKEND.Services
         public async Task<IEnumerable<Product>> GetRecommendedForYouProducts(int userId, int supplierId)
         {
             var user = await context.Users
-                                     .Include(u => u.Department)
-                                     .Where(u => u.Id == userId)
-                                     .FirstOrDefaultAsync();
+                        .Include(u => u.Department)
+                        .Where(u => u.Id == userId)
+                        .FirstOrDefaultAsync();
 
             if (user == null)
             {
                 return Enumerable.Empty<Product>();
             }
 
-            var completedOrders = context.Orders
-                                         .Where(o => o.Status == Status.Completed &&
-                                                o.UserId == userId)
-                                         .SelectMany(o => o.OrderItems)
-                                         .Where(oi => oi.Product.SupplierId == supplierId)
-                                         .Select(oi => oi.ProductId);
+            var completedOrders = context.OrderItems
+                                         .Include(oi => oi.Order)
+                                         .Include(oi => oi.Product)
+                                             .ThenInclude(p => p.Ratings)
+                                         .Where(oi => oi.Order.Status == Status.Completed &&
+                                                oi.Order.UserId == userId)
+                                         .Where(oi => oi.Product.SupplierId == supplierId);
 
-            var mostSold = completedOrders.GroupBy(productId => productId)
-                                          .OrderByDescending(g => g.Count())
-                                          .Select(g => g.Key)
-                                          .Take(10);
+            if (!completedOrders.Any())
+            {
+                return Enumerable.Empty<Product>();
+            }
 
-            var highestRated = context.Products.Where(p => mostSold.Contains(p.ProductId))
-                                               .OrderByDescending(p => p.Ratings.Average(r => r.Value))
-                                               .Select(p => p.ProductId)
-                                               .Take(10);
+            var mostSold = completedOrders.GroupBy(oi => oi.ProductId)
+                                          .OrderByDescending(g => g.Sum(oi => oi.Quantity)) // Sum up the quantity
+                                          .Select(g => g.Key);
+
+            var highestRated = completedOrders.Where(oi => mostSold.Contains(oi.ProductId))
+                                              .OrderByDescending(oi => oi.Product.Ratings.Average(r => r.Value))
+                                              .Select(oi => oi.ProductId)
+                                              .Distinct();
 
             var recommendedProducts = await context.Products
+                                                   .Include(p => p.Sizes)
+                                                   .Include(p => p.Ratings)
                                                    .Where(p => highestRated.Contains(p.ProductId) &&
                                                           p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
+                                                   .Take(4)
                                                    .ToListAsync();
+
+            foreach (var product in recommendedProducts)
+            {
+                double totalValueOfRating = product.Ratings.Where(oi => oi.ProductId == product.ProductId && oi.Role == RatingRole.Product).Sum(oi => oi.Value);
+                double totalNumberOfRated = product.Ratings.Where(oi => oi.ProductId == product.ProductId && oi.Role == RatingRole.Product).Count();
+                double Average = totalValueOfRating / totalNumberOfRated;
+                if (Average > 0)
+                {
+                    product.AverageRating = Average;
+                }
+                else if (Average == double.NaN)
+                {
+                    product.AverageRating = 0;
+                }
+                else
+                {
+                    product.AverageRating = 0;
+                }
+                product.NumberOfSolds = completedOrders.Where(oi => oi.ProductId == product.ProductId).Sum(oi => oi.Quantity);
+            }
 
             return recommendedProducts;
         }
@@ -177,7 +206,7 @@ namespace UNITEE_BACKEND.Services
                                          .Include(oi => oi.Order)
                                          .Include(oi => oi.Product)
                                              .ThenInclude(p => p.Ratings)
-                                         .Where(oi => oi.Order.Status == Status.Completed && 
+                                         .Where(oi => oi.Order.Status == Status.Completed &&
                                                 oi.Order.UserId == userId);
 
             if (!completedOrders.Any())
@@ -186,20 +215,41 @@ namespace UNITEE_BACKEND.Services
             }
 
             var mostSold = completedOrders.GroupBy(oi => oi.ProductId)
-                                          .OrderByDescending(g => g.Count())
-                                          .Select(g => g.Key)
-                                          .Take(10);
+                                          .OrderByDescending(g => g.Sum(oi => oi.Quantity)) // Sum up the quantity
+                                          .Select(g => g.Key);
 
             var highestRated = completedOrders.Where(oi => mostSold.Contains(oi.ProductId))
                                               .OrderByDescending(oi => oi.Product.Ratings.Average(r => r.Value))
                                               .Select(oi => oi.ProductId)
-                                              .Distinct()
-                                              .Take(10);
+                                              .Distinct();
 
             var recommendedProducts = await context.Products
+                                                   .Include(p => p.Sizes)
+                                                   .Include(p => p.Ratings)
                                                    .Where(p => highestRated.Contains(p.ProductId) &&
                                                           p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
+                                                   .Take(3)
                                                    .ToListAsync();
+
+            foreach (var product in recommendedProducts)
+            {
+                double totalValueOfRating = product.Ratings.Where(oi => oi.ProductId == product.ProductId && oi.Role == RatingRole.Product).Sum(oi => oi.Value);
+                double totalNumberOfRated = product.Ratings.Where(oi => oi.ProductId == product.ProductId && oi.Role == RatingRole.Product).Count();
+                double Average = totalValueOfRating / totalNumberOfRated;
+                if (Average > 0)
+                {
+                    product.AverageRating = Average;
+                }
+                else if (Average == double.NaN)
+                {
+                    product.AverageRating = 0;
+                }
+                else
+                {
+                    product.AverageRating = 0;
+                }
+                product.NumberOfSolds = completedOrders.Where(oi => oi.ProductId == product.ProductId).Sum(oi => oi.Quantity);
+            }
 
             return recommendedProducts;
         }
@@ -335,13 +385,49 @@ namespace UNITEE_BACKEND.Services
                             .ToListAsync();
 
         public async Task<IEnumerable<Product>> GetProductsByShopIdAndDepartmentId(int shopId, int departmentId)
-            => await context.Products
-                            .Include(p => p.ProductDepartments)
-                               .ThenInclude(pd => pd.Department)
-                            .Include(p => p.Sizes)
-                            .Where(p => p.SupplierId == shopId &&
-                                      p.ProductDepartments.Any(pd => pd.DepartmentId == departmentId))
-                            .ToListAsync();
+        {
+            var productsByDepartment = await context.Products
+                                                    .Include(p => p.Ratings)
+                                                    .Include(p => p.ProductDepartments)
+                                                        .ThenInclude(pd => pd.Department)
+                                                    .Include(p => p.Sizes)
+                                                    .Where(p => p.SupplierId == shopId &&
+                                                                p.ProductDepartments.Any(pd => pd.DepartmentId == departmentId))
+                                                    .ToListAsync();
+
+            var user = await context.Users
+                                    .Include(u => u.Ratings)
+                                    .Where(u => u.Id == shopId)
+                                    .FirstOrDefaultAsync();
+
+            foreach (var product in productsByDepartment)
+            {
+                double totalValueOfRatingForProduct = product.Ratings
+                                                             .Where(oi => oi.Role == RatingRole.Product)
+                                                             .Sum(oi => oi.Value);
+
+                double totalNumberOfRatedForProduct = product.Ratings
+                                                             .Count(oi => oi.Role == RatingRole.Product);
+
+                double averageForProduct = totalNumberOfRatedForProduct > 0 ? totalValueOfRatingForProduct / totalNumberOfRatedForProduct : 0;
+                product.AverageRating = double.IsNaN(averageForProduct) ? 0 : averageForProduct;
+            }
+
+            if (user != null)
+            {
+                double totalValueOfRatingForUser = user.Ratings
+                                                       .Where(oi => oi.Role == RatingRole.Supplier)
+                                                       .Sum(oi => oi.Value);
+
+                double totalNumberOfRatedForUser = user.Ratings
+                                                       .Count(oi => oi.Role == RatingRole.Supplier);
+
+                double averageForUser = totalNumberOfRatedForUser > 0 ? totalValueOfRatingForUser / totalNumberOfRatedForUser : 0;
+                user.AverageRating = double.IsNaN(averageForUser) ? 0 : averageForUser;
+            }
+
+            return productsByDepartment;
+        }
 
         public async Task<Product> GetById(int productId)
         {
@@ -371,6 +457,7 @@ namespace UNITEE_BACKEND.Services
                                             .Include(product => product.ProductDepartments)
                                                 .ThenInclude(pd => pd.Department)
                                             .Where(product => product.SupplierId == supplierId)
+                                            .OrderByDescending(product => product.DateCreated)
                                             .ToListAsync();
 
                 var productDto = products.Select(product => new ProductWithSizeQuantityDto
@@ -468,6 +555,7 @@ namespace UNITEE_BACKEND.Services
                 existingProduct.Description = request.Description;
                 existingProduct.Category = request.Category;
                 existingProduct.Price = request.Price;
+                existingProduct.DateUpdated = DateTime.Now;
 
                 // Update sizes
                 foreach (var sizeQuantityDto in request.Sizes)
