@@ -25,6 +25,10 @@ namespace UNITEE_BACKEND.Entities
         public string? SizeGuide { get; set; }
         public float Price { get; set; }
         public bool IsActive { get; set; }
+        public double? AverageRating { get; set; }
+        public int? NumberOfSolds { get; set; }
+        public DateTime DateCreated { get; set; }
+        public DateTime DateUpdated { get; set; }
 
         public ICollection<SizeQuantity> Sizes { get; set; } = new List<SizeQuantity>();
         public ICollection<ProductDepartment> ProductDepartments { get; set; } = new List<ProductDepartment>();

@@ -55,7 +55,8 @@ namespace UNITEE_BACKEND.Services
                     ProductId = request.ProductId,
                     SupplierId = request.SupplierId,
                     DateCreated = DateTime.Now,
-                    Role = RatingRole.Supplier
+                    Role = RatingRole.Supplier,
+                    Comment = request.Comment
                 };
 
                 context.Ratings.Add(rating);
@@ -74,15 +75,15 @@ namespace UNITEE_BACKEND.Services
             try
             {
                 var ratings = await context.Ratings
-                                       .Where(r => r.ProductId == productId && r.Role == RatingRole.Product)
-                                       .ToListAsync();
+                                           .Where(r => r.ProductId == productId && r.Role == RatingRole.Product)
+                                           .ToListAsync();
 
                 if (!ratings.Any()) return 0;
 
                 double sumOfRatings = ratings.Sum(r => r.Value);
-                double totalNumberOfRatings = ratings.Count() * 5;
+                int numberOfRatings = ratings.Count;
 
-                return sumOfRatings / totalNumberOfRatings;
+                return sumOfRatings / numberOfRatings;
             }
             catch (Exception e)
             {
@@ -101,9 +102,9 @@ namespace UNITEE_BACKEND.Services
                 if (!ratings.Any()) return 0;
 
                 double sumOfRatings = ratings.Sum(r => r.Value);
-                double totalNumberOfRatings = ratings.Count() * 5;
+                double totalNumberOfRatings = ratings.Count();
 
-                return sumOfRatings / totalNumberOfRatings;
+                return totalNumberOfRatings == 0 ? 0 : sumOfRatings / totalNumberOfRatings;
             }
             catch (Exception e)
             {

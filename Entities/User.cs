@@ -38,6 +38,7 @@ namespace UNITEE_BACKEND.Entities
         public bool IsActive { get; set; }
         public int Role { get; set; }
         public bool IsValidate { get; set; }
+        public double? AverageRating { get; set; }
         public EmailStatus EmailVerificationStatus { get; set; }
         public DateTime EmailVerificationSentTime { get; set; }
         [Column(TypeName = "nvarchar(6)")]
