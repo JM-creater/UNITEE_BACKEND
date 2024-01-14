@@ -388,11 +388,13 @@ namespace UNITEE_BACKEND.Services
         {
             var productsByDepartment = await context.Products
                                                     .Include(p => p.Ratings)
+                                                        .ThenInclude(r => r.User)
                                                     .Include(p => p.ProductDepartments)
                                                         .ThenInclude(pd => pd.Department)
                                                     .Include(p => p.Sizes)
                                                     .Where(p => p.SupplierId == shopId &&
                                                                 p.ProductDepartments.Any(pd => pd.DepartmentId == departmentId))
+                                                    .OrderByDescending(p => p.DateCreated)
                                                     .ToListAsync();
 
             var user = await context.Users
