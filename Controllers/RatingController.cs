@@ -103,5 +103,20 @@ namespace UNITEE_BACKEND.Controllers
                 return BadRequest(new { message = e.Message });
             }
         }
+
+        [HttpGet("getFeedBack/{productId}")]
+        public async Task<IActionResult> GetFeedBackByProductId(int productId)
+        {
+            try
+            {
+                var products = await service.GetFeedbackByProduct(productId);
+
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
     }
 }

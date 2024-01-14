@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
+using UNITEE_BACKEND.Entities;
+using UNITEE_BACKEND.Models.Email;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.Token;
 using UNITEE_BACKEND.Services;
@@ -13,12 +17,14 @@ namespace UNITEE_BACKEND.Controllers
         private readonly IUsersService service;
         private readonly AppDbContext context;
         private readonly Tokens tokens;
+        private readonly IConfiguration configuration;
 
-        public UsersController(IUsersService _service, AppDbContext dbcontext, Tokens _tokens)
+        public UsersController(IUsersService _service, AppDbContext dbcontext, Tokens _tokens, IConfiguration _configuration)
         {
             service = _service;
             context = dbcontext;
             tokens = _tokens;
+            configuration = _configuration;
         }
 
         [HttpPost("register")]
@@ -53,6 +59,52 @@ namespace UNITEE_BACKEND.Controllers
             }
         }
 
+        // ! To be fixed
+        [HttpGet("checkTokenExpiration")]
+        public async Task<IActionResult> CheckTokenExpirationAsync([FromQuery] string token, int userId)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return BadRequest("Token is required.");
+            }
+
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+
+                JwtSecurityToken? jwtToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
+
+                if (jwtToken == null)
+                {
+                    return BadRequest("Invalid token.");
+                }
+
+                bool isExpired = jwtToken.ValidTo < DateTime.UtcNow;
+
+                if (isExpired)
+                {
+                    var user = await context.Users.FindAsync(userId);
+
+                    if (user == null)
+                    {
+                        return BadRequest("User not found.");
+                    }
+
+                    var confirmationCode = Tokens.GenerateConfirmationCode();
+                    var emailConfig = new EmailConfig(configuration);
+
+                    await emailConfig.SendTokenExpiredEmail(user.Email, confirmationCode);
+                    return BadRequest("Token expired. A new code has been sent to your email.");
+                }
+
+                return Ok(new { IsExpired = isExpired });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -70,7 +122,7 @@ namespace UNITEE_BACKEND.Controllers
                     return BadRequest("User not found");
                 }
 
-                var token = tokens.GenerateJwtToken(user);
+                var token = tokens.GenerateTokenLogin(user);
 
                 return new JsonResult(new { user, Role = role.ToString(), Token = token });
             }

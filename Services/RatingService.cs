@@ -30,7 +30,8 @@ namespace UNITEE_BACKEND.Services
                     ProductId = request.ProductId,
                     SupplierId = request.SupplierId,
                     DateCreated = DateTime.Now,
-                    Role = RatingRole.Product
+                    Role = RatingRole.Product,
+                    Comment = request.Comment
                 };
 
                 context.Ratings.Add(rating);
@@ -55,8 +56,7 @@ namespace UNITEE_BACKEND.Services
                     ProductId = request.ProductId,
                     SupplierId = request.SupplierId,
                     DateCreated = DateTime.Now,
-                    Role = RatingRole.Supplier,
-                    Comment = request.Comment
+                    Role = RatingRole.Supplier
                 };
 
                 context.Ratings.Add(rating);
@@ -120,6 +120,12 @@ namespace UNITEE_BACKEND.Services
                            .Select(group => group.OrderByDescending(r => r.Value).First())
                            .Take(3)
                            .ToListAsync();
+
+        public async Task<IEnumerable<Rating>> GetFeedbackByProduct(int productId)  
+            => await context.Ratings
+                            .Include(r => r.User)
+                            .Where(r => r.ProductId == productId && r.Role == RatingRole.Product)
+                            .ToListAsync();
 
     }
 }

@@ -47,6 +47,9 @@ namespace UNITEE_BACKEND.Entities
         public bool IsEmailConfirmed { get; set; }
         public string? PasswordResetToken { get; set; }
         public DateTime? ResetTokenExpires { get; set; }
+        public bool IsTokenExpired { get; set; }
+        public string? LoginToken { get; set; }
+        public DateTime? LoginTokenExpiration { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }
 

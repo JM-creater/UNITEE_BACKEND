@@ -65,6 +65,37 @@ namespace UNITEE_BACKEND.Models.Email
             await SendEmailAsync(email, subject, message);
         }
 
+        public async Task SendTokenExpiredEmail(string email, string confirmationCode)
+        {
+            string subject = "Unitee Account Session Expired";
+            string message = $@"
+                <html>
+                <head>
+                  <style>
+                    body {{ font-family: 'Arial', sans-serif; background-color: #f6f6f6; padding: 20px; }}
+                    .email-container {{ background-color: #ffffff; padding: 20px; border: 1px solid #dddddd; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+                    .email-header {{ color: #333333; font-size: 18px; font-weight: bold; margin-bottom: 30px; }}
+                    .message {{ font-size: 16px; color: #333333; margin-bottom: 20px; }}
+                    .confirmation-code {{ font-size: 24px; font-weight: bold; color: #333333; padding: 10px 0; }}
+                    .footer {{ font-size: 12px; color: #999999; margin-top: 30px; }}
+                  </style>
+                </head>
+                <body>
+                  <div class='email-container'>
+                    <p class='email-header'>Unitee Account Session Expired</p>
+                    <p class='message'>Your login session has expired. To proceed with logging in, please confirm your identity by entering the following code:</p>
+                    <p class='confirmation-code'>{confirmationCode}</p>
+                    <p class='message'>If you have any questions or need assistance, please contact us at <a href='mailto:unitee42@gmail.com'>unitee42@gmail.com</a>.</p>
+                    <p class='footer'>Thank you for using Unitee!</p>
+                  </div>
+                </body>
+                </html>";
+
+            await SendEmailAsync(email, subject, message);
+        }
+
+
+
         public async Task SendOrderCompletedEmailAsync(string email, int orderId)
         {
             var orderDetails = await context.Orders
