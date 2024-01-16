@@ -81,26 +81,45 @@ namespace UNITEE_BACKEND.Services
         public async Task<IEnumerable<Product>> RecommendProducts(string search, int userId)
         {
             var searchToLower = search.ToLower();
+
             var user = await context.Users
                                     .Include(u => u.Department)
                                     .Where(u => u.Id == userId)
                                     .FirstOrDefaultAsync();
 
-            return await context.Products
-                                .Include(p => p.Sizes)
-                                .Include(p => p.ProductDepartments).ThenInclude(pd => pd.Department)
-                                .Include(p => p.ProductType)
-                                .Include(p => p.Rating)
-                                .Where(p => p.ProductName.ToLower().Contains(searchToLower) ||
-                                            p.Description.ToLower().Contains(searchToLower) ||
-                                            p.Sizes.Any(s => s.Size.ToLower().Contains(searchToLower)) ||
-                                            p.ProductDepartments.Any(pd => pd.Department.Department_Name.ToLower().Contains(searchToLower)) ||
-                                            p.ProductType.Product_Type.ToLower().Contains(searchToLower))
-                                .Where(p => p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
-                                .OrderByDescending(p => p.Rating.Value)
-                                .Take(5)
-                                .ToListAsync();
+            if (user == null)
+            {
+                return Enumerable.Empty<Product>();
+            }
+
+            var products = await context.Products
+                                        .Include(p => p.Sizes)
+                                        .Include(p => p.ProductDepartments).ThenInclude(pd => pd.Department)
+                                        .Include(p => p.ProductType)
+                                        .Include(p => p.Ratings)
+                                        .Where(p => p.ProductName.ToLower().Contains(searchToLower) ||
+                                                    p.Description.ToLower().Contains(searchToLower) ||
+                                                    p.Sizes.Any(s => s.Size.ToLower().Contains(searchToLower)) ||
+                                                    p.ProductDepartments.Any(pd => pd.Department.Department_Name.ToLower().Contains(searchToLower)) ||
+                                                    p.ProductType.Product_Type.ToLower().Contains(searchToLower))
+                                        .Where(p => p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
+                                        .OrderByDescending(p => p.Rating.Value)
+                                        .ToListAsync();
+
+            foreach (var product in products)
+            {
+                double totalValueOfRating = product.Ratings.Where(r => r.ProductId == product.ProductId && r.Role == RatingRole.Product).Sum(r => r.Value);
+                double totalNumberOfRatings = product.Ratings.Where(r => r.ProductId == product.ProductId && r.Role == RatingRole.Product).Count();
+                double averageRating = totalNumberOfRatings > 0 ? totalValueOfRating / totalNumberOfRatings : 0;
+                product.AverageRating = averageRating;
+
+                var numberOfSolds = context.OrderItems.Where(oi => oi.ProductId == product.ProductId).Sum(oi => oi.Quantity);
+                product.NumberOfSolds = numberOfSolds;
+            }
+
+            return products;
         }
+
 
         public async Task<IEnumerable<Product>> RecommendProductsPurchase(int userId)
         {
