@@ -911,6 +911,9 @@ namespace UNITEE_BACKEND.Services
                                          .Where(o => o.Id == orderId)
                                          .FirstOrDefaultAsync();
 
+                if (order == null)
+                    throw new InvalidOperationException("Order not found");
+
                 order.IsReceived = true;
 
                 context.Orders.Update(order);
