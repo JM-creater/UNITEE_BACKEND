@@ -127,6 +127,7 @@ namespace UNITEE_BACKEND.Services
             => await context.Ratings
                             .Include(r => r.User)
                             .Where(r => r.ProductId == productId && r.Role == RatingRole.Product)
+                            .OrderByDescending(r => r.DateCreated)
                             .ToListAsync();
 
     }
