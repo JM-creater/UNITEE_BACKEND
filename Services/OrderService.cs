@@ -68,6 +68,7 @@ namespace UNITEE_BACKEND.Services
                             .Include(u => u.Cart)
                                 .ThenInclude(i => i.Items)
                                     .ThenInclude(p => p.Product)
+                                        .ThenInclude(p => p.Ratings)
                             .Include(u => u.Cart)
                                 .ThenInclude(u => u.Supplier)
                             .Include(u => u.User)

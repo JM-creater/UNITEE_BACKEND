@@ -31,7 +31,8 @@ namespace UNITEE_BACKEND.Services
                     SupplierId = request.SupplierId,
                     DateCreated = DateTime.Now,
                     Role = RatingRole.Product,
-                    Comment = request.Comment
+                    Comment = request.Comment,
+                    IsRated = true
                 };
 
                 context.Ratings.Add(rating);
@@ -56,7 +57,8 @@ namespace UNITEE_BACKEND.Services
                     ProductId = request.ProductId,
                     SupplierId = request.SupplierId,
                     DateCreated = DateTime.Now,
-                    Role = RatingRole.Supplier
+                    Role = RatingRole.Supplier,
+                    IsRated = true
                 };
 
                 context.Ratings.Add(rating);

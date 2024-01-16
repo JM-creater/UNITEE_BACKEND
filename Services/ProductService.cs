@@ -128,9 +128,9 @@ namespace UNITEE_BACKEND.Services
         public async Task<IEnumerable<Product>> GetRecommendedForYouProducts(int userId, int supplierId)
         {
             var user = await context.Users
-                        .Include(u => u.Department)
-                        .Where(u => u.Id == userId)
-                        .FirstOrDefaultAsync();
+                                    .Include(u => u.Department)
+                                    .Where(u => u.Id == userId)
+                                    .FirstOrDefaultAsync();
 
             if (user == null)
             {
@@ -141,8 +141,7 @@ namespace UNITEE_BACKEND.Services
                                          .Include(oi => oi.Order)
                                          .Include(oi => oi.Product)
                                              .ThenInclude(p => p.Ratings)
-                                         .Where(oi => oi.Order.Status == Status.Completed &&
-                                                oi.Order.UserId == userId)
+                                         .Where(oi => oi.Order.Status == Status.Completed)
                                          .Where(oi => oi.Product.SupplierId == supplierId);
 
             if (!completedOrders.Any())
@@ -151,7 +150,7 @@ namespace UNITEE_BACKEND.Services
             }
 
             var mostSold = completedOrders.GroupBy(oi => oi.ProductId)
-                                          .OrderByDescending(g => g.Sum(oi => oi.Quantity)) // Sum up the quantity
+                                          .OrderByDescending(g => g.Sum(oi => oi.Quantity))
                                           .Select(g => g.Key);
 
             var highestRated = completedOrders.Where(oi => mostSold.Contains(oi.ProductId))
@@ -169,9 +168,9 @@ namespace UNITEE_BACKEND.Services
 
             foreach (var product in recommendedProducts)
             {
-                double totalValueOfRating = product.Ratings.Where(oi => oi.ProductId == product.ProductId && oi.Role == RatingRole.Product).Sum(oi => oi.Value);
-                double totalNumberOfRated = product.Ratings.Where(oi => oi.ProductId == product.ProductId && oi.Role == RatingRole.Product).Count();
-                double Average = totalValueOfRating / totalNumberOfRated;
+                double totalValueOfRating = product.Ratings.Where(r => r.ProductId == product.ProductId && r.Role == RatingRole.Product).Sum(r => r.Value);
+                double totalNumberOfRatings = product.Ratings.Where(r => r.ProductId == product.ProductId && r.Role == RatingRole.Product).Count();
+                double Average = totalValueOfRating / totalNumberOfRatings;
                 if (Average > 0)
                 {
                     product.AverageRating = Average;
@@ -187,8 +186,9 @@ namespace UNITEE_BACKEND.Services
                 product.NumberOfSolds = completedOrders.Where(oi => oi.ProductId == product.ProductId).Sum(oi => oi.Quantity);
             }
 
-            return recommendedProducts;
+            return recommendedProducts.Where(p => p.AverageRating >= 4).Take(4);
         }
+
 
         public async Task<IEnumerable<Product>> GetRecommendedForYouProductsOverAll(int userId)
         {
@@ -206,8 +206,7 @@ namespace UNITEE_BACKEND.Services
                                          .Include(oi => oi.Order)
                                          .Include(oi => oi.Product)
                                              .ThenInclude(p => p.Ratings)
-                                         .Where(oi => oi.Order.Status == Status.Completed &&
-                                                oi.Order.UserId == userId);
+                                         .Where(oi => oi.Order.Status == Status.Completed);
 
             if (!completedOrders.Any())
             {
@@ -215,27 +214,22 @@ namespace UNITEE_BACKEND.Services
             }
 
             var mostSold = completedOrders.GroupBy(oi => oi.ProductId)
-                                          .OrderByDescending(g => g.Sum(oi => oi.Quantity)) // Sum up the quantity
+                                          .OrderByDescending(g => g.Sum(oi => oi.Quantity))
                                           .Select(g => g.Key);
-
-            var highestRated = completedOrders.Where(oi => mostSold.Contains(oi.ProductId))
-                                              .OrderByDescending(oi => oi.Product.Ratings.Average(r => r.Value))
-                                              .Select(oi => oi.ProductId)
-                                              .Distinct();
 
             var recommendedProducts = await context.Products
                                                    .Include(p => p.Sizes)
                                                    .Include(p => p.Ratings)
-                                                   .Where(p => highestRated.Contains(p.ProductId) &&
+                                                   .Where(p => mostSold.Contains(p.ProductId) &&
                                                           p.ProductDepartments.Any(pd => pd.DepartmentId == user.DepartmentId))
-                                                   .Take(3)
+                                                   .Take(4)
                                                    .ToListAsync();
 
             foreach (var product in recommendedProducts)
             {
-                double totalValueOfRating = product.Ratings.Where(oi => oi.ProductId == product.ProductId && oi.Role == RatingRole.Product).Sum(oi => oi.Value);
-                double totalNumberOfRated = product.Ratings.Where(oi => oi.ProductId == product.ProductId && oi.Role == RatingRole.Product).Count();
-                double Average = totalValueOfRating / totalNumberOfRated;
+                double totalValueOfRating = product.Ratings.Where(r => r.ProductId == product.ProductId && r.Role == RatingRole.Product).Sum(r => r.Value);
+                double totalNumberOfRatings = product.Ratings.Where(r => r.ProductId == product.ProductId && r.Role == RatingRole.Product).Count();
+                double Average = totalValueOfRating / totalNumberOfRatings;
                 if (Average > 0)
                 {
                     product.AverageRating = Average;
@@ -251,8 +245,9 @@ namespace UNITEE_BACKEND.Services
                 product.NumberOfSolds = completedOrders.Where(oi => oi.ProductId == product.ProductId).Sum(oi => oi.Quantity);
             }
 
-            return recommendedProducts;
+            return recommendedProducts.Where(p => p.AverageRating >= 4).Take(3);
         }
+
 
 
         public async Task<IEnumerable<Product>> GetSearchProductByUserDepartment(int userId)
