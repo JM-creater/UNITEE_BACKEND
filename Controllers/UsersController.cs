@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using UNITEE_BACKEND.DatabaseContext;
 using UNITEE_BACKEND.Dto;
-using UNITEE_BACKEND.Entities;
 using UNITEE_BACKEND.Models.Email;
 using UNITEE_BACKEND.Models.Request;
 using UNITEE_BACKEND.Models.Token;
